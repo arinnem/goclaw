@@ -106,6 +106,7 @@ func (c *Config) applyEnvOverrides() {
 	envStr("GOCLAW_PERPLEXITY_API_KEY", &c.Providers.Perplexity.APIKey)
 	envStr("GOCLAW_GATEWAY_TOKEN", &c.Gateway.Token)
 	envStr("GOCLAW_TELEGRAM_TOKEN", &c.Channels.Telegram.Token)
+	envStr("GOCLAW_DISCORD_TOKEN", &c.Channels.Discord.Token)
 	envStr("GOCLAW_ZALO_TOKEN", &c.Channels.Zalo.Token)
 	envStr("GOCLAW_FEISHU_APP_ID", &c.Channels.Feishu.AppID)
 	envStr("GOCLAW_FEISHU_APP_SECRET", &c.Channels.Feishu.AppSecret)
@@ -121,6 +122,9 @@ func (c *Config) applyEnvOverrides() {
 	// Auto-enable channels if credentials are provided via env
 	if c.Channels.Telegram.Token != "" {
 		c.Channels.Telegram.Enabled = true
+	}
+	if c.Channels.Discord.Token != "" {
+		c.Channels.Discord.Enabled = true
 	}
 	if c.Channels.Zalo.Token != "" {
 		c.Channels.Zalo.Enabled = true

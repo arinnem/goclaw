@@ -42,6 +42,7 @@ services:
       - GOCLAW_XAI_API_KEY=${GOCLAW_XAI_API_KEY:-}
       # Channels
       - GOCLAW_TELEGRAM_TOKEN=${GOCLAW_TELEGRAM_TOKEN:-}
+      - GOCLAW_DISCORD_TOKEN=${GOCLAW_DISCORD_TOKEN:-}
       # Debug
       - GOCLAW_TRACE_VERBOSE=${GOCLAW_TRACE_VERBOSE:-0}
     volumes:
