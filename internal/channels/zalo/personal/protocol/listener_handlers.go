@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net/url"
 	"slices"
+	"strconv"
 	"time"
 	"unicode/utf8"
 )
@@ -83,6 +84,62 @@ func (ln *Listener) handleGroupMessages(ctx context.Context, data string, encTyp
 			continue
 		}
 		emit(ctx, ln.messageCh, Message(gm))
+	}
+}
+
+// --- Control events (cmd=601) ---
+
+func (ln *Listener) handleControlEvents(ctx context.Context, data string, encType uint) {
+	ln.mu.RLock()
+	ck := ln.cipherKey
+	ln.mu.RUnlock()
+
+	payload, err := ln.decryptEventData(data, encType, ck)
+	if err != nil {
+		emit(ctx, ln.errorCh, fmt.Errorf("zalo_personal: decrypt control event: %w", err))
+		return
+	}
+
+	var envelope struct {
+		Data struct {
+			Controls []struct {
+				Content struct {
+					ActType string `json:"act_type"`
+					FileID  any    `json:"fileId"` // can be string or number
+					Data    struct {
+						URL string `json:"url"`
+					} `json:"data"`
+				} `json:"content"`
+			} `json:"controls"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(payload, &envelope); err != nil {
+		emit(ctx, ln.errorCh, fmt.Errorf("zalo_personal: parse control event: %w", err))
+		return
+	}
+
+	for _, ctrl := range envelope.Data.Controls {
+		if ctrl.Content.ActType != "file_done" {
+			continue
+		}
+		if ctrl.Content.FileID == nil {
+			continue
+		}
+		// FileID can be string or number (float64 from JSON).
+		// fmt.Sprint on large float64 produces scientific notation (3.15e+11),
+		// but callbacks are registered with the plain decimal string.
+		fileID := anyToDecimalString(ctrl.Content.FileID)
+		fileURL := ctrl.Content.Data.URL
+
+		slog.Debug("zalo_personal file upload completed", "file_id", fileID, "url_len", len(fileURL))
+
+		if val, ok := ln.uploadCallbacks.LoadAndDelete(fileID); ok {
+			ch := val.(chan string)
+			select {
+			case ch <- fileURL:
+			default:
+			}
+		}
 	}
 }
 
@@ -306,6 +363,22 @@ func (ln *Listener) emitClosed(ci CloseInfo) {
 	select {
 	case ln.closedCh <- ci:
 	default:
+	}
+}
+
+// anyToDecimalString converts a value (string, float64, json.Number, etc.) to a
+// plain decimal string. Needed because JSON numbers unmarshalled into `any`
+// become float64, and fmt.Sprint produces scientific notation for large values.
+func anyToDecimalString(v any) string {
+	switch val := v.(type) {
+	case string:
+		return val
+	case float64:
+		return strconv.FormatFloat(val, 'f', -1, 64)
+	case json.Number:
+		return val.String()
+	default:
+		return fmt.Sprint(v)
 	}
 }
 

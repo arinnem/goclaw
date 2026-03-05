@@ -2,7 +2,11 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 )
@@ -76,6 +80,11 @@ func (t *MessageTool) Execute(ctx context.Context, args map[string]interface{}) 
 		return ErrorResult("target chat ID is required (no current chat in context)")
 	}
 
+	// Handle MEDIA: prefix — send file as attachment instead of text.
+	if filePath, ok := parseMediaPath(message); ok {
+		return t.sendMedia(ctx, channel, target, filePath)
+	}
+
 	// Prefer direct channel sender (channels.Manager.SendToChannel)
 	if t.sender != nil {
 		if err := t.sender(ctx, channel, target, message); err != nil {
@@ -95,4 +104,48 @@ func (t *MessageTool) Execute(ctx context.Context, args map[string]interface{}) 
 	}
 
 	return ErrorResult("no channel sender or message bus available")
+}
+
+// sendMedia sends a file as a media attachment via the outbound message bus.
+func (t *MessageTool) sendMedia(ctx context.Context, channel, target, filePath string) *Result {
+	if _, err := os.Stat(filePath); err != nil {
+		return ErrorResult(fmt.Sprintf("file not found: %s", filePath))
+	}
+	if t.msgBus == nil {
+		return ErrorResult("media sending requires message bus")
+	}
+
+	// Build metadata for group routing (Zalo needs group_id to choose group API).
+	var meta map[string]string
+	peerKind := ToolPeerKindFromCtx(ctx)
+	if peerKind == "group" {
+		meta = map[string]string{"group_id": target}
+	}
+
+	t.msgBus.PublishOutbound(bus.OutboundMessage{
+		Channel:  channel,
+		ChatID:   target,
+		Media:    []bus.MediaAttachment{{URL: filePath}},
+		Metadata: meta,
+	})
+	out, _ := json.Marshal(map[string]string{
+		"status":  "sent",
+		"channel": channel,
+		"target":  target,
+		"media":   filepath.Base(filePath),
+	})
+	return SilentResult(string(out))
+}
+
+// parseMediaPath extracts a file path from a "MEDIA:/path/to/file" string.
+func parseMediaPath(s string) (string, bool) {
+	s = strings.TrimSpace(s)
+	if !strings.HasPrefix(s, "MEDIA:") {
+		return "", false
+	}
+	path := filepath.Clean(strings.TrimSpace(s[len("MEDIA:"):]))
+	if path == "" || path == "." {
+		return "", false
+	}
+	return path, true
 }

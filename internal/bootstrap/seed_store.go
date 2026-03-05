@@ -95,6 +95,7 @@ var userSeedFilesOpen = []string{
 // and don't need a bootstrap onboarding ritual. They just need to learn the user's profile.
 var userSeedFilesPredefined = []string{
 	UserFile,
+	BootstrapFile,
 }
 
 // SeedUserFiles seeds embedded templates into user_context_files for a new user.

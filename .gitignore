@@ -38,3 +38,6 @@ deploy-*.sh
 docs/technical-diaries
 plans
 release-manifest.json
+
+# Test credentials (never commit)
+tests/**/creds.json

@@ -36,6 +36,8 @@ type Listener struct {
 
 	retryStates map[string]*retryState
 
+	uploadCallbacks sync.Map // fileID (string) → chan string (fileURL)
+
 	messageCh      chan Message
 	disconnectedCh chan CloseInfo
 	closedCh       chan CloseInfo
@@ -44,6 +46,19 @@ type Listener struct {
 	pingCancel context.CancelFunc
 	cancel     context.CancelFunc
 	wg         sync.WaitGroup
+}
+
+// RegisterUploadCallback registers a callback channel for a file upload completion.
+// Returns a channel that will receive the fileURL when the upload is done.
+func (ln *Listener) RegisterUploadCallback(fileID string) <-chan string {
+	ch := make(chan string, 1)
+	ln.uploadCallbacks.Store(fileID, ch)
+	return ch
+}
+
+// CancelUploadCallback removes a pending upload callback.
+func (ln *Listener) CancelUploadCallback(fileID string) {
+	ln.uploadCallbacks.Delete(fileID)
 }
 
 // CloseInfo carries the WebSocket close code and reason.
@@ -230,6 +245,8 @@ func (ln *Listener) handleFrame(ctx context.Context, data []byte) {
 		ln.handleUserMessages(ctx, envelope.Data, envelope.Encrypt)
 	case "1_521_0":
 		ln.handleGroupMessages(ctx, envelope.Data, envelope.Encrypt)
+	case "1_601_0":
+		ln.handleControlEvents(ctx, envelope.Data, envelope.Encrypt)
 	case "1_3000_0":
 		slog.Warn("zalo_personal: duplicate connection detected, closing")
 		ln.mu.RLock()
