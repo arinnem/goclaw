@@ -2,8 +2,10 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -64,11 +66,15 @@ func NewAgentSummoner(agents store.AgentStore, providerReg *providers.Registry, 
 	}
 }
 
+// singleCallTimeout is the deadline for the optimistic single LLM call.
+// If exceeded, we fall back to the 2-call approach with the remaining budget.
+const singleCallTimeout = 120 * time.Second
+
 // SummonAgent generates context files from a natural language description.
 // Meant to be called as a goroutine: go summoner.SummonAgent(...)
-// Generates SOUL.md first, then IDENTITY.md + USER_PREDEFINED.md using SOUL.md as context,
-// emitting progress events after each file so the UI can show incremental progress.
-// On retry, skips files that were already generated (differ from template).
+// Tries a single LLM call first (all files at once). On timeout, falls back to
+// 2 sequential calls (SOUL.md → IDENTITY.md + USER_PREDEFINED.md).
+// On retry (resummon), skips files that were already generated (differ from template).
 // On success: stores generated files and sets agent status to "active".
 // On failure: keeps template files (already seeded) and sets status to store.AgentStatusSummonFailed.
 func (s *AgentSummoner) SummonAgent(agentID uuid.UUID, providerName, model, description string) {
@@ -76,38 +82,67 @@ func (s *AgentSummoner) SummonAgent(agentID uuid.UUID, providerName, model, desc
 	defer cancel()
 
 	s.ensureUserPredefined(ctx, agentID)
-
 	s.emitEvent(agentID, SummonEventStarted, "", "")
 
 	// Check which files already exist (from a previous partial run)
-	existing, _ := s.agents.GetAgentContextFiles(ctx, agentID)
-	existingMap := make(map[string]string, len(existing))
-	for _, f := range existing {
-		existingMap[f.FileName] = f.Content
+	existingMap := s.loadExistingFiles(ctx, agentID)
+
+	// Skip if all files already generated
+	if s.isGenerated(existingMap, bootstrap.SoulFile) && s.isGenerated(existingMap, bootstrap.IdentityFile) {
+		slog.Info("summoning: all files already generated, skipping", "agent", agentID)
+		s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.SoulFile, "")
+		s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.IdentityFile, "")
+		s.finishSummon(ctx, agentID, existingMap[bootstrap.IdentityFile], "", description)
+		return
 	}
+
+	// === Optimistic single-call: generate all files at once ===
+	singleCtx, singleCancel := context.WithTimeout(ctx, singleCallTimeout)
+	files, err := s.generateFiles(singleCtx, providerName, model, s.buildCreatePrompt(description))
+	singleCancel()
+
+	if err == nil {
+		slog.Info("summoning: single-call succeeded", "agent", agentID)
+		s.storeFiles(ctx, agentID, files)
+		s.finishSummon(ctx, agentID, files[bootstrap.IdentityFile], files[frontmatterKey], description)
+		return
+	}
+
+	// Non-retryable error → fail immediately
+	if !isRetryableError(err) {
+		slog.Warn("summoning: single-call failed (non-retryable)", "agent", agentID, "error", err)
+		s.emitEvent(agentID, SummonEventFailed, "", err.Error())
+		s.setAgentStatus(context.Background(), agentID, store.AgentStatusSummonFailed)
+		return
+	}
+
+	// === Fallback: 2-call approach ===
+	slog.Info("summoning: single-call timed out, falling back to 2-call", "agent", agentID, "error", err)
+
+	// Refresh existing files (single-call didn't store anything on error)
+	existingMap = s.loadExistingFiles(ctx, agentID)
 
 	var soulContent string
 	var frontmatter string
 
-	// Step 1: Generate SOUL.md (skip if already generated, i.e. differs from template)
+	// Step 1: Generate SOUL.md
 	if s.isGenerated(existingMap, bootstrap.SoulFile) {
 		soulContent = existingMap[bootstrap.SoulFile]
 		slog.Info("summoning: SOUL.md already generated, skipping", "agent", agentID)
 		s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.SoulFile, "")
 	} else {
-		soulFiles, err := s.generateFiles(ctx, providerName, model, s.buildSoulPrompt(description))
-		if err != nil {
-			slog.Warn("summoning: SOUL.md generation failed", "agent", agentID, "error", err)
-			s.emitEvent(agentID, SummonEventFailed, "", err.Error())
+		soulFiles, soulErr := s.generateFiles(ctx, providerName, model, s.buildSoulPrompt(description))
+		if soulErr != nil {
+			slog.Warn("summoning: SOUL.md generation failed", "agent", agentID, "error", soulErr)
+			s.emitEvent(agentID, SummonEventFailed, "", soulErr.Error())
 			s.setAgentStatus(context.Background(), agentID, store.AgentStatusSummonFailed)
 			return
 		}
-
 		soulContent = soulFiles[bootstrap.SoulFile]
 		frontmatter = soulFiles[frontmatterKey]
 		if soulContent != "" {
-			if err := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.SoulFile, soulContent); err != nil {
-				slog.Warn("summoning: failed to store SOUL.md", "agent", agentID, "error", err)
+			if storeErr := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.SoulFile, soulContent); storeErr != nil {
+				slog.Warn("summoning: failed to store SOUL.md", "agent", agentID, "error", storeErr)
 			} else {
 				s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.SoulFile, "")
 			}
@@ -120,44 +155,42 @@ func (s *AgentSummoner) SummonAgent(agentID uuid.UUID, providerName, model, desc
 
 	var identityContent string
 	if !identityNeeded && !userPredNeeded {
-		// Both already generated from a previous run
 		identityContent = existingMap[bootstrap.IdentityFile]
 		slog.Info("summoning: IDENTITY.md + USER_PREDEFINED.md already generated, skipping", "agent", agentID)
 		s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.IdentityFile, "")
 	} else {
-		idFiles, err := s.generateFiles(ctx, providerName, model, s.buildIdentityPrompt(description, soulContent))
-		if err != nil {
-			slog.Warn("summoning: IDENTITY.md generation failed", "agent", agentID, "error", err)
-			s.emitEvent(agentID, SummonEventFailed, "", err.Error())
+		idFiles, idErr := s.generateFiles(ctx, providerName, model, s.buildIdentityPrompt(description, soulContent))
+		if idErr != nil {
+			slog.Warn("summoning: IDENTITY.md generation failed", "agent", agentID, "error", idErr)
+			s.emitEvent(agentID, SummonEventFailed, "", idErr.Error())
 			s.setAgentStatus(context.Background(), agentID, store.AgentStatusSummonFailed)
 			return
 		}
-
 		identityContent = idFiles[bootstrap.IdentityFile]
 		if frontmatter == "" {
 			frontmatter = idFiles[frontmatterKey]
 		}
-
-		// Store IDENTITY.md
 		if identityContent != "" && identityNeeded {
-			if err := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.IdentityFile, identityContent); err != nil {
-				slog.Warn("summoning: failed to store IDENTITY.md", "agent", agentID, "error", err)
+			if storeErr := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.IdentityFile, identityContent); storeErr != nil {
+				slog.Warn("summoning: failed to store IDENTITY.md", "agent", agentID, "error", storeErr)
 			} else {
 				s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.IdentityFile, "")
 			}
 		}
-
-		// Store USER_PREDEFINED.md (optional — only if LLM generated it)
 		if upContent := idFiles[bootstrap.UserPredefinedFile]; upContent != "" && userPredNeeded {
-			if err := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.UserPredefinedFile, upContent); err != nil {
-				slog.Warn("summoning: failed to store USER_PREDEFINED.md", "agent", agentID, "error", err)
+			if storeErr := s.agents.SetAgentContextFile(ctx, agentID, bootstrap.UserPredefinedFile, upContent); storeErr != nil {
+				slog.Warn("summoning: failed to store USER_PREDEFINED.md", "agent", agentID, "error", storeErr)
 			} else {
 				s.emitEvent(agentID, SummonEventFileGenerated, bootstrap.UserPredefinedFile, "")
 			}
 		}
 	}
 
-	// Save frontmatter + display_name
+	s.finishSummon(ctx, agentID, identityContent, frontmatter, description)
+}
+
+// finishSummon saves agent metadata and marks the agent as active.
+func (s *AgentSummoner) finishSummon(ctx context.Context, agentID uuid.UUID, identityContent, frontmatter, description string) {
 	updates := map[string]any{}
 	if frontmatter == "" {
 		frontmatter = truncateUTF8(description, 200)
@@ -173,11 +206,19 @@ func (s *AgentSummoner) SummonAgent(agentID uuid.UUID, providerName, model, desc
 			slog.Warn("summoning: failed to save agent metadata", "agent", agentID, "error", err)
 		}
 	}
-
 	s.setAgentStatus(ctx, agentID, store.AgentStatusActive)
 	s.emitEvent(agentID, SummonEventCompleted, "", "")
-
 	slog.Info("summoning: completed", "agent", agentID)
+}
+
+// loadExistingFiles reads agent context files and returns them as a map.
+func (s *AgentSummoner) loadExistingFiles(ctx context.Context, agentID uuid.UUID) map[string]string {
+	existing, _ := s.agents.GetAgentContextFiles(ctx, agentID)
+	m := make(map[string]string, len(existing))
+	for _, f := range existing {
+		m[f.FileName] = f.Content
+	}
+	return m
 }
 
 // RegenerateAgent updates context files based on an edit prompt.
@@ -231,6 +272,19 @@ func (s *AgentSummoner) RegenerateAgent(agentID uuid.UUID, providerName, model, 
 	s.emitEvent(agentID, SummonEventCompleted, "", "")
 
 	slog.Info("summoning: regeneration completed", "agent", agentID, "files", len(files))
+}
+
+// isRetryableError returns true for timeout and context-cancellation errors
+// that warrant falling back to the 2-call approach.
+func isRetryableError(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) && netErr.Timeout() {
+		return true
+	}
+	return false
 }
 
 // isGenerated checks if a context file has been generated (differs from the default template).
@@ -452,6 +506,90 @@ func (s *AgentSummoner) buildIdentityPrompt(description, soulContent string) str
    - Keep headings in English. Write content in the same language as the description.
 
 Output format:
+
+<file name="IDENTITY.md">
+(content here)
+</file>
+
+<file name="USER_PREDEFINED.md">
+(content here — or omit this entire block if not relevant)
+</file>`)
+
+	return sb.String()
+}
+
+// buildCreatePrompt constructs the prompt for generating all files in a single LLM call.
+// Used by the optimistic single-call path; generates frontmatter + SOUL.md + IDENTITY.md + USER_PREDEFINED.md.
+func (s *AgentSummoner) buildCreatePrompt(description string) string {
+	var sb strings.Builder
+	sb.WriteString("You are setting up a new AI assistant. Based on the description below, generate the required files.\n\n")
+
+	fmt.Fprintf(&sb, "<description>\n%s\n</description>\n\n", description)
+
+	soulTemplate, err := bootstrap.ReadTemplate(bootstrap.SoulFile)
+	if err != nil {
+		slog.Warn("summoning: failed to read SOUL.md template", "error", err)
+	}
+	identityTemplate, err := bootstrap.ReadTemplate(bootstrap.IdentityFile)
+	if err != nil {
+		slog.Warn("summoning: failed to read IDENTITY.md template", "error", err)
+	}
+	userPredefinedTemplate, err := bootstrap.ReadTemplate(bootstrap.UserPredefinedFile)
+	if err != nil {
+		slog.Warn("summoning: failed to read USER_PREDEFINED.md template", "error", err)
+	}
+
+	sb.WriteString("<templates>\n")
+	if soulTemplate != "" {
+		fmt.Fprintf(&sb, "<file name=\"SOUL.md\">\n%s\n</file>\n", soulTemplate)
+	}
+	if identityTemplate != "" {
+		fmt.Fprintf(&sb, "<file name=\"IDENTITY.md\">\n%s\n</file>\n", identityTemplate)
+	}
+	if userPredefinedTemplate != "" {
+		fmt.Fprintf(&sb, "<file name=\"USER_PREDEFINED.md\">\n%s\n</file>\n", userPredefinedTemplate)
+	}
+	sb.WriteString("</templates>\n\n")
+
+	sb.WriteString(`IMPORTANT RULES:
+
+1. Language: Write ALL content in the SAME LANGUAGE as the <description>. If description is in Vietnamese, write in Vietnamese. If in English, write in English. BUT keep ALL headings and section titles in English exactly as in the templates.
+
+2. SOUL.md section guide — each section has a specific purpose:
+   - "## Core Truths" — universal personality traits. KEEP the general advice. Do NOT inject agent-specific references here.
+   - "## Boundaries" — rules and limits. CUSTOMIZE only if the description mentions specific boundaries.
+   - "## Vibe" — communication style and personality ONLY. How the agent talks, its tone, its attitude. Do NOT put technical knowledge here.
+   - "## Style" — communication preferences: tone, humor level, emoji usage, opinion strength, response length, formality. Generate SPECIFIC values based on the description. E.g. a cute sweet bot → warm tone, frequent emoji, playful humor. A formal business bot → professional tone, no emoji, measured opinions. These are knobs the user can later customize per agent.
+   - "## Expertise" — domain-specific knowledge, technical skills, specialized instructions, keywords, parameters. If the description mentions any specialized domain (e.g. image generation, coding, writing), put that knowledge HERE. Remove the placeholder text. If no domain expertise, omit this section entirely.
+   - "## Continuity" — keep as-is (just translate if needed).
+   - KEEP the exact English headings. Do NOT add the agent's name into Core Truths or Boundaries.
+
+3. IDENTITY.md rules:
+   - KEEP the exact English heading: "# IDENTITY.md - Who Am I?"
+   - Fill in ONLY the field values: Name, Creature, Purpose, Vibe, Emoji based on the description.
+   - Purpose: mission statement — what this agent does, key resources, focus areas. Can be multiple lines. Include URLs or references mentioned in the description.
+   - REMOVE all template placeholder/instruction text (the italic hints in parentheses).
+   - Leave Avatar blank.
+   - Keep the footer note section as-is.
+
+4. Generate a short expertise summary (1-2 sentences, under 200 characters) for delegation discovery.
+
+5. USER_PREDEFINED.md (OPTIONAL — only generate if relevant):
+   - Generate this file if the description mentions ANY of: owner/creator info (name, username, role), target users/audience, user groups, communication policies, language requirements, or group-specific context.
+   - This is the RIGHT place for information about specific people (owner, creator, team members, contacts) — do NOT put personal/people info in SOUL.md or IDENTITY.md.
+   - If the description is purely about the agent's personality/expertise with no people or user-context, OMIT this file entirely.
+   - Content: owner/creator info, baseline rules for ALL users — default language, communication norms, audience assumptions, boundaries that individual users cannot override.
+   - Keep headings in English. Write content in the same language as the description.
+
+Output format — generate in this EXACT order:
+
+<frontmatter>
+(short expertise summary here)
+</frontmatter>
+
+<file name="SOUL.md">
+(content here)
+</file>
 
 <file name="IDENTITY.md">
 (content here)
