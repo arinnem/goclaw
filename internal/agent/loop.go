@@ -687,12 +687,14 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 
 			l.scanWebToolResult(tc.Name, result)
 
-			// Collect MEDIA: paths from tool results
-			if mr := parseMediaResult(result.ForLLM); mr != nil {
+			// Collect MEDIA: paths from tool results.
+			// Prefer result.Media (explicit) over ForLLM MEDIA: prefix (legacy) to avoid duplicates.
+			if len(result.Media) > 0 {
+				for _, p := range result.Media {
+					mediaResults = append(mediaResults, MediaResult{Path: p, ContentType: mimeFromExt(filepath.Ext(p))})
+				}
+			} else if mr := parseMediaResult(result.ForLLM); mr != nil {
 				mediaResults = append(mediaResults, *mr)
-			}
-			for _, p := range result.Media {
-				mediaResults = append(mediaResults, MediaResult{Path: p, ContentType: mimeFromExt(filepath.Ext(p))})
 			}
 			if result.Deliverable != "" {
 				deliverables = append(deliverables, result.Deliverable)
@@ -820,12 +822,14 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 
 				l.scanWebToolResult(r.tc.Name, r.result)
 
-				// Collect MEDIA: paths from tool results
-				if mr := parseMediaResult(r.result.ForLLM); mr != nil {
+				// Collect MEDIA: paths from tool results.
+				// Prefer result.Media (explicit) over ForLLM MEDIA: prefix (legacy) to avoid duplicates.
+				if len(r.result.Media) > 0 {
+					for _, p := range r.result.Media {
+						mediaResults = append(mediaResults, MediaResult{Path: p, ContentType: mimeFromExt(filepath.Ext(p))})
+					}
+				} else if mr := parseMediaResult(r.result.ForLLM); mr != nil {
 					mediaResults = append(mediaResults, *mr)
-				}
-				for _, p := range r.result.Media {
-					mediaResults = append(mediaResults, MediaResult{Path: p, ContentType: mimeFromExt(filepath.Ext(p))})
 				}
 				if r.result.Deliverable != "" {
 					deliverables = append(deliverables, r.result.Deliverable)

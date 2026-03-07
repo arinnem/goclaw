@@ -626,8 +626,9 @@ func runGateway() {
 		server.SetBuiltinToolsHandler(builtinToolsH)
 	}
 
-	// Workspace file serving endpoint
-	server.SetFilesHandler(httpapi.NewFilesHandler(workspace, cfg.Gateway.Token))
+	// Workspace file serving endpoint — serves files by absolute path, auth-token protected.
+	// Supports media from any agent workspace (each agent has its own workspace from DB).
+	server.SetFilesHandler(httpapi.NewFilesHandler(cfg.Gateway.Token))
 
 	// Seed + apply builtin tool disables
 	if pgStores.BuiltinTools != nil {

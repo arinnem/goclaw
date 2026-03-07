@@ -9,15 +9,15 @@ import (
 	"strings"
 )
 
-// FilesHandler serves workspace files over HTTP with Bearer token auth.
+// FilesHandler serves files over HTTP with Bearer token auth.
+// Accepts absolute paths — the auth token protects against unauthorized access.
 type FilesHandler struct {
-	workspaceRoot string
-	token         string
+	token string
 }
 
-// NewFilesHandler creates a handler that serves files from the workspace root.
-func NewFilesHandler(workspaceRoot, token string) *FilesHandler {
-	return &FilesHandler{workspaceRoot: workspaceRoot, token: token}
+// NewFilesHandler creates a handler that serves files by absolute path.
+func NewFilesHandler(token string) *FilesHandler {
+	return &FilesHandler{token: token}
 }
 
 // RegisterRoutes registers the file serving route.
@@ -43,42 +43,34 @@ func (h *FilesHandler) auth(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (h *FilesHandler) handleServe(w http.ResponseWriter, r *http.Request) {
-	relPath := r.PathValue("path")
-	if relPath == "" {
+	urlPath := r.PathValue("path")
+	if urlPath == "" {
 		http.Error(w, "path is required", http.StatusBadRequest)
 		return
 	}
 
 	// Prevent path traversal
-	if strings.Contains(relPath, "..") {
-		slog.Warn("security.files_traversal", "path", relPath)
+	if strings.Contains(urlPath, "..") {
+		slog.Warn("security.files_traversal", "path", urlPath)
 		http.Error(w, "invalid path", http.StatusBadRequest)
 		return
 	}
 
-	absPath := filepath.Join(h.workspaceRoot, relPath)
+	// URL path is the absolute path with leading "/" stripped (e.g. "app/.goclaw/workspace/file.png")
+	absPath := filepath.Clean("/" + urlPath)
 
-	// Double-check the resolved path is within the workspace
-	cleanAbs := filepath.Clean(absPath)
-	cleanRoot := filepath.Clean(h.workspaceRoot)
-	if !strings.HasPrefix(cleanAbs, cleanRoot+string(filepath.Separator)) && cleanAbs != cleanRoot {
-		slog.Warn("security.files_escape", "resolved", cleanAbs, "root", cleanRoot)
-		http.Error(w, "invalid path", http.StatusBadRequest)
-		return
-	}
-
-	info, err := os.Stat(cleanAbs)
+	info, err := os.Stat(absPath)
 	if err != nil || info.IsDir() {
 		http.NotFound(w, r)
 		return
 	}
 
 	// Set Content-Type from extension
-	ext := filepath.Ext(cleanAbs)
+	ext := filepath.Ext(absPath)
 	ct := mime.TypeByExtension(ext)
 	if ct != "" {
 		w.Header().Set("Content-Type", ct)
 	}
 
-	http.ServeFile(w, r, cleanAbs)
+	http.ServeFile(w, r, absPath)
 }

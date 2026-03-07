@@ -431,7 +431,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 			fwdMedia := msg.Media
 			contentSuffix := ""
 			if origChannel == "ws" && len(msg.Media) > 0 {
-				contentSuffix = mediaToMarkdownFromPaths(msg.Media, cfg.WorkspacePath(), cfg)
+				contentSuffix = mediaToMarkdownFromPaths(msg.Media, cfg)
 				fwdMedia = nil // WS: images delivered via ContentSuffix, not ForwardMedia
 			}
 
@@ -565,7 +565,7 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 			fwdMedia := msg.Media
 			contentSuffix := ""
 			if origChannel == "ws" && len(msg.Media) > 0 {
-				contentSuffix = mediaToMarkdownFromPaths(msg.Media, cfg.WorkspacePath(), cfg)
+				contentSuffix = mediaToMarkdownFromPaths(msg.Media, cfg)
 				fwdMedia = nil // WS: images delivered via ContentSuffix, not ForwardMedia
 			}
 
@@ -897,34 +897,28 @@ func overrideSessionKeyFromLocalKey(sessionKey, localKey, agentID, channel, chat
 // mediaToMarkdown converts media results to markdown image/link syntax using the
 // /v1/files/ HTTP endpoint. Used for WS channel where outbound media attachments
 // are not supported (no channel handler). Returns empty string if no media.
-func mediaToMarkdown(media []agent.MediaResult, workspace string, cfg *config.Config) string {
+// Uses absolute file paths with the /v1/files endpoint (auth-token protected).
+// Generates relative URLs (/v1/files/...) so they work regardless of the server's
+// external hostname — the browser resolves them from the current origin.
+func mediaToMarkdown(media []agent.MediaResult, cfg *config.Config) string {
 	if len(media) == 0 {
 		return ""
 	}
 
-	scheme := "http"
-	if cfg.Tailscale.EnableTLS {
-		scheme = "https"
-	}
-	host := cfg.Gateway.Host
-	if host == "" || host == "0.0.0.0" {
-		host = "localhost"
-	}
-	baseURL := fmt.Sprintf("%s://%s:%d/v1/files", scheme, host, cfg.Gateway.Port)
 	tokenQuery := ""
 	if cfg.Gateway.Token != "" {
 		tokenQuery = "?token=" + cfg.Gateway.Token
 	}
 
-	cleanRoot := filepath.Clean(workspace)
 	var parts []string
 	for _, mr := range media {
 		cleanPath := filepath.Clean(mr.Path)
-		relPath, err := filepath.Rel(cleanRoot, cleanPath)
-		if err != nil || strings.HasPrefix(relPath, "..") {
+		// Strip leading "/" so URL path is /v1/files/app/.goclaw/...
+		urlPath := strings.TrimPrefix(cleanPath, "/")
+		if urlPath == "" {
 			continue
 		}
-		fileURL := baseURL + "/" + relPath + tokenQuery
+		fileURL := "/v1/files/" + urlPath + tokenQuery
 		if strings.HasPrefix(mr.ContentType, "image/") {
 			parts = append(parts, fmt.Sprintf("![image](%s)", fileURL))
 		} else {
@@ -939,7 +933,7 @@ func mediaToMarkdown(media []agent.MediaResult, workspace string, cfg *config.Co
 
 // mediaToMarkdownFromPaths is like mediaToMarkdown but accepts raw file paths
 // ([]string from bus.InboundMessage.Media) instead of []agent.MediaResult.
-func mediaToMarkdownFromPaths(paths []string, workspace string, cfg *config.Config) string {
+func mediaToMarkdownFromPaths(paths []string, cfg *config.Config) string {
 	if len(paths) == 0 {
 		return ""
 	}
@@ -954,7 +948,7 @@ func mediaToMarkdownFromPaths(paths []string, workspace string, cfg *config.Conf
 			ContentType: ct,
 		})
 	}
-	return mediaToMarkdown(media, workspace, cfg)
+	return mediaToMarkdown(media, cfg)
 }
 
 func buildAnnounceOutMeta(localKey string) map[string]string {
