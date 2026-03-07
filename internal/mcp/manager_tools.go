@@ -16,8 +16,12 @@ func (m *Manager) ToolNames() []string {
 	defer m.mu.RUnlock()
 
 	var names []string
-	for _, ss := range m.servers {
-		names = append(names, ss.toolNames...)
+	for name, ss := range m.servers {
+		if _, isPool := m.poolServers[name]; isPool {
+			names = append(names, m.poolToolNames[name]...)
+		} else {
+			names = append(names, ss.toolNames...)
+		}
 	}
 	return names
 }
@@ -27,6 +31,9 @@ func (m *Manager) ServerToolNames(serverName string) []string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	if _, isPool := m.poolServers[serverName]; isPool {
+		return append([]string(nil), m.poolToolNames[serverName]...)
+	}
 	if ss, ok := m.servers[serverName]; ok {
 		return append([]string(nil), ss.toolNames...)
 	}
@@ -49,20 +56,45 @@ func (m *Manager) unregisterAllTools() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	for name, ss := range m.servers {
-		if ss.cancel != nil {
-			ss.cancel()
-		}
-		if ss.client != nil {
-			_ = ss.client.Close()
-		}
-		for _, toolName := range ss.toolNames {
-			m.registry.Unregister(toolName)
+	for name := range m.servers {
+		if _, isPool := m.poolServers[name]; isPool {
+			// Pool-backed: unregister per-agent tools, release shared connection
+			for _, toolName := range m.poolToolNames[name] {
+				m.registry.Unregister(toolName)
+			}
+			if m.pool != nil {
+				m.pool.Release(name)
+			}
+		} else {
+			// Standalone: close connection directly
+			ss := m.servers[name]
+			if ss.cancel != nil {
+				ss.cancel()
+			}
+			if ss.client != nil {
+				_ = ss.client.Close()
+			}
+			for _, toolName := range ss.toolNames {
+				m.registry.Unregister(toolName)
+			}
 		}
 		tools.UnregisterToolGroup("mcp:" + name)
-		slog.Debug("mcp.server.unregistered", "server", name, "tools", len(ss.toolNames))
+		slog.Debug("mcp.server.unregistered", "server", name)
 	}
+
+	// Clean up search mode state: unregister activated tools and clear deferred
+	if m.searchMode {
+		for name := range m.activatedTools {
+			m.registry.Unregister(name)
+		}
+		m.deferredTools = nil
+		m.activatedTools = nil
+		m.searchMode = false
+	}
+
 	m.servers = make(map[string]*serverState)
+	m.poolServers = nil
+	m.poolToolNames = nil
 	tools.UnregisterToolGroup("mcp")
 }
 
@@ -114,8 +146,14 @@ func (m *Manager) filterTools(serverName string, allow, deny []string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	ss, ok := m.servers[serverName]
-	if !ok {
+	// Get the tool names list (pool-backed or standalone)
+	var toolNames []string
+	_, isPool := m.poolServers[serverName]
+	if isPool {
+		toolNames = m.poolToolNames[serverName]
+	} else if ss, ok := m.servers[serverName]; ok {
+		toolNames = ss.toolNames
+	} else {
 		return
 	}
 
@@ -123,7 +161,7 @@ func (m *Manager) filterTools(serverName string, allow, deny []string) {
 	denySet := toSet(deny)
 
 	var kept []string
-	for _, toolName := range ss.toolNames {
+	for _, toolName := range toolNames {
 		bt, ok := m.registry.Get(toolName)
 		if !ok {
 			continue
@@ -151,5 +189,11 @@ func (m *Manager) filterTools(serverName string, allow, deny []string) {
 
 		kept = append(kept, toolName)
 	}
-	ss.toolNames = kept
+
+	// Update the correct tool names list
+	if isPool {
+		m.poolToolNames[serverName] = kept
+	} else {
+		m.servers[serverName].toolNames = kept
+	}
 }

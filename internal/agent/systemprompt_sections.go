@@ -9,6 +9,21 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
 )
 
+// buildMCPToolsSection generates the MCP tools instruction block for search mode.
+// Shown when mcp_tool_search is registered instead of individual MCP tools.
+func buildMCPToolsSection() []string {
+	return []string{
+		"## MCP Tools (mandatory)",
+		"",
+		"You have access to external tool integrations (MCP servers) with many specialized tools.",
+		"Not all tools are loaded by default — use `mcp_tool_search` to discover them.",
+		"1. Before performing external operations (database, API, file management, messaging), run `mcp_tool_search` with descriptive English keywords.",
+		"2. Matching tools are activated immediately and can be called right away in the same turn.",
+		"3. If no match found, proceed with other available tools.",
+		"",
+	}
+}
+
 // buildSandboxSection creates the "## Sandbox" section matching TS system-prompt.ts lines 476-519.
 func buildSandboxSection(cfg SystemPromptConfig) []string {
 	lines := []string{

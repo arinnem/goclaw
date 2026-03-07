@@ -35,7 +35,8 @@ type SystemPromptConfig struct {
 	ExtraPrompt   string                 // extra system prompt (subagent context, etc.)
 	AgentType     string                 // "open" or "predefined" — affects context file framing
 
-	HasSkillSearch bool // skill_search tool registered? (for search-mode prompt)
+	HasSkillSearch   bool // skill_search tool registered? (for search-mode prompt)
+	HasMCPToolSearch bool // mcp_tool_search tool registered? (MCP search mode)
 
 	// Sandbox info — matching TS sandboxInfo in system-prompt.ts
 	SandboxEnabled       bool   // exec tool runs inside Docker sandbox?
@@ -56,7 +57,8 @@ var coreToolSummaries = map[string]string{
 	"web_search":    "Search the web",
 	"web_fetch":     "Fetch and extract content from a URL",
 	"cron":          "Manage scheduled jobs and reminders",
-	"skill_search":  "Search available skills by keyword (weather, translate, github, etc.)",
+	"skill_search":     "Search available skills by keyword (weather, translate, github, etc.)",
+	"mcp_tool_search":  "Search for available MCP external integration tools by keyword",
 	"browser":          "Browse web pages interactively",
 	"tts":              "Convert text to speech audio",
 	"edit":             "Edit a file by replacing exact text matches",
@@ -106,6 +108,11 @@ func BuildSystemPrompt(cfg SystemPromptConfig) string {
 	// SkillsSummary empty + HasSkillSearch → search mode (use skill_search tool)
 	if !isMinimal && (cfg.SkillsSummary != "" || cfg.HasSkillSearch) {
 		lines = append(lines, buildSkillsSection(cfg.SkillsSummary, cfg.HasSkillSearch)...)
+	}
+
+	// 4.5. ## MCP Tools (full only, search mode)
+	if !isMinimal && cfg.HasMCPToolSearch {
+		lines = append(lines, buildMCPToolsSection()...)
 	}
 
 	// 5. ## Memory Recall (full only)

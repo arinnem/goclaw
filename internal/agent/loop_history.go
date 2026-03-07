@@ -29,6 +29,7 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 
 	_, hasSpawn := l.tools.Get("spawn")
 	_, hasSkillSearch := l.tools.Get("skill_search")
+	_, hasMCPToolSearch := l.tools.Get("mcp_tool_search")
 
 	// Per-user workspace: show the user's subdirectory in the system prompt.
 	// Uses cached workspace from user_agent_profiles (includes channel isolation).
@@ -77,6 +78,7 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 		HasMemory:              l.hasMemory,
 		HasSpawn:               l.tools != nil && hasSpawn,
 		HasSkillSearch:         hasSkillSearch,
+		HasMCPToolSearch:       hasMCPToolSearch,
 		ContextFiles:           contextFiles,
 		AgentType:              l.agentType,
 		ExtraPrompt:            extraSystemPrompt,

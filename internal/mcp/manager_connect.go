@@ -13,22 +13,23 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/tools"
 )
 
-// connectServer creates a client, initializes the connection, discovers tools, and registers them.
-func (m *Manager) connectServer(ctx context.Context, name, transportType, command string, args []string, env map[string]string, url string, headers map[string]string, toolPrefix string, timeoutSec int) error {
+// connectAndDiscover creates a client, initializes the MCP handshake, and
+// discovers tools. Returns a connected serverState with discovered tool
+// definitions. The caller is responsible for registering tools and starting
+// the health loop. This function is shared by both Manager and Pool.
+func connectAndDiscover(ctx context.Context, name, transportType, command string, args []string, env map[string]string, url string, headers map[string]string, timeoutSec int) (*serverState, []mcpgo.Tool, error) {
 	client, err := createClient(transportType, command, args, env, url, headers)
 	if err != nil {
-		return fmt.Errorf("create client: %w", err)
+		return nil, nil, fmt.Errorf("create client: %w", err)
 	}
 
-	// Start transport (SSE/streamable-http need explicit Start; stdio auto-starts)
 	if transportType != "stdio" {
 		if err := client.Start(ctx); err != nil {
 			_ = client.Close()
-			return fmt.Errorf("start transport: %w", err)
+			return nil, nil, fmt.Errorf("start transport: %w", err)
 		}
 	}
 
-	// Initialize MCP handshake
 	initReq := mcpgo.InitializeRequest{}
 	initReq.Params.ProtocolVersion = mcpgo.LATEST_PROTOCOL_VERSION
 	initReq.Params.ClientInfo = mcpgo.Implementation{
@@ -38,14 +39,13 @@ func (m *Manager) connectServer(ctx context.Context, name, transportType, comman
 
 	if _, err := client.Initialize(ctx, initReq); err != nil {
 		_ = client.Close()
-		return fmt.Errorf("initialize: %w", err)
+		return nil, nil, fmt.Errorf("initialize: %w", err)
 	}
 
-	// Discover tools
 	toolsResult, err := client.ListTools(ctx, mcpgo.ListToolsRequest{})
 	if err != nil {
 		_ = client.Close()
-		return fmt.Errorf("list tools: %w", err)
+		return nil, nil, fmt.Errorf("list tools: %w", err)
 	}
 
 	if timeoutSec <= 0 {
@@ -60,40 +60,29 @@ func (m *Manager) connectServer(ctx context.Context, name, transportType, comman
 	}
 	ss.connected.Store(true)
 
-	// Register tools
-	var registeredNames []string
-	for _, mcpTool := range toolsResult.Tools {
-		bt := NewBridgeTool(name, mcpTool, client, toolPrefix, timeoutSec, &ss.connected)
+	return ss, toolsResult.Tools, nil
+}
 
-		// Check for name collision with existing tools
-		if _, exists := m.registry.Get(bt.Name()); exists {
-			slog.Warn("mcp.tool.name_collision",
-				"server", name,
-				"tool", bt.Name(),
-				"action", "skipped",
-			)
-			continue
-		}
-
-		m.registry.Register(bt)
-		registeredNames = append(registeredNames, bt.Name())
+// connectServer creates a client, initializes the connection, discovers tools, and registers them.
+func (m *Manager) connectServer(ctx context.Context, name, transportType, command string, args []string, env map[string]string, url string, headers map[string]string, toolPrefix string, timeoutSec int) error {
+	ss, mcpTools, err := connectAndDiscover(ctx, name, transportType, command, args, env, url, headers, timeoutSec)
+	if err != nil {
+		return err
 	}
+
+	// Register tools
+	registeredNames := m.registerBridgeTools(ss, mcpTools, name, toolPrefix, timeoutSec)
 	ss.toolNames = registeredNames
 
-	// Create health monitoring context BEFORE storing server in map,
-	// so DisconnectServer() can safely call ss.cancel even if called immediately.
+	// Create health monitoring context
 	hctx, hcancel := context.WithCancel(context.Background())
 	ss.cancel = hcancel
 
-	// Store server state BEFORE updating MCP group, because updateMCPGroup()
-	// calls ToolNames() which iterates m.servers. If we store after, the current
-	// server's tools are invisible to ToolNames() and toolGroups["mcp"] ends up
-	// incomplete — causing the policy engine to block MCP tools.
+	// Store server state BEFORE updating MCP group
 	m.mu.Lock()
 	m.servers[name] = ss
 	m.mu.Unlock()
 
-	// Register dynamic tool groups for policy filtering
 	if len(registeredNames) > 0 {
 		tools.RegisterToolGroup("mcp:"+name, registeredNames)
 		m.updateMCPGroup()
@@ -108,6 +97,89 @@ func (m *Manager) connectServer(ctx context.Context, name, transportType, comman
 	)
 
 	return nil
+}
+
+// registerBridgeTools creates BridgeTools from MCP tool definitions and
+// registers them in the Manager's registry. Returns registered tool names.
+func (m *Manager) registerBridgeTools(ss *serverState, mcpTools []mcpgo.Tool, serverName, toolPrefix string, timeoutSec int) []string {
+	var registeredNames []string
+	for _, mcpTool := range mcpTools {
+		bt := NewBridgeTool(serverName, mcpTool, ss.client, toolPrefix, timeoutSec, &ss.connected)
+
+		if _, exists := m.registry.Get(bt.Name()); exists {
+			slog.Warn("mcp.tool.name_collision",
+				"server", serverName,
+				"tool", bt.Name(),
+				"action", "skipped",
+			)
+			continue
+		}
+
+		m.registry.Register(bt)
+		registeredNames = append(registeredNames, bt.Name())
+	}
+	return registeredNames
+}
+
+// connectViaPool acquires a shared connection from the pool and creates
+// per-agent BridgeTools pointing to the shared client/connected pointers.
+func (m *Manager) connectViaPool(ctx context.Context, name, transportType, command string, args []string, env map[string]string, url string, headers map[string]string, toolPrefix string, timeoutSec int) error {
+	entry, err := m.pool.Acquire(ctx, name, transportType, command, args, env, url, headers, timeoutSec)
+	if err != nil {
+		return err
+	}
+
+	// Create per-agent BridgeTools from the pool's shared connection
+	registeredNames := m.registerPoolBridgeTools(entry, name, toolPrefix, timeoutSec)
+
+	// Track server state and per-agent tool names
+	m.mu.Lock()
+	m.servers[name] = entry.state
+	if m.poolServers == nil {
+		m.poolServers = make(map[string]struct{})
+	}
+	m.poolServers[name] = struct{}{}
+	if m.poolToolNames == nil {
+		m.poolToolNames = make(map[string][]string)
+	}
+	m.poolToolNames[name] = registeredNames
+	m.mu.Unlock()
+
+	if len(registeredNames) > 0 {
+		tools.RegisterToolGroup("mcp:"+name, registeredNames)
+		m.updateMCPGroup()
+	}
+
+	slog.Info("mcp.server.connected_via_pool",
+		"server", name,
+		"transport", transportType,
+		"tools", len(registeredNames),
+	)
+
+	return nil
+}
+
+// registerPoolBridgeTools creates BridgeTools from pool entry's discovered tools,
+// pointing to the shared client/connected pointers. Returns registered tool names.
+func (m *Manager) registerPoolBridgeTools(entry *poolEntry, serverName, toolPrefix string, timeoutSec int) []string {
+	var registeredNames []string
+	for _, mcpTool := range entry.tools {
+		bt := NewBridgeTool(serverName, mcpTool, entry.state.client, toolPrefix, timeoutSec, &entry.state.connected)
+
+		if _, exists := m.registry.Get(bt.Name()); exists {
+			slog.Warn("mcp.tool.name_collision",
+				"server", serverName,
+				"tool", bt.Name(),
+				"action", "skipped",
+			)
+			continue
+		}
+
+		m.registry.Register(bt)
+		registeredNames = append(registeredNames, bt.Name())
+	}
+
+	return registeredNames
 }
 
 // createClient creates the appropriate MCP client based on transport type.
@@ -136,9 +208,20 @@ func createClient(transportType, command string, args []string, env map[string]s
 	}
 }
 
+// newHealthTicker creates a ticker for health check intervals.
+func newHealthTicker() *time.Ticker {
+	return time.NewTicker(healthCheckInterval)
+}
+
+// isMethodNotFound returns true if the error indicates the server
+// doesn't implement the "ping" method (still considered healthy).
+func isMethodNotFound(err error) bool {
+	return strings.Contains(strings.ToLower(err.Error()), "method not found")
+}
+
 // healthLoop periodically pings the MCP server and attempts reconnection on failure.
 func (m *Manager) healthLoop(ctx context.Context, ss *serverState) {
-	ticker := time.NewTicker(healthCheckInterval)
+	ticker := newHealthTicker()
 	defer ticker.Stop()
 
 	for {
@@ -147,8 +230,7 @@ func (m *Manager) healthLoop(ctx context.Context, ss *serverState) {
 			return
 		case <-ticker.C:
 			if err := ss.client.Ping(ctx); err != nil {
-				// Servers that don't implement "ping" are still alive — treat as healthy.
-				if strings.Contains(strings.ToLower(err.Error()), "method not found") {
+				if isMethodNotFound(err) {
 					ss.connected.Store(true)
 					ss.mu.Lock()
 					ss.reconnAttempts = 0

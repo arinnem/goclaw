@@ -574,7 +574,11 @@ func runGateway() {
 		}
 	}
 
-	contextFileInterceptor, delegateMgr = wireExtras(pgStores, agentRouter, providerRegistry, msgBus, pgStores.Sessions, toolsReg, toolPE, skillsLoader, hasMemory, traceCollector, workspace, cfg.Gateway.InjectionAction, cfg, sandboxMgr, dynamicLoader)
+	var mcpPool *mcpbridge.Pool
+	contextFileInterceptor, delegateMgr, mcpPool = wireExtras(pgStores, agentRouter, providerRegistry, msgBus, pgStores.Sessions, toolsReg, toolPE, skillsLoader, hasMemory, traceCollector, workspace, cfg.Gateway.InjectionAction, cfg, sandboxMgr, dynamicLoader)
+	if mcpPool != nil {
+		defer mcpPool.Stop()
+	}
 	gatewayAddr := loopbackAddr(cfg.Gateway.Host, cfg.Gateway.Port)
 	var mcpToolLister httpapi.MCPToolLister
 	if mcpMgr != nil {
