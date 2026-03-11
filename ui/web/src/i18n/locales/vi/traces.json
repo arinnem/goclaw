@@ -31,7 +31,8 @@
     "output": "Đầu ra",
     "spansCount": "Khoảng ({{count}})",
     "llmCalls": "LLM",
-    "toolCalls": "công cụ"
+    "toolCalls": "công cụ",
+    "export": "Xuất trace"
   },
   "span": {
     "model": "Model:",

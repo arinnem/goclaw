@@ -31,7 +31,8 @@
     "output": "Output",
     "spansCount": "Spans ({{count}})",
     "llmCalls": "LLM",
-    "toolCalls": "tool"
+    "toolCalls": "tool",
+    "export": "Export trace"
   },
   "span": {
     "model": "Model:",

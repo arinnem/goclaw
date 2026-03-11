@@ -25,7 +25,8 @@
     "status": "状态：",
     "title": "追踪详情",
     "tokens": "令牌：",
-    "toolCalls": "工具"
+    "toolCalls": "工具",
+    "export": "导出追踪"
   },
   "emptyDescription": "暂无追踪记录。当Agent处理请求时将自动记录追踪。",
   "emptyTitle": "暂无追踪",

@@ -191,6 +191,59 @@ func (s *PGTracingStore) ListTraces(ctx context.Context, opts store.TraceListOpt
 	return result, nil
 }
 
+func (s *PGTracingStore) ListChildTraces(ctx context.Context, parentTraceID uuid.UUID) ([]store.TraceData, error) {
+	q := `SELECT id, parent_trace_id, agent_id, user_id, session_key, run_id, start_time, end_time,
+		 duration_ms, name, channel, input_preview, output_preview,
+		 total_input_tokens, total_output_tokens, COALESCE(total_cost, 0), span_count, llm_call_count, tool_call_count,
+		 status, error, metadata, tags, created_at
+		 FROM traces WHERE parent_trace_id = $1 ORDER BY created_at`
+
+	rows, err := s.db.QueryContext(ctx, q, parentTraceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []store.TraceData
+	for rows.Next() {
+		var d store.TraceData
+		var parentID, agentID *uuid.UUID
+		var userID, sessionKey, runID, name, channel, inputPreview, outputPreview, errStr *string
+		var endTime *time.Time
+		var durationMS *int
+		var metadata *[]byte
+		var tags []byte
+
+		if err := rows.Scan(&d.ID, &parentID, &agentID, &userID, &sessionKey, &runID, &d.StartTime, &endTime,
+			&durationMS, &name, &channel, &inputPreview, &outputPreview,
+			&d.TotalInputTokens, &d.TotalOutputTokens, &d.TotalCost, &d.SpanCount, &d.LLMCallCount, &d.ToolCallCount,
+			&d.Status, &errStr, &metadata, &tags, &d.CreatedAt); err != nil {
+			continue
+		}
+
+		d.ParentTraceID = parentID
+		d.AgentID = agentID
+		d.UserID = derefStr(userID)
+		d.SessionKey = derefStr(sessionKey)
+		d.RunID = derefStr(runID)
+		d.EndTime = endTime
+		if durationMS != nil {
+			d.DurationMS = *durationMS
+		}
+		d.Name = derefStr(name)
+		d.Channel = derefStr(channel)
+		d.InputPreview = derefStr(inputPreview)
+		d.OutputPreview = derefStr(outputPreview)
+		d.Error = derefStr(errStr)
+		if metadata != nil {
+			d.Metadata = *metadata
+		}
+		scanStringArray(tags, &d.Tags)
+		result = append(result, d)
+	}
+	return result, nil
+}
+
 func (s *PGTracingStore) CreateSpan(ctx context.Context, span *store.SpanData) error {
 	if span.ID == uuid.Nil {
 		span.ID = store.GenNewID()
