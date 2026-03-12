@@ -115,6 +115,11 @@ func buildTraceWhere(opts store.TraceListOpts) (string, []any) {
 		args = append(args, opts.Status)
 		argIdx++
 	}
+	if opts.Channel != "" {
+		conditions = append(conditions, fmt.Sprintf("channel = $%d", argIdx))
+		args = append(args, opts.Channel)
+		argIdx++
+	}
 
 	where := ""
 	if len(conditions) > 0 {

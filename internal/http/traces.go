@@ -71,6 +71,9 @@ func (h *TracesHandler) handleList(w http.ResponseWriter, r *http.Request) {
 	if v := r.URL.Query().Get("status"); v != "" {
 		opts.Status = v
 	}
+	if v := r.URL.Query().Get("channel"); v != "" {
+		opts.Channel = v
+	}
 	if v := r.URL.Query().Get("limit"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 && n <= 200 {
 			opts.Limit = n
