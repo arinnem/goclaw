@@ -65,7 +65,7 @@ ALTER TABLE team_tasks ADD COLUMN task_type VARCHAR(30) NOT NULL DEFAULT 'genera
 ALTER TABLE team_tasks ADD COLUMN task_number INT NOT NULL DEFAULT 0;
 ALTER TABLE team_tasks ADD COLUMN identifier VARCHAR(20);
 ALTER TABLE team_tasks ADD COLUMN created_by_agent_id UUID REFERENCES agents(id);
-ALTER TABLE team_tasks ADD COLUMN assignee_user_id TEXT;
+ALTER TABLE team_tasks ADD COLUMN assignee_user_id VARCHAR(255);
 ALTER TABLE team_tasks ADD COLUMN parent_id UUID REFERENCES team_tasks(id) ON DELETE SET NULL;
 ALTER TABLE team_tasks ADD COLUMN chat_id VARCHAR(255) DEFAULT '';
 ALTER TABLE team_tasks ADD COLUMN locked_at TIMESTAMPTZ;
@@ -85,8 +85,9 @@ CREATE TABLE team_task_comments (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
     task_id    UUID NOT NULL REFERENCES team_tasks(id) ON DELETE CASCADE,
     agent_id   UUID REFERENCES agents(id),
-    user_id    TEXT,
+    user_id    VARCHAR(255),
     content    TEXT NOT NULL,
+    metadata   JSONB DEFAULT '{}',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_ttc_task ON team_task_comments(task_id);
@@ -97,7 +98,7 @@ CREATE TABLE team_task_events (
     task_id    UUID NOT NULL REFERENCES team_tasks(id) ON DELETE CASCADE,
     event_type VARCHAR(30) NOT NULL,
     actor_type VARCHAR(10) NOT NULL,
-    actor_id   TEXT NOT NULL,
+    actor_id   VARCHAR(255) NOT NULL,
     data       JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -109,6 +110,7 @@ CREATE TABLE team_task_attachments (
     task_id    UUID NOT NULL REFERENCES team_tasks(id) ON DELETE CASCADE,
     file_id    UUID NOT NULL REFERENCES team_workspace_files(id) ON DELETE CASCADE,
     added_by   UUID REFERENCES agents(id),
+    metadata   JSONB DEFAULT '{}',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE(task_id, file_id)
 );
