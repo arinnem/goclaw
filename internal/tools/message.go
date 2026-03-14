@@ -190,7 +190,8 @@ func (t *MessageTool) resolveMediaPath(ctx context.Context, s string) (string, b
 	resolved, err := resolvePath(raw, workspace, restrict)
 	if err != nil {
 		// When restricted, also allow /tmp/ (used by create_image, create_audio, etc.)
-		if restrict && isInTempDir(raw) {
+		// Reject traversal paths (containing "..") to prevent workspace escape via /tmp/ fallback.
+		if restrict && !strings.Contains(raw, "..") && isInTempDir(raw) {
 			return filepath.Clean(raw), true
 		}
 		return "", false
