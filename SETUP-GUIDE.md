@@ -638,22 +638,86 @@ Invoke-RestMethod -Uri "http://localhost:18790/v1/providers" `
   -Headers $headers -Method POST -Body $body
 ```
 
-### Authentication inside Docker
+### Authenticate & test the CLIs
 
-Each CLI requires its own authentication:
+The CLIs run inside the Docker container, so all commands are executed after shelling in.
 
-| CLI | Auth Method | Notes |
-|-----|-------------|-------|
-| **Claude CLI** | `claude login` inside container | Requires Anthropic account with API access |
-| **Gemini CLI** | `gemini auth` inside container | Free tier: 1,000 requests/day with Google account |
-
-To authenticate, shell into the running container:
+#### Step 1: Shell into the container
 
 ```powershell
 docker exec -it goclaw-goclaw-1 sh
-claude login          # Follow prompts for Anthropic auth
-gemini auth           # Follow prompts for Google auth
 ```
+
+You'll get a `/ $` prompt inside the Alpine container.
+
+#### Step 2: Authenticate Claude Code (one-time)
+
+```sh
+claude login
+```
+
+1. A URL is displayed — open it in your browser
+2. Log in with your **Anthropic account** (requires API access or Max subscription)
+3. Paste the authorization code back into the terminal
+4. You should see `✓ Successfully authenticated`
+
+> **Note**: The free Claude.ai plan does **not** include CLI access.
+
+#### Step 3: Authenticate Gemini CLI (one-time)
+
+```sh
+gemini auth
+```
+
+1. A URL is displayed — open it in your browser
+2. Log in with your **Google account**
+3. Paste the authorization code back into the terminal
+4. You should see a success message
+
+> **Free tier**: 1,000 requests/day and 60 requests/minute with a personal Google account.
+
+#### Step 4: Test the CLIs
+
+Still inside the container shell:
+
+```sh
+# Test Claude
+claude "Hello, what can you do?"
+
+# Test Gemini
+gemini "Hello, what can you do?"
+```
+
+Both should return AI responses. Type `exit` to leave the container shell.
+
+#### Step 5: Connect as GoClaw providers
+
+Now wire the CLIs into GoClaw so your agents can use them:
+
+1. Open http://localhost:3000/providers
+2. Click **"+ Add Provider"**
+
+**For Claude Code:**
+
+| Field | Value |
+|-------|-------|
+| **Provider Type** | `Claude CLI (Local)` |
+| **Name** | `claude-cli` |
+
+**For Gemini (via ACP):**
+
+| Field | Value |
+|-------|-------|
+| **Provider Type** | `ACP` |
+| **Name** | `gemini-agent` |
+| **API Base** | `gemini` |
+
+3. Create an agent at http://localhost:3000/agents → **"+ New Agent"**
+4. Select the new provider and set an appropriate model:
+   - Claude CLI: `sonnet` (or `opus`, `haiku`)
+   - Gemini ACP: `gemini`
+
+5. Chat with your agent in the Dashboard — it will now delegate tasks to the CLI
 
 ---
 
