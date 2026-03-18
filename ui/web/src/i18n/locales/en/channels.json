@@ -259,7 +259,7 @@
       "requireMention": "Require @mention",
       "enabled": "Enabled",
       "allowedUsers": "Allowed Users",
-      "allowedUsersPlaceholder": "One user ID per line",
+      "allowedUsersPlaceholder": "One user ID per line or comma-separated",
       "skillsFilter": "Skills Filter",
       "skillsPlaceholder": "One skill name per line (empty = inherit)",
       "toolAllow": "Tool Allow",

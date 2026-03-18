@@ -248,7 +248,7 @@ function FieldRenderer({
             id={id}
             value={Array.isArray(value) ? (value as string[]).join("\n") : ""}
             onChange={(e) => {
-              const lines = e.target.value.split("\n").map((l) => l.trim()).filter(Boolean);
+              const lines = e.target.value.split(/[\n,]/).map((l) => l.trim()).filter(Boolean);
               onChange(lines.length > 0 ? lines : undefined);
             }}
             placeholder={field.placeholder ?? t("groupOverrides.fields.allowedUsersPlaceholder")}
