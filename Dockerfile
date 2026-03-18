@@ -42,6 +42,7 @@ ARG ENABLE_SANDBOX=false
 ARG ENABLE_PYTHON=false
 ARG ENABLE_NODE=false
 ARG ENABLE_FULL_SKILLS=false
+ARG ENABLE_CODING_AGENTS=false
 
 # Install ca-certificates + wget (healthcheck) + optional runtimes.
 # ENABLE_FULL_SKILLS=true pre-installs all skill deps (larger image, no on-demand install needed).
@@ -66,6 +67,18 @@ RUN set -eux; \
         if [ "$ENABLE_NODE" = "true" ]; then \
             apk add --no-cache nodejs npm; \
         fi; \
+    fi
+
+# AI coding agent CLIs (Claude Code + Gemini CLI).
+# Both are npm packages requiring Node.js 20+.
+# Enables claude_cli and acp providers to spawn these as subprocesses.
+RUN set -eux; \
+    if [ "$ENABLE_CODING_AGENTS" = "true" ]; then \
+        apk add --no-cache nodejs npm git; \
+        npm install -g --cache /tmp/npm-cache \
+            @anthropic-ai/claude-code \
+            @google/gemini-cli; \
+        rm -rf /tmp/npm-cache /root/.cache; \
     fi
 
 # Non-root user

@@ -549,6 +549,105 @@ docker compose -f docker-compose.yml `
 
 ---
 
+## Enable AI Coding Agents (Claude CLI + Gemini CLI)
+
+GoClaw can delegate tasks to local AI coding agent CLIs (**Claude Code** and **Gemini CLI**) running inside the Docker container. This is enabled via the `ENABLE_CODING_AGENTS` build argument.
+
+> **Note on Antigravity**: Google Antigravity is an IDE/platform, not a standalone CLI binary. For CLI-based Gemini integration, use **Gemini CLI** (`@google/gemini-cli`) which is what gets installed here.
+
+### Build with coding agents enabled
+
+```powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.postgres.yml `
+  -f docker-compose.selfservice.yml `
+  up -d --build `
+  --build-arg ENABLE_CODING_AGENTS=true
+```
+
+This installs inside the container:
+- **Node.js 20+** and **npm** (required runtime)
+- **Claude Code CLI** (`claude` binary) — via `@anthropic-ai/claude-code`
+- **Gemini CLI** (`gemini` binary) — via `@google/gemini-cli`
+
+### Configure the providers
+
+After building, add a provider via the Dashboard or API:
+
+#### Option A: Claude CLI provider
+
+| Field | Value |
+|-------|-------|
+| **Provider Type** | `Claude CLI (Local)` |
+| **Name** | `claude-cli` |
+
+Then create an agent using provider `claude-cli` with model `sonnet` (or `opus`, `haiku`).
+
+#### Option B: ACP provider (Claude, Gemini, or Codex)
+
+The ACP provider can orchestrate any of the installed CLI agents:
+
+**Via API:**
+```powershell
+$headers = @{
+  "Authorization" = "Bearer <YOUR_GATEWAY_TOKEN>"
+  "X-User-ID"     = "admin@local"
+  "Content-Type"  = "application/json"
+}
+
+# For Gemini CLI agent
+$body = '{
+  "name": "gemini-agent",
+  "display_name": "Gemini Agent",
+  "provider_type": "acp",
+  "api_base": "gemini",
+  "enabled": true,
+  "settings": {
+    "idle_ttl": "5m",
+    "perm_mode": "approve-all",
+    "work_dir": "/app/workspace"
+  }
+}'
+Invoke-RestMethod -Uri "http://localhost:18790/v1/providers" `
+  -Headers $headers -Method POST -Body $body
+
+# For Claude CLI via ACP
+$body = '{
+  "name": "claude-agent",
+  "display_name": "Claude Agent",
+  "provider_type": "acp",
+  "api_base": "claude",
+  "enabled": true,
+  "settings": {
+    "idle_ttl": "5m",
+    "perm_mode": "approve-all",
+    "work_dir": "/app/workspace"
+  }
+}'
+Invoke-RestMethod -Uri "http://localhost:18790/v1/providers" `
+  -Headers $headers -Method POST -Body $body
+```
+
+### Authentication inside Docker
+
+Each CLI requires its own authentication:
+
+| CLI | Auth Method | Notes |
+|-----|-------------|-------|
+| **Claude CLI** | `claude login` inside container | Requires Anthropic account with API access |
+| **Gemini CLI** | `gemini auth` inside container | Free tier: 1,000 requests/day with Google account |
+
+To authenticate, shell into the running container:
+
+```powershell
+docker exec -it goclaw-goclaw-1 sh
+claude login          # Follow prompts for Anthropic auth
+gemini auth           # Follow prompts for Google auth
+```
+
+---
+
 ## Management Commands
 
 ```powershell
