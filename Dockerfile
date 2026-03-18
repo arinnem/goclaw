@@ -72,9 +72,11 @@ RUN set -eux; \
 # AI coding agent CLIs (Claude Code + Gemini CLI).
 # Both are npm packages requiring Node.js 20+.
 # Enables claude_cli and acp providers to spawn these as subprocesses.
+# coreutils is needed because Gemini CLI's shebang uses #!/usr/bin/env -S node
+# which Alpine's busybox env does not support.
 RUN set -eux; \
     if [ "$ENABLE_CODING_AGENTS" = "true" ]; then \
-        apk add --no-cache nodejs npm git; \
+        apk add --no-cache nodejs npm git coreutils; \
         npm install -g --cache /tmp/npm-cache \
             @anthropic-ai/claude-code \
             @google/gemini-cli; \

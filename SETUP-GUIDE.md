@@ -557,13 +557,20 @@ GoClaw can delegate tasks to local AI coding agent CLIs (**Claude Code** and **G
 
 ### Build with coding agents enabled
 
+1. Add to your `.env` file:
+
+```env
+ENABLE_CODING_AGENTS=true
+```
+
+2. Rebuild:
+
 ```powershell
 docker compose `
   -f docker-compose.yml `
   -f docker-compose.postgres.yml `
   -f docker-compose.selfservice.yml `
-  up -d --build `
-  --build-arg ENABLE_CODING_AGENTS=true
+  up -d --build
 ```
 
 This installs inside the container:
