@@ -1,6 +1,6 @@
 # GoClaw — Windows Setup Guide (Docker + 9Router)
 
-> Complete step-by-step guide to install, configure, and run GoClaw on **Windows** using **Docker Desktop** and **9Router** as the free AI provider.
+> Complete step-by-step guide to install, configure, and run GoClaw on **Windows** using **Docker Desktop** and **9Router** as the free AI provider. All services run inside Docker — a single `docker compose up` starts everything, `docker compose down` stops everything.
 
 ---
 
@@ -8,11 +8,11 @@
 
 - [Architecture Overview](#architecture-overview)
 - [Prerequisites](#prerequisites)
-- [Part 1: Install 9Router](#part-1-install-9router)
-- [Part 2: Configure GoClaw](#part-2-configure-goclaw)
-- [Part 3: Fix Windows Compatibility Issues](#part-3-fix-windows-compatibility-issues)
-- [Part 4: Build & Launch](#part-4-build--launch)
-- [Part 5: Verify Installation](#part-5-verify-installation)
+- [Part 1: Configure GoClaw](#part-1-configure-goclaw)
+- [Part 2: Fix Windows Compatibility Issues](#part-2-fix-windows-compatibility-issues)
+- [Part 3: Build & Launch](#part-3-build--launch)
+- [Part 4: Verify Installation](#part-4-verify-installation)
+- [Part 5: Connect 9Router Providers](#part-5-connect-9router-providers)
 - [Part 6: Dashboard Login](#part-6-dashboard-login)
 - [Part 7: Add LLM Provider (Dashboard)](#part-7-add-llm-provider-dashboard)
 - [Part 8: Create an AI Agent (Dashboard)](#part-8-create-an-ai-agent-dashboard)
@@ -34,22 +34,28 @@
 ┌──────────────────────────────────────────────────────────────┐
 │                    Your Windows Machine                       │
 │                                                              │
-│  ┌────────────────┐     ┌──────────────────────────────────┐ │
-│  │    9Router      │     │        Docker Desktop            │ │
-│  │  :20128         │     │                                  │ │
-│  │                 │     │  ┌────────────┐  ┌────────────┐  │ │
-│  │  Qwen (free)    │◄────┤  │  GoClaw    │  │ PostgreSQL │  │ │
-│  │  Gemini (free)  │     │  │  Gateway   │  │ 18+pgvector│  │ │
-│  │  + 40 more...   │     │  │  :18790    │  │  :5432     │  │ │
-│  │                 │     │  └────────────┘  └────────────┘  │ │
-│  └────────────────┘     │  ┌────────────┐                  │ │
-│                          │  │ Dashboard  │                  │ │
-│  Browser ◄───────────────┤  │ (React SPA)│                  │ │
-│  http://localhost:3000   │  │  :3000     │                  │ │
-│                          │  └────────────┘                  │ │
-│                          └──────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────┐ │
+│  │                    Docker Desktop                        │ │
+│  │                                                          │ │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────────────┐  │ │
+│  │  │  GoClaw    │  │ PostgreSQL │  │     9Router        │  │ │
+│  │  │  Gateway   │──│ 18+pgvector│  │  :20128            │  │ │
+│  │  │  :18790    │  │  :5432     │  │  Qwen/Gemini/40+   │  │ │
+│  │  └────────────┘  └────────────┘  └────────────────────┘  │ │
+│  │  ┌────────────┐                                          │ │
+│  │  │ Dashboard  │                                          │ │
+│  │  │ (React SPA)│                                          │ │
+│  │  │  :3000     │                                          │ │
+│  │  └────────────┘                                          │ │
+│  └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  Browser ◄── http://localhost:3000 (Dashboard)               │
+│              http://localhost:20128 (9Router Dashboard)       │
+│              http://localhost:18790 (Gateway API)             │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+All services run inside Docker and start/stop together with a single command.
 
 | Service | URL | Purpose |
 |---------|-----|---------|
@@ -66,61 +72,22 @@
 | Requirement | Version | Check Command |
 |-------------|---------|---------------|
 | Docker Desktop | Latest | `docker --version` |
-| Node.js | 18+ | `node --version` |
-| npm | 9+ | `npm --version` |
 | Git | Latest | `git --version` |
 
-> **Note**: Docker Desktop must be running with **WSL2 backend** enabled.
+> **Note**: Docker Desktop must be running with **WSL2 backend** enabled. Node.js/npm are **not** required — 9Router runs inside Docker.
 
 ---
 
-## Part 1: Install 9Router
+## Part 1: Configure GoClaw
 
-9Router is a free, open-source AI model router that aggregates 40+ providers into a single OpenAI-compatible API.
-
-### 1.1 Install globally
-
-```powershell
-npm install -g 9router
-```
-
-### 1.2 Start 9Router
-
-Open a **dedicated terminal** (9Router runs in the foreground):
-
-```powershell
-9router
-```
-
-It starts:
-- Dashboard at `http://localhost:20128`
-- OpenAI-compatible API at `http://localhost:20128/v1`
-
-### 1.3 Connect free providers
-
-1. Open http://localhost:20128/dashboard/providers
-2. Login with default password: **`123456`**
-3. Click **Connect** on free providers:
-   - **Qwen** — unlimited free (qwen3-coder-plus, etc.)
-   - **Gemini CLI** — Google's Gemini models via CLI auth
-4. Click **Free Test** → verify both show green ✅
-
-### 1.4 Note your API key
-
-The default 9Router API key is `sk_9router`. You can also find/generate keys in the 9Router dashboard under Settings.
-
----
-
-## Part 2: Configure GoClaw
-
-### 2.1 Clone the repository
+### 1.1 Clone the repository
 
 ```powershell
 git clone https://github.com/nextlevelbuilder/goclaw.git
 cd goclaw
 ```
 
-### 2.2 Generate secrets
+### 1.2 Generate secrets
 
 Run in PowerShell to generate cryptographic keys:
 
@@ -135,7 +102,7 @@ Write-Output "GOCLAW_ENCRYPTION_KEY=$encKey"
 Write-Output "GOCLAW_GATEWAY_TOKEN=$gwToken"
 ```
 
-### 2.3 Create `.env` file
+### 1.3 Create `.env` file
 
 Create a `.env` file in the project root with the generated secrets:
 
@@ -147,9 +114,13 @@ GOCLAW_ENCRYPTION_KEY=<your-64-char-hex-key>
 GOCLAW_GATEWAY_TOKEN=<your-32-char-hex-token>
 
 # 9Router Configuration
-# "host.docker.internal" lets Docker containers reach your Windows host
+# 9Router runs inside Docker — containers reach it via service name
 GOCLAW_OPENROUTER_API_KEY=sk_9router
-GOCLAW_OPENROUTER_BASE_URL=http://host.docker.internal:20128/v1
+GOCLAW_OPENROUTER_BASE_URL=http://9router:20128/v1
+
+# 9Router settings (used by docker-compose.9router.yml)
+NINEROUTER_JWT_SECRET=9router-default-secret-change-me
+NINEROUTER_PASSWORD=123456
 
 # Provider override
 GOCLAW_PROVIDER=openrouter
@@ -163,15 +134,15 @@ POSTGRES_PASSWORD=goclaw
 POSTGRES_DB=goclaw
 ```
 
-> **IMPORTANT**: `host.docker.internal` is critical. Docker containers cannot use `localhost` to reach host processes — they need this special DNS name provided by Docker Desktop.
+> **Note**: 9Router runs inside Docker alongside GoClaw. Containers reach it via the Docker service name `9router` — no `host.docker.internal` needed.
 
 ---
 
-## Part 3: Fix Windows Compatibility Issues
+## Part 2: Fix Windows Compatibility Issues
 
 Two issues must be fixed before GoClaw will run on Windows.
 
-### 3.1 Fix CRLF line endings in `docker-entrypoint.sh`
+### 2.1 Fix CRLF line endings in `docker-entrypoint.sh`
 
 **What happens**: Windows saves files with `\r\n` (CRLF) line endings. When Docker copies this file into a Linux container, the shell interprets `#!/bin/sh\r` as looking for `/bin/sh\r` (with a carriage return), which doesn't exist.
 
@@ -202,7 +173,7 @@ git config core.autocrlf input
 git checkout -- docker-entrypoint.sh
 ```
 
-### 3.2 Fix Docker capability for permission issues
+### 2.2 Fix Docker capability for permission issues
 
 **What happens**: `docker-compose.yml` drops ALL Linux capabilities with `cap_drop: ALL`, including `DAC_OVERRIDE`. The entrypoint runs as root to create runtime directories, but without `DAC_OVERRIDE`, root cannot write to directories owned by the `goclaw` user (UID 1000).
 
@@ -223,29 +194,47 @@ mkdir: can't create directory '/app/data/.runtime/': Permission denied
 
 ---
 
-## Part 4: Build & Launch
+## Part 3: Build & Launch
 
-### 4.1 Build and start all services
+### 3.1 Build and start all services
 
 ```powershell
 docker compose `
   -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml `
   up -d --build
 ```
 
-This builds from source and starts:
+This builds from source and starts **all services together**:
+- **goclaw-9router-1** — 9Router AI model router (auto-installed from npm)
 - **goclaw-postgres-1** — PostgreSQL 18 with pgvector
 - **goclaw-goclaw-1** — GoClaw gateway
 - **goclaw-goclaw-ui-1** — Web dashboard (Nginx + React)
 
-### 4.2 Wait for healthy containers
+> **Note**: The first startup takes ~30–60s extra while the 9Router container runs `npm install -g 9router`. Subsequent starts are faster.
+
+### 3.2 Stop all services
 
 ```powershell
 docker compose `
   -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
+  -f docker-compose.selfservice.yml `
+  down
+```
+
+This stops **everything** — GoClaw, PostgreSQL, 9Router, and the Dashboard — in one command. Your data persists in Docker volumes.
+
+### 3.3 Check container status
+
+```powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml `
   ps
 ```
@@ -254,9 +243,9 @@ All containers should show `Up` or `Up (healthy)`.
 
 ---
 
-## Part 5: Verify Installation
+## Part 4: Verify Installation
 
-### 5.1 Check gateway logs
+### 4.1 Check gateway logs
 
 ```powershell
 docker logs goclaw-goclaw-1 --tail 20
@@ -277,7 +266,15 @@ level=INFO msg="lane created" name=cron concurrency=30
 level=INFO msg="gateway starting" addr=0.0.0.0:18790
 ```
 
-### 5.2 Health check
+### 4.2 Check 9Router logs
+
+```powershell
+docker logs goclaw-9router-1 --tail 20
+```
+
+You should see 9Router started and listening on port 20128.
+
+### 4.3 Health check
 
 ```powershell
 Invoke-RestMethod -Uri http://localhost:18790/health
@@ -285,14 +282,39 @@ Invoke-RestMethod -Uri http://localhost:18790/health
 # Expected: {"status":"ok","protocol":3}
 ```
 
-### 5.3 Check all services
+### 4.4 Check all services
 
 | Check | Command / URL | Expected |
 |-------|---------------|----------|
 | Gateway health | `http://localhost:18790/health` | `{"status":"ok"}` |
 | Dashboard | `http://localhost:3000` | Login page |
-| 9Router | `http://localhost:20128` | Dashboard |
+| 9Router | `http://localhost:20128` | 9Router Dashboard |
 | API Docs | `http://localhost:18790/docs` | Swagger UI |
+
+---
+
+## Part 5: Connect 9Router Providers
+
+Now that all services are running inside Docker, connect free AI providers in 9Router.
+
+### 5.1 Open 9Router dashboard
+
+1. Open http://localhost:20128/dashboard/providers
+2. Login with default password: **`123456`** (or the value of `NINEROUTER_PASSWORD` in your `.env`)
+
+### 5.2 Connect free providers
+
+Click **Connect** on the providers you want to use:
+- **Qwen** — unlimited free (qwen3-coder-plus, etc.)
+- **Gemini CLI** — Google's Gemini models via CLI auth
+
+### 5.3 Verify providers
+
+Click **Free Test** → verify each connected provider shows green ✅
+
+### 5.4 Note your API key
+
+The default 9Router API key is `sk_9router`. You can also find/generate keys in the 9Router dashboard under Settings.
 
 ---
 
@@ -337,7 +359,7 @@ Fill in the form with these values:
 | **Name** | `9router` | Internal identifier (lowercase, no spaces) |
 | **Display Name** | `9Router` | Shown in the UI |
 | **Provider Type** | `OpenAI Compatible` | **Critical** — select this from the dropdown. Do NOT select "OpenAI" |
-| **API Base URL** | `http://host.docker.internal:20128/v1` | Docker internal address for host access |
+| **API Base URL** | `http://9router:20128/v1` | Docker-internal service name |
 | **API Key** | `sk_9router` | Default 9Router key |
 | **Enabled** | ✅ On | Toggle to enable |
 
@@ -390,7 +412,7 @@ The dashboard dropdown maps to these API values:
 
 > **WARNING — Model mismatch is the #1 setup error!**
 >
-> The model name must match a provider you have **actually connected** in 9Router (Part 1.3):
+> The model name must match a provider you have **actually connected** in 9Router ([Part 5](#part-5-connect-9router-providers)):
 > - ✅ Connected **Qwen** in 9Router → use model `qwen/qwen3-coder-plus`
 > - ✅ Connected **Gemini CLI** in 9Router → use model `gemini/gemini-2.5-flash`
 > - ❌ Did NOT connect **OpenAI** in 9Router → `openai/gpt-4o-mini` **will fail** with `"No credentials for provider: openai"`
@@ -518,6 +540,7 @@ When creating a provider via API, `provider_type` must be one of:
 |------|---------|-------------|
 | `docker-compose.yml` | Base service definition | Always |
 | `docker-compose.postgres.yml` | PostgreSQL 18 + pgvector | Always (required) |
+| `docker-compose.9router.yml` | 9Router AI model router | Recommended |
 | `docker-compose.selfservice.yml` | Web dashboard (React SPA) | Recommended |
 | `docker-compose.upgrade.yml` | One-shot schema upgrade | Manual upgrades |
 | `docker-compose.browser.yml` | Headless Chrome | Browser automation |
@@ -529,20 +552,23 @@ When creating a provider via API, `provider_type` must be one of:
 **Common combinations:**
 
 ```powershell
-# Recommended: Gateway + Dashboard + PostgreSQL
+# Recommended: Gateway + Dashboard + PostgreSQL + 9Router
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml `
   up -d --build
 
-# Minimal: Gateway + PostgreSQL (no dashboard)
+# Minimal: Gateway + PostgreSQL + 9Router (no dashboard)
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   up -d --build
 
 # Full: + Tracing (Jaeger UI at http://localhost:16686)
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml `
   -f docker-compose.otel.yml `
   up -d --build
@@ -570,6 +596,7 @@ ENABLE_CODING_AGENTS=true
 docker compose `
   -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml `
   up -d --build
 ```
@@ -728,32 +755,38 @@ Now wire the CLIs into GoClaw so your agents can use them:
 docker logs goclaw-goclaw-1 -f                    # Live gateway logs
 docker logs goclaw-goclaw-1 --tail 50              # Last 50 lines
 docker logs goclaw-postgres-1 --tail 20            # PostgreSQL logs
+docker logs goclaw-9router-1 --tail 20             # 9Router logs
 
 # === Lifecycle ===
-# Start
+# Start (all services come up together, including 9Router)
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml up -d
 
 # Restart
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml restart
 
-# Stop
+# Stop (all services go down together, including 9Router)
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml down
 
 # Rebuild from source (after code changes)
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml up -d --build
 
 # === Upgrade ===
 # Pull latest images
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml pull
 
 # Check schema status
@@ -764,15 +797,18 @@ docker compose -f docker-compose.yml `
 # === Reset (DELETES ALL DATA) ===
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml down
-docker volume rm goclaw_goclaw-data goclaw_postgres-data
+docker volume rm goclaw_goclaw-data goclaw_postgres-data goclaw_9router-data goclaw_9router-usage
 docker compose -f docker-compose.yml `
   -f docker-compose.postgres.yml `
+  -f docker-compose.9router.yml `
   -f docker-compose.selfservice.yml up -d --build
 
 # === Inspect ===
 docker exec -it goclaw-goclaw-1 sh                 # Shell into gateway
 docker exec -it goclaw-postgres-1 psql -U goclaw   # PostgreSQL console
+docker exec -it goclaw-9router-1 sh                # Shell into 9Router
 ```
 
 ---
@@ -785,7 +821,7 @@ docker exec -it goclaw-postgres-1 psql -U goclaw   # PostgreSQL console
 |---|---|
 | **Error** | `[FATAL tini (7)] exec /app/docker-entrypoint.sh failed: No such file or directory` |
 | **Cause** | CRLF line endings in `docker-entrypoint.sh` (Windows `\r\n` vs Linux `\n`) |
-| **Fix** | Convert to LF — see [Part 3.1](#31-fix-crlf-line-endings-in-docker-entrypointsh) |
+| **Fix** | Convert to LF — see [Part 2.1](#21-fix-crlf-line-endings-in-docker-entrypointsh) |
 
 ### Container crash: `Permission denied`
 
@@ -793,7 +829,7 @@ docker exec -it goclaw-postgres-1 psql -U goclaw   # PostgreSQL console
 |---|---|
 | **Error** | `mkdir: can't create directory '/app/data/.runtime/': Permission denied` |
 | **Cause** | Missing `DAC_OVERRIDE` Linux capability in `docker-compose.yml` |
-| **Fix** | Add `DAC_OVERRIDE` to `cap_add` — see [Part 3.2](#32-fix-docker-capability-for-permission-issues) |
+| **Fix** | Add `DAC_OVERRIDE` to `cap_add` — see [Part 2.2](#22-fix-docker-capability-for-permission-issues) |
 
 ### Schema compatibility check failed (v0 → v14)
 
@@ -872,7 +908,7 @@ $body = '{
   "name": "9router",
   "display_name": "9Router",
   "provider_type": "openai_compat",
-  "api_base": "http://host.docker.internal:20128/v1",
+  "api_base": "http://9router:20128/v1",
   "api_key": "sk_9router",
   "enabled": true
 }'

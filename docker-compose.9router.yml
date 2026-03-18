@@ -1,0 +1,40 @@
+# 9Router overlay — AI model router running inside Docker.
+#
+# Usage (with Gateway + Dashboard + PostgreSQL + 9Router):
+#   docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.9router.yml -f docker-compose.selfservice.yml up -d --build
+#
+# 9Router dashboard: http://localhost:20128
+# Default login password: 123456 (or set NINEROUTER_PASSWORD in .env)
+
+services:
+  9router:
+    image: node:22-alpine
+    working_dir: /app
+    command: ["sh", "-c", "npm install -g 9router && 9router"]
+    ports:
+      - "${NINEROUTER_PORT:-20128}:20128"
+    environment:
+      - PORT=20128
+      - HOSTNAME=0.0.0.0
+      - DATA_DIR=/app/data
+      - JWT_SECRET=${NINEROUTER_JWT_SECRET:-9router-default-secret-change-me}
+      - INITIAL_PASSWORD=${NINEROUTER_PASSWORD:-123456}
+      - NODE_ENV=production
+    volumes:
+      - 9router-data:/app/data
+      - 9router-usage:/root/.9router
+    networks:
+      - default
+      - shared
+    restart: unless-stopped
+
+  goclaw:
+    depends_on:
+      - 9router
+    environment:
+      # Use Docker-internal hostname — no need for host.docker.internal
+      - GOCLAW_OPENROUTER_BASE_URL=http://9router:20128/v1
+
+volumes:
+  9router-data:
+  9router-usage:
