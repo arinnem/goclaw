@@ -20,6 +20,7 @@
 - [Part 10: Explore the Dashboard](#part-10-explore-the-dashboard)
 - [Valid Provider Types](#valid-provider-types)
 - [Docker Compose Files Reference](#docker-compose-files-reference)
+- [Enable AI Coding Agents (Claude CLI + Gemini CLI)](#enable-ai-coding-agents-claude-cli--gemini-cli)
 - [Management Commands](#management-commands)
 - [Troubleshooting](#troubleshooting)
 - [Appendix A: API Commands](#appendix-a-api-commands-for-automation)
@@ -574,9 +575,10 @@ docker compose `
 ```
 
 This installs inside the container:
-- **Node.js 20+** and **npm** (required runtime)
-- **Claude Code CLI** (`claude` binary) — via `@anthropic-ai/claude-code`
-- **Gemini CLI** (`gemini` binary) — via `@google/gemini-cli`
+- **Node.js 22** and **npm** (required runtime)
+- **Claude Code CLI** (`claude` binary, v2.1.78) — via `@anthropic-ai/claude-code`
+- **Gemini CLI** (`gemini` binary, v0.34.0) — via `@google/gemini-cli`
+- **coreutils** — required for Gemini CLI's `#!/usr/bin/env -S node` shebang (Alpine's busybox `env` doesn't support `-S`)
 
 ### Configure the providers
 
