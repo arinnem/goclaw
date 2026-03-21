@@ -338,7 +338,7 @@ func setupMemoryEmbeddings(
 	if pgStores.Memory != nil {
 		memCfg := cfg.Agents.Defaults.Memory
 		if pgStores.Agents != nil {
-			if defaultAgent, agErr := pgStores.Agents.GetByKey(context.Background(), "default"); agErr == nil {
+			if defaultAgent, agErr := pgStores.Agents.GetByKey(store.WithCrossTenant(context.Background()), "default"); agErr == nil {
 				if agentMemCfg := defaultAgent.ParseMemoryConfig(); agentMemCfg != nil {
 					memCfg = agentMemCfg
 					slog.Debug("using per-agent memory config from DB", "agent", defaultAgent.AgentKey)

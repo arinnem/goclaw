@@ -58,34 +58,49 @@ func (s *PGSkillStore) UpdateSkill(ctx context.Context, id uuid.UUID, updates ma
 	return nil
 }
 
-func (s *PGSkillStore) DeleteSkill(id uuid.UUID) error {
+func (s *PGSkillStore) DeleteSkill(ctx context.Context, id uuid.UUID) error {
 	// Reject deletion of system skills
 	var isSystem bool
-	if err := s.db.QueryRow("SELECT is_system FROM skills WHERE id = $1", id).Scan(&isSystem); err != nil {
+	if err := s.db.QueryRowContext(ctx, "SELECT is_system FROM skills WHERE id = $1", id).Scan(&isSystem); err != nil {
 		return fmt.Errorf("check skill: %w", err)
 	}
 	if isSystem {
 		return fmt.Errorf("cannot delete system skill")
 	}
 
-	tx, err := s.db.Begin()
+	// Tenant-scoped delete: only delete skill owned by this tenant.
+	if !store.IsCrossTenant(ctx) {
+		tid := store.TenantIDFromContext(ctx)
+		if tid == uuid.Nil {
+			return fmt.Errorf("tenant_id required")
+		}
+		var skillTenantID uuid.UUID
+		if err := s.db.QueryRowContext(ctx, "SELECT tenant_id FROM skills WHERE id = $1", id).Scan(&skillTenantID); err != nil {
+			return fmt.Errorf("skill not found")
+		}
+		if skillTenantID != tid {
+			return fmt.Errorf("skill not found")
+		}
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
 	// Cascade: remove all agent grants for this skill
-	if _, err := tx.Exec("DELETE FROM skill_agent_grants WHERE skill_id = $1", id); err != nil {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM skill_agent_grants WHERE skill_id = $1", id); err != nil {
 		return fmt.Errorf("delete skill grants: %w", err)
 	}
 
 	// Cascade: remove all user grants for this skill
-	if _, err := tx.Exec("DELETE FROM skill_user_grants WHERE skill_id = $1", id); err != nil {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM skill_user_grants WHERE skill_id = $1", id); err != nil {
 		return fmt.Errorf("delete skill user grants: %w", err)
 	}
 
 	// Soft-delete the skill (use 'deleted' status, distinct from 'archived' which means missing deps)
-	if _, err := tx.Exec("UPDATE skills SET status = 'deleted' WHERE id = $1", id); err != nil {
+	if _, err := tx.ExecContext(ctx, "UPDATE skills SET status = 'deleted' WHERE id = $1", id); err != nil {
 		return fmt.Errorf("delete skill: %w", err)
 	}
 

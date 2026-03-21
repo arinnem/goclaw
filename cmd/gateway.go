@@ -597,7 +597,7 @@ func runGateway() {
 			if err != nil {
 				return
 			}
-			team, err := notifyTeamStore.GetTeam(context.Background(), teamUUID)
+			team, err := notifyTeamStore.GetTeam(store.WithCrossTenant(context.Background()), teamUUID)
 			if err != nil || team == nil {
 				return
 			}
@@ -639,7 +639,7 @@ func runGateway() {
 			// Resolve lead agent key (needed for leader mode routing + completed-by-leader skip).
 			var leadAgentKey string
 			if notifyAgentStore != nil {
-				if la, err := notifyAgentStore.GetByID(context.Background(), team.LeadAgentID); err == nil {
+				if la, err := notifyAgentStore.GetByID(store.WithCrossTenant(context.Background()), team.LeadAgentID); err == nil {
 					leadAgentKey = la.AgentKey
 				}
 			}

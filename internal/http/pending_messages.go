@@ -182,7 +182,7 @@ func (h *PendingMessagesHandler) resolveProviderAndModel() (providers.Provider, 
 
 	// Fallback: default agent's provider+model.
 	if h.agentStore != nil {
-		if ag, err := h.agentStore.GetDefault(context.Background()); err == nil && ag.Provider != "" {
+		if ag, err := h.agentStore.GetDefault(store.WithCrossTenant(context.Background())); err == nil && ag.Provider != "" {
 			if p, err := h.providerReg.Get(ag.Provider); err == nil {
 				model := ag.Model
 				if model == "" {

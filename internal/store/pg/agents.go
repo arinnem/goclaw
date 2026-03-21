@@ -191,12 +191,22 @@ func (s *PGAgentStore) Update(ctx context.Context, id uuid.UUID, updates map[str
 		return nil
 	}
 
-	// If setting this agent as default, unset any existing default first.
+	// If setting this agent as default, unset any existing default first (scoped to same tenant).
 	if v, ok := updates["is_default"]; ok {
 		if isDefault, _ := v.(bool); isDefault {
-			if _, err := s.db.ExecContext(ctx,
-				"UPDATE agents SET is_default = false WHERE is_default = true AND id != $1 AND deleted_at IS NULL", id); err != nil {
-				slog.Warn("agents.unset_default", "error", err)
+			if store.IsCrossTenant(ctx) {
+				if _, err := s.db.ExecContext(ctx,
+					"UPDATE agents SET is_default = false WHERE is_default = true AND id != $1 AND deleted_at IS NULL", id); err != nil {
+					slog.Warn("agents.unset_default", "error", err)
+				}
+			} else {
+				tid := store.TenantIDFromContext(ctx)
+				if tid != uuid.Nil {
+					if _, err := s.db.ExecContext(ctx,
+						"UPDATE agents SET is_default = false WHERE is_default = true AND id != $1 AND deleted_at IS NULL AND tenant_id = $2", id, tid); err != nil {
+						slog.Warn("agents.unset_default", "error", err)
+					}
+				}
 			}
 		}
 	}
@@ -229,22 +239,37 @@ func (s *PGAgentStore) Update(ctx context.Context, id uuid.UUID, updates map[str
 }
 
 func (s *PGAgentStore) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM agents WHERE id = $1", id)
+	if store.IsCrossTenant(ctx) {
+		_, err := s.db.ExecContext(ctx, "DELETE FROM agents WHERE id = $1", id)
+		return err
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return fmt.Errorf("agent not found: %s", id)
+	}
+	_, err := s.db.ExecContext(ctx, "DELETE FROM agents WHERE id = $1 AND tenant_id = $2", id, tid)
 	return err
 }
 
 func (s *PGAgentStore) List(ctx context.Context, ownerID string) ([]store.AgentData, error) {
-	var rows *sql.Rows
-	var err error
+	q := `SELECT ` + agentSelectCols + ` FROM agents WHERE deleted_at IS NULL`
+	var args []any
+	argIdx := 1
+
 	if ownerID != "" {
-		rows, err = s.db.QueryContext(ctx,
-			`SELECT `+agentSelectCols+`
-			 FROM agents WHERE deleted_at IS NULL AND owner_id = $1 ORDER BY created_at DESC`, ownerID)
-	} else {
-		rows, err = s.db.QueryContext(ctx,
-			`SELECT `+agentSelectCols+`
-			 FROM agents WHERE deleted_at IS NULL ORDER BY created_at DESC`)
+		q += fmt.Sprintf(" AND owner_id = $%d", argIdx)
+		args = append(args, ownerID)
+		argIdx++
 	}
+
+	if clause, targs, err := tenantClauseN(ctx, argIdx); err == nil && clause != "" {
+		q += clause
+		args = append(args, targs...)
+		argIdx++
+	}
+
+	q += " ORDER BY created_at DESC"
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -253,10 +278,21 @@ func (s *PGAgentStore) List(ctx context.Context, ownerID string) ([]store.AgentD
 }
 
 func (s *PGAgentStore) GetDefault(ctx context.Context) (*store.AgentData, error) {
+	if store.IsCrossTenant(ctx) {
+		row := s.db.QueryRowContext(ctx,
+			`SELECT `+agentSelectCols+`
+			 FROM agents WHERE deleted_at IS NULL
+			 ORDER BY is_default DESC, created_at ASC LIMIT 1`)
+		return scanAgentRow(row)
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return nil, fmt.Errorf("agent not found: default")
+	}
 	row := s.db.QueryRowContext(ctx,
 		`SELECT `+agentSelectCols+`
-		 FROM agents WHERE deleted_at IS NULL
-		 ORDER BY is_default DESC, created_at ASC LIMIT 1`)
+		 FROM agents WHERE deleted_at IS NULL AND tenant_id = $1
+		 ORDER BY is_default DESC, created_at ASC LIMIT 1`, tid)
 	return scanAgentRow(row)
 }
 
@@ -269,24 +305,43 @@ func (s *PGAgentStore) ShareAgent(ctx context.Context, agentID uuid.UUID, userID
 	if err := store.ValidateUserID(grantedBy); err != nil {
 		return err
 	}
+	tid := tenantIDForInsert(ctx)
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO agent_shares (id, agent_id, user_id, role, granted_by, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6)
+		`INSERT INTO agent_shares (id, agent_id, user_id, role, granted_by, tenant_id, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
 		 ON CONFLICT (agent_id, user_id) DO UPDATE SET role = EXCLUDED.role, granted_by = EXCLUDED.granted_by`,
-		store.GenNewID(), agentID, userID, role, grantedBy, time.Now(),
+		store.GenNewID(), agentID, userID, role, grantedBy, tid, time.Now(),
 	)
 	return err
 }
 
 func (s *PGAgentStore) RevokeShare(ctx context.Context, agentID uuid.UUID, userID string) error {
+	if store.IsCrossTenant(ctx) {
+		_, err := s.db.ExecContext(ctx,
+			"DELETE FROM agent_shares WHERE agent_id = $1 AND user_id = $2", agentID, userID)
+		return err
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return fmt.Errorf("tenant_id required")
+	}
 	_, err := s.db.ExecContext(ctx,
-		"DELETE FROM agent_shares WHERE agent_id = $1 AND user_id = $2", agentID, userID)
+		"DELETE FROM agent_shares WHERE agent_id = $1 AND user_id = $2 AND tenant_id = $3", agentID, userID, tid)
 	return err
 }
 
 func (s *PGAgentStore) ListShares(ctx context.Context, agentID uuid.UUID) ([]store.AgentShareData, error) {
-	rows, err := s.db.QueryContext(ctx,
-		"SELECT id, agent_id, user_id, role, granted_by, created_at FROM agent_shares WHERE agent_id = $1", agentID)
+	q := "SELECT id, agent_id, user_id, role, granted_by, created_at FROM agent_shares WHERE agent_id = $1"
+	args := []any{agentID}
+	if !store.IsCrossTenant(ctx) {
+		tid := store.TenantIDFromContext(ctx)
+		if tid == uuid.Nil {
+			return nil, fmt.Errorf("tenant_id required")
+		}
+		q += " AND tenant_id = $2"
+		args = append(args, tid)
+	}
+	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -307,9 +362,20 @@ func (s *PGAgentStore) CanAccess(ctx context.Context, agentID uuid.UUID, userID 
 	// Check ownership + default flag
 	var ownerID string
 	var isDefault bool
-	err := s.db.QueryRowContext(ctx,
-		"SELECT owner_id, is_default FROM agents WHERE id = $1 AND deleted_at IS NULL", agentID,
-	).Scan(&ownerID, &isDefault)
+	var err error
+	if store.IsCrossTenant(ctx) {
+		err = s.db.QueryRowContext(ctx,
+			"SELECT owner_id, is_default FROM agents WHERE id = $1 AND deleted_at IS NULL", agentID,
+		).Scan(&ownerID, &isDefault)
+	} else {
+		tid := store.TenantIDFromContext(ctx)
+		if tid == uuid.Nil {
+			return false, "", fmt.Errorf("agent not found")
+		}
+		err = s.db.QueryRowContext(ctx,
+			"SELECT owner_id, is_default FROM agents WHERE id = $1 AND deleted_at IS NULL AND tenant_id = $2", agentID, tid,
+		).Scan(&ownerID, &isDefault)
+	}
 	if err != nil {
 		return false, "", fmt.Errorf("agent not found")
 	}
@@ -324,9 +390,19 @@ func (s *PGAgentStore) CanAccess(ctx context.Context, agentID uuid.UUID, userID 
 	}
 	// Check shares
 	var role string
-	err = s.db.QueryRowContext(ctx,
-		"SELECT role FROM agent_shares WHERE agent_id = $1 AND user_id = $2", agentID, userID,
-	).Scan(&role)
+	if store.IsCrossTenant(ctx) {
+		err = s.db.QueryRowContext(ctx,
+			"SELECT role FROM agent_shares WHERE agent_id = $1 AND user_id = $2", agentID, userID,
+		).Scan(&role)
+	} else {
+		tid := store.TenantIDFromContext(ctx)
+		if tid == uuid.Nil {
+			return false, "", nil
+		}
+		err = s.db.QueryRowContext(ctx,
+			"SELECT role FROM agent_shares WHERE agent_id = $1 AND user_id = $2 AND tenant_id = $3", agentID, userID, tid,
+		).Scan(&role)
+	}
 	if err != nil {
 		return false, "", nil
 	}
@@ -334,18 +410,49 @@ func (s *PGAgentStore) CanAccess(ctx context.Context, agentID uuid.UUID, userID 
 }
 
 func (s *PGAgentStore) ListAccessible(ctx context.Context, userID string) ([]store.AgentData, error) {
+	if store.IsCrossTenant(ctx) {
+		rows, err := s.db.QueryContext(ctx,
+			`SELECT `+agentSelectCols+`
+			 FROM agents
+			 WHERE deleted_at IS NULL AND (
+			     owner_id = $1
+			     OR is_default = true
+			     OR id IN (SELECT agent_id FROM agent_shares WHERE user_id = $1)
+			     OR (
+			         agent_type = 'predefined'
+			         AND id IN (
+			             SELECT agent_id FROM channel_instances ci
+			             WHERE ci.enabled = true
+			             AND EXISTS (
+			                 SELECT 1 FROM jsonb_array_elements_text(ci.config->'allow_from') af
+			                 WHERE af = $1
+			             )
+			         )
+			     )
+			 )
+			 ORDER BY created_at DESC`, userID)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		return scanAgentRows(rows)
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return nil, fmt.Errorf("tenant_id required")
+	}
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT `+agentSelectCols+`
 		 FROM agents
-		 WHERE deleted_at IS NULL AND (
+		 WHERE deleted_at IS NULL AND tenant_id = $2 AND (
 		     owner_id = $1
 		     OR is_default = true
-		     OR id IN (SELECT agent_id FROM agent_shares WHERE user_id = $1)
+		     OR id IN (SELECT agent_id FROM agent_shares WHERE user_id = $1 AND tenant_id = $2)
 		     OR (
 		         agent_type = 'predefined'
 		         AND id IN (
 		             SELECT agent_id FROM channel_instances ci
-		             WHERE ci.enabled = true
+		             WHERE ci.enabled = true AND ci.tenant_id = $2
 		             AND EXISTS (
 		                 SELECT 1 FROM jsonb_array_elements_text(ci.config->'allow_from') af
 		                 WHERE af = $1
@@ -353,7 +460,7 @@ func (s *PGAgentStore) ListAccessible(ctx context.Context, userID string) ([]sto
 		         )
 		     )
 		 )
-		 ORDER BY created_at DESC`, userID)
+		 ORDER BY created_at DESC`, userID, tid)
 	if err != nil {
 		return nil, err
 	}

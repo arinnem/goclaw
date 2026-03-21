@@ -144,7 +144,7 @@ func (h *SkillsHandler) handleDelete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := h.skills.DeleteSkill(id); err != nil {
+	if err := h.skills.DeleteSkill(r.Context(), id); err != nil {
 		if err.Error() == "cannot delete system skill" {
 			writeJSON(w, http.StatusForbidden, map[string]string{"error": "cannot delete system skill"})
 			return

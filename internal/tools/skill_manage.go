@@ -340,7 +340,7 @@ func (t *SkillManageTool) executeDelete(ctx context.Context, args map[string]any
 	if err != nil {
 		return ErrorResult(fmt.Sprintf("invalid skill ID in database: %v", err))
 	}
-	if err := t.skills.DeleteSkill(skillID); err != nil {
+	if err := t.skills.DeleteSkill(ctx, skillID); err != nil {
 		return ErrorResult(fmt.Sprintf("failed to archive skill in database: %v", err))
 	}
 

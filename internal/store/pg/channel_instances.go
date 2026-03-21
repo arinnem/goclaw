@@ -252,7 +252,15 @@ func (s *PGChannelInstanceStore) loadExistingCreds(ctx context.Context, id uuid.
 }
 
 func (s *PGChannelInstanceStore) Delete(ctx context.Context, id uuid.UUID) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM channel_instances WHERE id = $1", id)
+	if store.IsCrossTenant(ctx) {
+		_, err := s.db.ExecContext(ctx, "DELETE FROM channel_instances WHERE id = $1", id)
+		return err
+	}
+	tid := store.TenantIDFromContext(ctx)
+	if tid == uuid.Nil {
+		return fmt.Errorf("tenant_id required")
+	}
+	_, err := s.db.ExecContext(ctx, "DELETE FROM channel_instances WHERE id = $1 AND tenant_id = $2", id, tid)
 	return err
 }
 

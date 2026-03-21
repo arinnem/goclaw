@@ -30,7 +30,7 @@ func (s *PGContactStore) UpsertContact(ctx context.Context, channelType, channel
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO channel_contacts (channel_type, channel_instance, sender_id, user_id, display_name, username, peer_kind, tenant_id)
 		VALUES ($1, NULLIF($2,''), $3, NULLIF($4,''), NULLIF($5,''), NULLIF($6,''), NULLIF($7,''), $8)
-		ON CONFLICT (channel_type, sender_id) DO UPDATE SET
+		ON CONFLICT (tenant_id, channel_type, sender_id) DO UPDATE SET
 			display_name     = COALESCE(NULLIF($5,''), channel_contacts.display_name),
 			username         = COALESCE(NULLIF($6,''), channel_contacts.username),
 			user_id          = COALESCE(NULLIF($4,''), channel_contacts.user_id),
