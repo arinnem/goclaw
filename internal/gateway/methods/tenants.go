@@ -13,6 +13,7 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/gateway"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
+	"github.com/nextlevelbuilder/goclaw/internal/permissions"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
 	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
 )
@@ -95,7 +96,7 @@ func (m *TenantsMethods) handleGet(ctx context.Context, client *gateway.Client, 
 
 func (m *TenantsMethods) handleCreate(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	locale := store.LocaleFromContext(ctx)
-	if !client.IsCrossTenant() {
+	if !client.IsCrossTenant() && !client.HasScope(permissions.ScopeProvision) {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "tenants.create")))
 		return
 	}
@@ -239,7 +240,7 @@ func (m *TenantsMethods) handleUsersList(ctx context.Context, client *gateway.Cl
 
 func (m *TenantsMethods) handleUsersAdd(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	locale := store.LocaleFromContext(ctx)
-	if !client.IsCrossTenant() {
+	if !client.IsCrossTenant() && !client.HasScope(permissions.ScopeProvision) {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "tenants.users.add")))
 		return
 	}

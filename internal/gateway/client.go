@@ -206,6 +206,16 @@ func (c *Client) TenantID() uuid.UUID { return c.tenantID }
 // IsCrossTenant returns true if the client has cross-tenant (owner/system admin) access.
 func (c *Client) IsCrossTenant() bool { return c.crossTenant }
 
+// HasScope reports whether the client has the given scope.
+func (c *Client) HasScope(scope permissions.Scope) bool {
+	for _, s := range c.scopes {
+		if s == scope {
+			return true
+		}
+	}
+	return false
+}
+
 // hasTeamAccess checks if the client has access to a team (for event filtering).
 // Returns true for admin role. For others, checks the lazily-populated teamIDs cache.
 // TODO: populate teamIDs from team_user_grants on connect or first team event.

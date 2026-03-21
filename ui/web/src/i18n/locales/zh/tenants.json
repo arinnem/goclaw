@@ -17,5 +17,17 @@
   "currentTenant": "当前租户",
   "noTenants": "未找到租户",
   "confirmRemoveUser": "确定从租户中移除此用户？",
-  "slugHelp": "URL标识符（小写字母和连字符）"
+  "slugHelp": "URL标识符（小写字母和连字符）",
+  "detail": "租户详情",
+  "back": "返回租户列表",
+  "userManagement": "用户管理",
+  "addUserTitle": "添加用户到租户",
+  "selectRole": "选择角色",
+  "roleOwner": "所有者",
+  "roleAdmin": "管理员",
+  "roleOperator": "运营员",
+  "roleMember": "成员",
+  "roleViewer": "查看者",
+  "noUsers": "此租户中没有用户",
+  "created": "创建时间"
 }

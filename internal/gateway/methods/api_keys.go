@@ -111,6 +111,18 @@ func (m *APIKeysMethods) handleCreate(ctx context.Context, client *gateway.Clien
 			tenantID = tid
 		}
 		// else: uuid.Nil stays → system-level key
+	} else if client.HasScope(permissions.ScopeProvision) {
+		// Provision-scoped callers may create tenant-bound keys only (not system-level).
+		if params.TenantID != "" {
+			tid, err := uuid.Parse(params.TenantID)
+			if err != nil {
+				client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgInvalidID, "tenant_id")))
+				return
+			}
+			tenantID = tid
+		} else {
+			tenantID = client.TenantID()
+		}
 	} else {
 		tenantID = client.TenantID()
 	}

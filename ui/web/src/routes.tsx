@@ -99,6 +99,9 @@ const PackagesPage = lazyWithRetry(() =>
 const TenantsAdminPage = lazyWithRetry(() =>
   import("@/pages/tenants-admin/tenants-admin-page").then((m) => ({ default: m.TenantsAdminPage })),
 );
+const TenantDetailPage = lazyWithRetry(() =>
+  import("@/pages/tenants-admin/tenant-detail-page").then((m) => ({ default: m.TenantDetailPage })),
+);
 
 function PageLoader() {
   return (
@@ -164,6 +167,7 @@ export function AppRoutes() {
           <Route path={ROUTES.STORAGE} element={<RequireAdmin><StoragePage /></RequireAdmin>} />
           <Route path={ROUTES.PACKAGES} element={<RequireAdmin><PackagesPage /></RequireAdmin>} />
           <Route path={ROUTES.TENANTS} element={<RequireCrossTenant><TenantsAdminPage /></RequireCrossTenant>} />
+          <Route path={ROUTES.TENANT_DETAIL} element={<RequireCrossTenant><TenantDetailPage /></RequireCrossTenant>} />
 
           {/* Operator+ pages */}
           <Route path={ROUTES.TRACES} element={<TracesPage key="list" />} />

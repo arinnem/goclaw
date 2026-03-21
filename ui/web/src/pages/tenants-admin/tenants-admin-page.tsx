@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Plus, RefreshCw, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { useDeferredLoading } from "@/hooks/use-deferred-loading";
 import { useMinLoading } from "@/hooks/use-min-loading";
 import { useTenantsAdmin } from "./hooks/use-tenants-admin";
+import { ROUTES } from "@/lib/constants";
 
 function statusVariant(status: string): "default" | "secondary" | "destructive" {
   if (status === "active") return "default";
@@ -28,6 +30,7 @@ function statusVariant(status: string): "default" | "secondary" | "destructive" 
 export function TenantsAdminPage() {
   const { t } = useTranslation("tenants");
   const { t: tc } = useTranslation("common");
+  const navigate = useNavigate();
   const { tenants, loading, refreshing, refresh, createTenant } = useTenantsAdmin();
 
   const spinning = useMinLoading(refreshing);
@@ -93,7 +96,11 @@ export function TenantsAdminPage() {
               </thead>
               <tbody>
                 {tenants.map((tenant) => (
-                  <tr key={tenant.id} className="border-b last:border-0 hover:bg-muted/30">
+                  <tr
+                    key={tenant.id}
+                    className="border-b last:border-0 hover:bg-muted/30 cursor-pointer"
+                    onClick={() => navigate(ROUTES.TENANT_DETAIL.replace(":id", tenant.id))}
+                  >
                     <td className="px-4 py-2 font-medium">{tenant.name}</td>
                     <td className="px-4 py-2">
                       <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{tenant.slug}</code>

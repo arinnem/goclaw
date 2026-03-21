@@ -37,6 +37,7 @@ export const ROUTES = {
   API_KEYS: "/api-keys",
   PACKAGES: "/packages",
   TENANTS: "/admin/tenants",
+  TENANT_DETAIL: "/admin/tenants/:id",
   SETUP: "/setup",
 } as const;
 
