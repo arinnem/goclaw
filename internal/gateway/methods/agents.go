@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"slices"
 
 	"github.com/nextlevelbuilder/goclaw/internal/agent"
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/config"
 	"github.com/nextlevelbuilder/goclaw/internal/gateway"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
+	"github.com/nextlevelbuilder/goclaw/internal/permissions"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
 	"github.com/nextlevelbuilder/goclaw/internal/tools"
 	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
@@ -34,10 +34,7 @@ func NewAgentsMethods(agents *agent.Router, cfg *config.Config, cfgPath, workspa
 
 // isOwnerUser checks if the given user ID is in the configured owner IDs.
 func (m *AgentsMethods) isOwnerUser(userID string) bool {
-	if userID == "" {
-		return false
-	}
-	return slices.Contains(m.cfg.Gateway.OwnerIDs, userID)
+	return canSeeAll(permissions.RoleViewer, m.cfg.Gateway.OwnerIDs, userID)
 }
 
 func (m *AgentsMethods) Register(router *gateway.MethodRouter) {

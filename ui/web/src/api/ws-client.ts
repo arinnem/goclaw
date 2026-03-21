@@ -23,6 +23,9 @@ export class WsClient {
   private intentionalClose = false;
   private connectGeneration = 0;
 
+  /** Server-assigned role from connect response. */
+  role: "admin" | "operator" | "viewer" | "" = "";
+
   private readonly maxReconnectDelay = 30_000;
   private readonly baseReconnectDelay = 1_000;
   private readonly defaultTimeout = 30_000;
@@ -218,6 +221,7 @@ export class WsClient {
       }
 
       this.authenticated = true;
+      this.role = (res?.role as "admin" | "operator" | "viewer") ?? "";
       this.onStateChange("connected");
     } catch {
       if (this.connectGeneration === generation) {

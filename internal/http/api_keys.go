@@ -42,7 +42,8 @@ func (h *APIKeysHandler) adminAuth(next http.HandlerFunc) http.HandlerFunc {
 
 func (h *APIKeysHandler) handleList(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	keys, err := h.apiKeys.List(r.Context())
+	// HTTP API key list is admin-only (adminAuth middleware), so no owner filter needed.
+	keys, err := h.apiKeys.List(r.Context(), "")
 	if err != nil {
 		slog.Error("api_keys.list failed", "error", err)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": i18n.T(locale, i18n.MsgFailedToList, "API keys")})
@@ -141,7 +142,8 @@ func (h *APIKeysHandler) handleRevoke(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.apiKeys.Revoke(r.Context(), id); err != nil {
+	// HTTP revoke is admin-only (adminAuth middleware), so no owner filter needed.
+	if err := h.apiKeys.Revoke(r.Context(), id, ""); err != nil {
 		slog.Error("api_keys.revoke failed", "error", err, "id", idStr)
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": i18n.T(locale, i18n.MsgNotFound, "API key", idStr)})
 		return

@@ -274,6 +274,85 @@ func (s *PGTeamStore) KnownUserIDs(ctx context.Context, teamID uuid.UUID, limit 
 }
 
 // ============================================================
+// Team user grants
+// ============================================================
+
+func (s *PGTeamStore) GrantTeamAccess(ctx context.Context, teamID uuid.UUID, userID, role, grantedBy string) error {
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO team_user_grants (id, team_id, user_id, role, granted_by, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6)
+		 ON CONFLICT (team_id, user_id) DO UPDATE SET role = EXCLUDED.role, granted_by = EXCLUDED.granted_by`,
+		store.GenNewID(), teamID, userID, role, grantedBy, time.Now(),
+	)
+	return err
+}
+
+func (s *PGTeamStore) RevokeTeamAccess(ctx context.Context, teamID uuid.UUID, userID string) error {
+	_, err := s.db.ExecContext(ctx,
+		`DELETE FROM team_user_grants WHERE team_id = $1 AND user_id = $2`, teamID, userID)
+	return err
+}
+
+func (s *PGTeamStore) ListTeamGrants(ctx context.Context, teamID uuid.UUID) ([]store.TeamUserGrant, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT id, team_id, user_id, role, COALESCE(granted_by, ''), created_at
+		 FROM team_user_grants WHERE team_id = $1 ORDER BY created_at DESC`, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []store.TeamUserGrant
+	for rows.Next() {
+		var g store.TeamUserGrant
+		if err := rows.Scan(&g.ID, &g.TeamID, &g.UserID, &g.Role, &g.GrantedBy, &g.CreatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, g)
+	}
+	return result, rows.Err()
+}
+
+func (s *PGTeamStore) ListUserTeams(ctx context.Context, userID string) ([]store.TeamData, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT `+teamSelectCols+`
+		 FROM agent_teams t
+		 WHERE t.status = $1
+		   AND EXISTS (SELECT 1 FROM team_user_grants g WHERE g.team_id = t.id AND g.user_id = $2)
+		 ORDER BY t.created_at DESC`, store.TeamStatusActive, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var teams []store.TeamData
+	for rows.Next() {
+		var d store.TeamData
+		var desc sql.NullString
+		if err := rows.Scan(
+			&d.ID, &d.Name, &d.LeadAgentID, &desc, &d.Status,
+			&d.Settings, &d.CreatedBy, &d.CreatedAt, &d.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		if desc.Valid {
+			d.Description = desc.String
+		}
+		teams = append(teams, d)
+	}
+	return teams, rows.Err()
+}
+
+func (s *PGTeamStore) HasTeamAccess(ctx context.Context, teamID uuid.UUID, userID string) (bool, error) {
+	var exists bool
+	err := s.db.QueryRowContext(ctx,
+		`SELECT EXISTS(SELECT 1 FROM team_user_grants WHERE team_id = $1 AND user_id = $2)`,
+		teamID, userID,
+	).Scan(&exists)
+	return exists, err
+}
+
+// ============================================================
 // Scan helpers
 // ============================================================
 

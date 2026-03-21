@@ -238,7 +238,7 @@ func (m *ChatMethods) handleSend(ctx context.Context, client *gateway.Client, re
 				}
 				m.eventBus.Broadcast(bus.Event{
 					Name:    protocol.EventSessionUpdated,
-					Payload: map[string]string{"sessionKey": sessionKey, "label": title},
+					Payload: map[string]string{"sessionKey": sessionKey, "label": title, "userId": userID},
 				})
 			}()
 		}

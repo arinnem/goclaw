@@ -27,7 +27,11 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
       () => useAuthStore.getState().userId,
       () => useAuthStore.getState().senderID,
       (state: ConnectionState) => {
-        useAuthStore.getState().setConnected(state === "connected");
+        const store = useAuthStore.getState();
+        store.setConnected(state === "connected");
+        if (state === "connected" && wsRef.current) {
+          store.setRole(wsRef.current.role || "");
+        }
       },
     );
     wsRef.current.onAuthFailure = () => {

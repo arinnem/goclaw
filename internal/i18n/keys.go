@@ -94,9 +94,6 @@ const (
 	MsgAgentIsTeamLead      = "error.agent_is_team_lead"      // "agent is already the team lead"
 	MsgCannotRemoveTeamLead = "error.cannot_remove_team_lead" // "cannot remove the team lead"
 
-	// --- Delegations ---
-	MsgDelegationsUnavailable = "error.delegations_not_available" // "delegations not available"
-
 	// --- Channels ---
 	MsgCannotDeleteDefaultInst  = "error.cannot_delete_default_inst"  // "cannot delete default channel instance"
 

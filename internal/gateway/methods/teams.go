@@ -10,6 +10,7 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
 	"github.com/nextlevelbuilder/goclaw/internal/gateway"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
+	"github.com/nextlevelbuilder/goclaw/internal/permissions"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
 	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
 )
@@ -73,7 +74,14 @@ func (m *TeamsMethods) handleList(ctx context.Context, client *gateway.Client, r
 		return
 	}
 
-	teams, err := m.teamStore.ListTeams(ctx)
+	var teams []store.TeamData
+	var err error
+	if permissions.HasMinRole(client.Role(), permissions.RoleAdmin) {
+		teams, err = m.teamStore.ListTeams(ctx)
+	} else {
+		callerID := store.UserIDFromContext(ctx)
+		teams, err = m.teamStore.ListUserTeams(ctx, callerID)
+	}
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal, err.Error()))
 		return

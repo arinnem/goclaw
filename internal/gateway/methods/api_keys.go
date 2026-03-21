@@ -35,7 +35,12 @@ func (m *APIKeysMethods) Register(router *gateway.MethodRouter) {
 
 func (m *APIKeysMethods) handleList(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	locale := store.LocaleFromContext(ctx)
-	keys, err := m.apiKeys.List(ctx)
+	// Non-admin callers only see their own keys.
+	ownerID := ""
+	if client.Role() != permissions.RoleAdmin {
+		ownerID = client.UserID()
+	}
+	keys, err := m.apiKeys.List(ctx, ownerID)
 	if err != nil {
 		slog.Error("api_keys.list failed", "error", err)
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal, i18n.T(locale, i18n.MsgFailedToList, "API keys")))
@@ -54,6 +59,7 @@ func (m *APIKeysMethods) handleCreate(ctx context.Context, client *gateway.Clien
 		Name      string   `json:"name"`
 		Scopes    []string `json:"scopes"`
 		ExpiresIn *int     `json:"expires_in"` // seconds; nil = never
+		OwnerID   string   `json:"owner_id"`   // optional; non-admin callers always get their own user_id
 	}
 	if req.Params != nil {
 		if err := json.Unmarshal(req.Params, &params); err != nil {
@@ -79,6 +85,12 @@ func (m *APIKeysMethods) handleCreate(ctx context.Context, client *gateway.Clien
 		}
 	}
 
+	// Non-admin callers always bind the key to their own user_id.
+	ownerID := params.OwnerID
+	if client.Role() != permissions.RoleAdmin {
+		ownerID = client.UserID()
+	}
+
 	raw, hash, prefix, err := crypto.GenerateAPIKey()
 	if err != nil {
 		slog.Error("api_keys.generate failed", "error", err)
@@ -93,6 +105,7 @@ func (m *APIKeysMethods) handleCreate(ctx context.Context, client *gateway.Clien
 		Prefix:    prefix,
 		KeyHash:   hash,
 		Scopes:    params.Scopes,
+		OwnerID:   ownerID,
 		CreatedBy: store.UserIDFromContext(ctx),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -139,7 +152,13 @@ func (m *APIKeysMethods) handleRevoke(ctx context.Context, client *gateway.Clien
 		return
 	}
 
-	if err := m.apiKeys.Revoke(ctx, id); err != nil {
+	// Non-admin callers can only revoke their own keys.
+	ownerID := ""
+	if client.Role() != permissions.RoleAdmin {
+		ownerID = client.UserID()
+	}
+
+	if err := m.apiKeys.Revoke(ctx, id, ownerID); err != nil {
 		slog.Error("api_keys.revoke failed", "error", err, "id", params.ID)
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, i18n.T(locale, i18n.MsgNotFound, "API key", params.ID)))
 		return

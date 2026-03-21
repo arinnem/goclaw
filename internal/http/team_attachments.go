@@ -34,10 +34,11 @@ func (h *TeamAttachmentsHandler) authMiddleware(next http.HandlerFunc) http.Hand
 		if provided == "" {
 			provided = r.URL.Query().Get("token")
 		}
-		if !requireAuthBearer(h.token, "", provided, w, r) {
+		authedReq, ok := requireAuthBearer(h.token, "", provided, w, r)
+		if !ok {
 			return
 		}
-		next(w, r)
+		next(w, authedReq)
 	}
 }
 

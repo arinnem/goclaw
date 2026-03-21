@@ -93,9 +93,6 @@ func init() {
 		MsgAgentIsTeamLead:      "agent is already the team lead",
 		MsgCannotRemoveTeamLead: "cannot remove the team lead",
 
-		// Delegations
-		MsgDelegationsUnavailable: "delegations not available",
-
 		// Channels
 		MsgCannotDeleteDefaultInst: "cannot delete default channel instance",
 

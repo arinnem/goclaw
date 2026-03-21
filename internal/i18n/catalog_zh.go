@@ -93,9 +93,6 @@ func init() {
 		MsgAgentIsTeamLead:      "该Agent已是团队负责人",
 		MsgCannotRemoveTeamLead: "无法移除团队负责人",
 
-		// Delegations
-		MsgDelegationsUnavailable: "委派功能不可用",
-
 		// Channels
 		MsgCannotDeleteDefaultInst: "无法删除默认Channel实例",
 

@@ -84,6 +84,7 @@ type CronEvent struct {
 	Action  string `json:"action"` // "running", "completed", "error"
 	JobID   string `json:"jobId"`
 	JobName string `json:"jobName,omitempty"`
+	UserID  string `json:"userId,omitempty"` // job owner for event filtering
 	Status  string `json:"status,omitempty"` // final status for completed/error
 	Error   string `json:"error,omitempty"`
 }

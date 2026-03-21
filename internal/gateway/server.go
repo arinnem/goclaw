@@ -46,7 +46,6 @@ type Server struct {
 	customToolsHandler      *httpapi.CustomToolsHandler      // custom tool CRUD API
 	channelInstancesHandler *httpapi.ChannelInstancesHandler // channel instance CRUD API
 	providersHandler        *httpapi.ProvidersHandler        // provider CRUD API
-	delegationsHandler      *httpapi.DelegationsHandler      // delegation history API
 	teamEventsHandler       *httpapi.TeamEventsHandler       // team event history API
 	teamAttachmentsHandler  *httpapi.TeamAttachmentsHandler  // team attachment download API
 	builtinToolsHandler     *httpapi.BuiltinToolsHandler     // builtin tool management API
@@ -228,10 +227,6 @@ func (s *Server) BuildMux() *http.ServeMux {
 		s.providersHandler.RegisterRoutes(mux)
 	}
 
-	// Delegation history API
-	if s.delegationsHandler != nil {
-		s.delegationsHandler.RegisterRoutes(mux)
-	}
 
 	// Team event history API
 	if s.teamEventsHandler != nil {
@@ -498,9 +493,6 @@ func (s *Server) SetChannelInstancesHandler(h *httpapi.ChannelInstancesHandler) 
 // SetProvidersHandler sets the provider CRUD handler.
 func (s *Server) SetProvidersHandler(h *httpapi.ProvidersHandler) { s.providersHandler = h }
 
-// SetDelegationsHandler sets the delegation history handler.
-func (s *Server) SetDelegationsHandler(h *httpapi.DelegationsHandler) { s.delegationsHandler = h }
-
 // SetTeamEventsHandler sets the team event history handler.
 func (s *Server) SetTeamEventsHandler(h *httpapi.TeamEventsHandler) { s.teamEventsHandler = h }
 
@@ -623,12 +615,11 @@ func (s *Server) registerClient(c *Client) {
 	defer s.mu.Unlock()
 	s.clients[c.id] = c
 
-	// Subscribe to bus events for this client (skip internal cache events)
+	// Subscribe to bus events with per-user/team filtering.
 	s.eventPub.Subscribe(c.id, func(event bus.Event) {
-		if strings.HasPrefix(event.Name, "cache.") {
-			return // internal event, don't forward to WS clients
+		if clientCanReceiveEvent(c, event) {
+			c.SendEvent(*protocol.NewEvent(event.Name, event.Payload))
 		}
-		c.SendEvent(*protocol.NewEvent(event.Name, event.Payload))
 	})
 
 	slog.Info("client connected", "id", c.id)

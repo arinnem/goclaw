@@ -172,13 +172,17 @@ func (m *SkillsMethods) handleUpdate(ctx context.Context, client *gateway.Client
 		return
 	}
 
-	// Ownership check: only skill owner or admin can update
+	// Ownership check: only skill owner or admin can update.
+	// Fail-closed: if store doesn't implement skillOwnerGetter, deny non-admin callers.
 	if !permissions.HasMinRole(client.Role(), permissions.RoleAdmin) {
-		if ownerGetter, ok := m.store.(skillOwnerGetter); ok {
-			if ownerID, found := ownerGetter.GetSkillOwnerID(skillID); found && ownerID != client.UserID() {
-				client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "skills.update")))
-				return
-			}
+		ownerGetter, ok := m.store.(skillOwnerGetter)
+		if !ok {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "skills.update")))
+			return
+		}
+		if ownerID, found := ownerGetter.GetSkillOwnerID(skillID); found && ownerID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "skills.update")))
+			return
 		}
 	}
 

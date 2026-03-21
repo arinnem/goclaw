@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/nextlevelbuilder/goclaw/internal/config"
 	"github.com/nextlevelbuilder/goclaw/internal/gateway"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
@@ -15,10 +16,11 @@ import (
 type SessionsMethods struct {
 	sessions store.SessionStore
 	eventBus bus.EventPublisher
+	cfg      *config.Config
 }
 
-func NewSessionsMethods(sess store.SessionStore, eventBus bus.EventPublisher) *SessionsMethods {
-	return &SessionsMethods{sessions: sess, eventBus: eventBus}
+func NewSessionsMethods(sess store.SessionStore, eventBus bus.EventPublisher, cfg *config.Config) *SessionsMethods {
+	return &SessionsMethods{sessions: sess, eventBus: eventBus, cfg: cfg}
 }
 
 func (m *SessionsMethods) Register(router *gateway.MethodRouter) {
@@ -52,9 +54,10 @@ func (m *SessionsMethods) handleList(_ context.Context, client *gateway.Client, 
 		Limit:   params.Limit,
 		Offset:  params.Offset,
 	}
-	// Only filter by UserID when a channel filter is specified (e.g. chat sidebar sends channel="ws").
-	// Sessions admin page omits channel → sees all sessions unfiltered.
-	if params.Channel != "" {
+	// Role-based filtering: admins/owners see all sessions; regular users see only their own.
+	if canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		// Admin/owner sees all sessions regardless of channel filter
+	} else {
 		opts.UserID = client.UserID()
 	}
 
@@ -77,6 +80,14 @@ func (m *SessionsMethods) handlePreview(ctx context.Context, client *gateway.Cli
 	if err := json.Unmarshal(req.Params, &params); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgInvalidJSON)))
 		return
+	}
+
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		sess := m.sessions.GetOrCreate(params.Key)
+		if sess.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "session")))
+			return
+		}
 	}
 
 	history := m.sessions.GetHistory(params.Key)
@@ -107,6 +118,14 @@ func (m *SessionsMethods) handlePatch(ctx context.Context, client *gateway.Clien
 	if params.Key == "" {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgRequired, "key")))
 		return
+	}
+
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		sess := m.sessions.GetOrCreate(params.Key)
+		if sess.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "session")))
+			return
+		}
 	}
 
 	// Apply label patch
@@ -142,6 +161,14 @@ func (m *SessionsMethods) handleDelete(ctx context.Context, client *gateway.Clie
 		return
 	}
 
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		sess := m.sessions.GetOrCreate(params.Key)
+		if sess.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "session")))
+			return
+		}
+	}
+
 	if err := m.sessions.Delete(params.Key); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInternal, err.Error()))
 		return
@@ -159,6 +186,14 @@ func (m *SessionsMethods) handleReset(ctx context.Context, client *gateway.Clien
 	if err := json.Unmarshal(req.Params, &params); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgInvalidJSON)))
 		return
+	}
+
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		sess := m.sessions.GetOrCreate(params.Key)
+		if sess.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "session")))
+			return
+		}
 	}
 
 	m.sessions.Reset(params.Key)

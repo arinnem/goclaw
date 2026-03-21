@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router";
 import { AppLayout } from "@/components/layout/app-layout";
 import { RequireAuth } from "@/components/shared/require-auth";
+import { RequireAdmin } from "@/components/shared/require-role";
 import { RequireSetup } from "@/components/shared/require-setup";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { ROUTES } from "@/lib/constants";
@@ -147,31 +148,34 @@ export function AppRoutes() {
           <Route path={ROUTES.SKILL_DETAIL} element={<SkillsPage key="detail" />} />
           <Route path={ROUTES.CRON} element={<CronPage />} />
           <Route path={ROUTES.CRON_DETAIL} element={<CronPage />} />
-          <Route path={ROUTES.CONFIG} element={<ConfigPage />} />
+          {/* Admin-only pages */}
+          <Route path={ROUTES.CONFIG} element={<RequireAdmin><ConfigPage /></RequireAdmin>} />
+          <Route path={ROUTES.PROVIDERS} element={<RequireAdmin><ProvidersPage key="list" /></RequireAdmin>} />
+          <Route path={ROUTES.PROVIDER_DETAIL} element={<RequireAdmin><ProvidersPage key="detail" /></RequireAdmin>} />
+          <Route path={ROUTES.CLI_CREDENTIALS} element={<RequireAdmin><CliCredentialsPage /></RequireAdmin>} />
+          <Route path={ROUTES.API_KEYS} element={<RequireAdmin><ApiKeysPage /></RequireAdmin>} />
+          <Route path={ROUTES.CHANNELS} element={<RequireAdmin><ChannelsPage key="list" /></RequireAdmin>} />
+          <Route path={ROUTES.CHANNEL_DETAIL} element={<RequireAdmin><ChannelsPage key="detail" /></RequireAdmin>} />
+          <Route path={ROUTES.NODES} element={<RequireAdmin><NodesPage /></RequireAdmin>} />
+          <Route path={ROUTES.LOGS} element={<RequireAdmin><LogsPage /></RequireAdmin>} />
+          <Route path={ROUTES.CUSTOM_TOOLS} element={<RequireAdmin><CustomToolsPage /></RequireAdmin>} />
+          <Route path={ROUTES.BUILTIN_TOOLS} element={<RequireAdmin><BuiltinToolsPage /></RequireAdmin>} />
+          <Route path={ROUTES.MCP} element={<RequireAdmin><MCPPage /></RequireAdmin>} />
+          <Route path={ROUTES.TTS} element={<RequireAdmin><TtsPage /></RequireAdmin>} />
+          <Route path={ROUTES.STORAGE} element={<RequireAdmin><StoragePage /></RequireAdmin>} />
+          <Route path={ROUTES.PACKAGES} element={<RequireAdmin><PackagesPage /></RequireAdmin>} />
+
+          {/* Operator+ pages */}
           <Route path={ROUTES.TRACES} element={<TracesPage key="list" />} />
           <Route path={ROUTES.TRACE_DETAIL} element={<TracesPage key="detail" />} />
           <Route path={ROUTES.EVENTS} element={<EventsPage />} />
           <Route path={ROUTES.USAGE} element={<Navigate to={ROUTES.OVERVIEW} replace />} />
           <Route path={ROUTES.ACTIVITY} element={<ActivityPage />} />
-          <Route path={ROUTES.CHANNELS} element={<ChannelsPage key="list" />} />
-          <Route path={ROUTES.CHANNEL_DETAIL} element={<ChannelsPage key="detail" />} />
           <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
           <Route path={ROUTES.APPROVALS} element={<ApprovalsPage />} />
-          <Route path={ROUTES.NODES} element={<NodesPage />} />
-          <Route path={ROUTES.LOGS} element={<LogsPage />} />
-          <Route path={ROUTES.PROVIDERS} element={<ProvidersPage key="list" />} />
-          <Route path={ROUTES.PROVIDER_DETAIL} element={<ProvidersPage key="detail" />} />
-          <Route path={ROUTES.CUSTOM_TOOLS} element={<CustomToolsPage />} />
-          <Route path={ROUTES.BUILTIN_TOOLS} element={<BuiltinToolsPage />} />
-          <Route path={ROUTES.MCP} element={<MCPPage />} />
-          <Route path={ROUTES.TTS} element={<TtsPage />} />
-          <Route path={ROUTES.STORAGE} element={<StoragePage />} />
           <Route path={ROUTES.PENDING_MESSAGES} element={<PendingMessagesPage />} />
           <Route path={ROUTES.MEMORY} element={<MemoryPage />} />
           <Route path={ROUTES.KNOWLEDGE_GRAPH} element={<KnowledgeGraphPage />} />
-          <Route path={ROUTES.CLI_CREDENTIALS} element={<CliCredentialsPage />} />
-          <Route path={ROUTES.API_KEYS} element={<ApiKeysPage />} />
-          <Route path={ROUTES.PACKAGES} element={<PackagesPage />} />
         </Route>
 
         {/* Catch-all → overview */}

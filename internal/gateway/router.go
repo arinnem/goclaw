@@ -120,7 +120,18 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 			client.role = role
 			client.scopes = scopes
 			client.authenticated = true
-			client.userID = params.UserID
+			// If the key has a bound owner, force user_id to owner_id.
+			if keyData.OwnerID != "" {
+				if params.UserID != "" && params.UserID != keyData.OwnerID {
+					slog.Warn("security.ws_api_key_owner_override",
+						"param_user_id", params.UserID,
+						"owner_id", keyData.OwnerID,
+					)
+				}
+				client.userID = keyData.OwnerID
+			} else {
+				client.userID = params.UserID
+			}
 			r.sendConnectResponse(client, req.ID)
 			return
 		}

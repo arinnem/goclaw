@@ -32,7 +32,7 @@ func (s *PGCronStore) RunJob(jobID string, force bool) (bool, string, error) {
 	s.cacheLoaded = false
 	s.mu.Unlock()
 
-	s.emitEvent(store.CronEvent{Action: "running", JobID: job.ID, JobName: job.Name})
+	s.emitEvent(store.CronEvent{Action: "running", JobID: job.ID, JobName: job.Name, UserID: job.UserID})
 
 	// Use executeOneJob for proper state updates, run logging, and retry
 	s.executeOneJob(*job, handler)

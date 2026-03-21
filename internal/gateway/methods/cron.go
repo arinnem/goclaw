@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/nextlevelbuilder/goclaw/internal/config"
 	"github.com/nextlevelbuilder/goclaw/internal/gateway"
 	"github.com/nextlevelbuilder/goclaw/internal/i18n"
 	"github.com/nextlevelbuilder/goclaw/internal/store"
@@ -19,10 +20,11 @@ var cronSlugRe = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`)
 type CronMethods struct {
 	service  store.CronStore
 	eventBus bus.EventPublisher
+	cfg      *config.Config
 }
 
-func NewCronMethods(service store.CronStore, eventBus bus.EventPublisher) *CronMethods {
-	return &CronMethods{service: service, eventBus: eventBus}
+func NewCronMethods(service store.CronStore, eventBus bus.EventPublisher, cfg *config.Config) *CronMethods {
+	return &CronMethods{service: service, eventBus: eventBus, cfg: cfg}
 }
 
 func (m *CronMethods) Register(router *gateway.MethodRouter) {
@@ -44,7 +46,11 @@ func (m *CronMethods) handleList(_ context.Context, client *gateway.Client, req 
 		json.Unmarshal(req.Params, &params)
 	}
 
-	jobs := m.service.ListJobs(params.IncludeDisabled, "", "")
+	userID := ""
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		userID = client.UserID()
+	}
+	jobs := m.service.ListJobs(params.IncludeDisabled, "", userID)
 
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"jobs":   jobs,
@@ -106,6 +112,14 @@ func (m *CronMethods) handleDelete(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		job, ok := m.service.GetJob(params.JobID)
+		if !ok || job.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "cron job")))
+			return
+		}
+	}
+
 	if err := m.service.RemoveJob(params.JobID); err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return
@@ -130,6 +144,14 @@ func (m *CronMethods) handleToggle(ctx context.Context, client *gateway.Client, 
 	if params.JobID == "" {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgRequired, "jobId")))
 		return
+	}
+
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		job, ok := m.service.GetJob(params.JobID)
+		if !ok || job.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "cron job")))
+			return
+		}
 	}
 
 	if err := m.service.EnableJob(params.JobID, params.Enabled); err != nil {
@@ -168,6 +190,14 @@ func (m *CronMethods) handleUpdate(ctx context.Context, client *gateway.Client, 
 		return
 	}
 
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		existing, ok := m.service.GetJob(jobID)
+		if !ok || existing.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "cron job")))
+			return
+		}
+	}
+
 	job, err := m.service.UpdateJob(jobID, params.Patch)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, err.Error()))
@@ -203,10 +233,17 @@ func (m *CronMethods) handleRun(ctx context.Context, client *gateway.Client, req
 	force := params.Mode == "force"
 
 	// Validate job exists before responding
-	_, ok := m.service.GetJob(jobID)
+	job, ok := m.service.GetJob(jobID)
 	if !ok {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrInvalidRequest, i18n.T(locale, i18n.MsgJobNotFound)))
 		return
+	}
+
+	if !canSeeAll(client.Role(), m.cfg.Gateway.OwnerIDs, client.UserID()) {
+		if job.UserID != client.UserID() {
+			client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrUnauthorized, i18n.T(locale, i18n.MsgPermissionDenied, "cron job")))
+			return
+		}
 	}
 
 	// Respond immediately — job execution happens in background

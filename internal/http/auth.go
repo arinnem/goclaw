@@ -111,6 +111,7 @@ func ResolveAPIKey(ctx context.Context, token string) (*store.APIKeyData, permis
 type authResult struct {
 	Role          permissions.Role
 	Authenticated bool
+	KeyData       *store.APIKeyData // non-nil when authenticated via API key
 }
 
 // resolveAuth determines the caller's role from the request.
@@ -127,8 +128,8 @@ func resolveAuthBearer(r *http.Request, gatewayToken, bearer string) authResult 
 		return authResult{Role: permissions.RoleAdmin, Authenticated: true}
 	}
 	// API key → role from scopes
-	if _, role := ResolveAPIKey(r.Context(), bearer); role != "" {
-		return authResult{Role: role, Authenticated: true}
+	if keyData, role := ResolveAPIKey(r.Context(), bearer); role != "" {
+		return authResult{Role: role, Authenticated: true, KeyData: keyData}
 	}
 	// Browser pairing → operator (via X-GoClaw-Sender-Id header)
 	if senderID := r.Header.Get("X-GoClaw-Sender-Id"); senderID != "" && pkgPairingStore != nil {
@@ -187,7 +188,18 @@ func requireAuth(token string, minRole permissions.Role, next http.HandlerFunc) 
 		}
 
 		ctx := store.WithLocale(r.Context(), locale)
-		if userID := extractUserID(r); userID != "" {
+		userID := extractUserID(r)
+		// If the API key has a bound owner, force user_id to owner regardless of header.
+		if auth.KeyData != nil && auth.KeyData.OwnerID != "" {
+			if userID != "" && userID != auth.KeyData.OwnerID {
+				slog.Warn("security.api_key_owner_override",
+					"header_user_id", userID,
+					"owner_id", auth.KeyData.OwnerID,
+				)
+			}
+			userID = auth.KeyData.OwnerID
+		}
+		if userID != "" {
 			ctx = store.WithUserID(ctx, userID)
 		}
 		next(w, r.WithContext(ctx))
@@ -196,7 +208,8 @@ func requireAuth(token string, minRole permissions.Role, next http.HandlerFunc) 
 
 // requireAuthBearer is like requireAuth but accepts a pre-extracted bearer token.
 // Used by handlers that accept tokens from query params (files, media).
-func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) bool {
+// Returns the authenticated request with user context applied (owner_id enforcement included).
+func requireAuthBearer(token string, minRole permissions.Role, bearer string, w http.ResponseWriter, r *http.Request) (*http.Request, bool) {
 	locale := extractLocale(r)
 	auth := resolveAuthBearer(r, token, bearer)
 
@@ -204,7 +217,7 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusUnauthorized, map[string]string{
 			"error": i18n.T(locale, i18n.MsgUnauthorized),
 		})
-		return false
+		return r, false
 	}
 
 	required := minRole
@@ -216,9 +229,26 @@ func requireAuthBearer(token string, minRole permissions.Role, bearer string, w 
 		writeJSON(w, http.StatusForbidden, map[string]string{
 			"error": i18n.T(locale, i18n.MsgPermissionDenied, r.URL.Path),
 		})
-		return false
+		return r, false
 	}
-	return true
+
+	// Apply user context + owner_id enforcement (same as requireAuth).
+	ctx := store.WithLocale(r.Context(), locale)
+	userID := extractUserID(r)
+	if auth.KeyData != nil && auth.KeyData.OwnerID != "" {
+		if userID != "" && userID != auth.KeyData.OwnerID {
+			slog.Warn("security.api_key_owner_override",
+				"header_user_id", userID,
+				"owner_id", auth.KeyData.OwnerID,
+				"path", r.URL.Path,
+			)
+		}
+		userID = auth.KeyData.OwnerID
+	}
+	if userID != "" {
+		ctx = store.WithUserID(ctx, userID)
+	}
+	return r.WithContext(ctx), true
 }
 
 // extractLocale parses the Accept-Language header and returns a supported locale.

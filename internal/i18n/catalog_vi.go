@@ -93,9 +93,6 @@ func init() {
 		MsgAgentIsTeamLead:      "agent đã là trưởng nhóm",
 		MsgCannotRemoveTeamLead: "không thể xóa trưởng nhóm",
 
-		// Delegations
-		MsgDelegationsUnavailable: "ủy quyền không khả dụng",
-
 		// Channels
 		MsgCannotDeleteDefaultInst: "không thể xóa phiên bản channel mặc định",
 
