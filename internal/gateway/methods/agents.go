@@ -54,7 +54,7 @@ type agentParams struct {
 	AgentID string `json:"agentId"`
 }
 
-func (m *AgentsMethods) handleAgent(_ context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+func (m *AgentsMethods) handleAgent(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	var params agentParams
 	if req.Params != nil {
 		json.Unmarshal(req.Params, &params)
@@ -63,7 +63,7 @@ func (m *AgentsMethods) handleAgent(_ context.Context, client *gateway.Client, r
 		params.AgentID = "default"
 	}
 
-	loop, err := m.agents.Get(params.AgentID)
+	loop, err := m.agents.Get(ctx, params.AgentID)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return
@@ -75,7 +75,7 @@ func (m *AgentsMethods) handleAgent(_ context.Context, client *gateway.Client, r
 	}))
 }
 
-func (m *AgentsMethods) handleAgentWait(_ context.Context, client *gateway.Client, req *protocol.RequestFrame) {
+func (m *AgentsMethods) handleAgentWait(ctx context.Context, client *gateway.Client, req *protocol.RequestFrame) {
 	var params agentParams
 	if req.Params != nil {
 		json.Unmarshal(req.Params, &params)
@@ -84,7 +84,7 @@ func (m *AgentsMethods) handleAgentWait(_ context.Context, client *gateway.Clien
 		params.AgentID = "default"
 	}
 
-	loop, err := m.agents.Get(params.AgentID)
+	loop, err := m.agents.Get(ctx, params.AgentID)
 	if err != nil {
 		client.SendResponse(protocol.NewErrorResponse(req.ID, protocol.ErrNotFound, err.Error()))
 		return

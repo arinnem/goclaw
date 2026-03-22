@@ -101,9 +101,7 @@ type ResolverDeps struct {
 // NewManagedResolver creates a ResolverFunc that builds Loops from DB agent data.
 // Agents are defined in Postgres, not config.json.
 func NewManagedResolver(deps ResolverDeps) ResolverFunc {
-	return func(agentKey string) (Agent, error) {
-		// Resolver is a system-level operation that must see all agents regardless of tenant.
-		ctx := store.WithCrossTenant(context.Background())
+	return func(ctx context.Context, agentKey string) (Agent, error) {
 
 		// Support lookup by UUID (e.g. from cron jobs that store agent_id as UUID)
 		var ag *store.AgentData
@@ -340,6 +338,7 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 		loop := NewLoop(LoopConfig{
 			ID:                     ag.AgentKey,
 			AgentUUID:              ag.ID,
+			TenantID:               ag.TenantID,
 			AgentType:              ag.AgentType,
 			Provider:               provider,
 			Model:                  ag.Model,

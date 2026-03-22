@@ -89,6 +89,8 @@ type SessionListRichResult struct {
 // SessionStore manages conversation sessions.
 type SessionStore interface {
 	GetOrCreate(ctx context.Context, key string) *SessionData
+	// Get returns the session if it exists (cache or DB), nil otherwise. Never creates.
+	Get(ctx context.Context, key string) *SessionData
 	AddMessage(ctx context.Context, key string, msg providers.Message)
 	GetHistory(ctx context.Context, key string) []providers.Message
 	GetSummary(ctx context.Context, key string) string

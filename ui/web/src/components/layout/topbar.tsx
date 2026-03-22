@@ -117,10 +117,7 @@ function UserMenu() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
 
-  const isNilTenant = !currentTenantId || currentTenantId === "00000000-0000-0000-0000-000000000000";
-  const tenantLabel = isCrossTenant && isNilTenant
-    ? tt("allTenants")
-    : currentTenant?.name || currentTenantName || "";
+  const tenantLabel = currentTenant?.name || currentTenantName || "";
 
   const handleSwitchTenant = (_tenantId: string, slug: string) => {
     // Cross-tenant admin: narrow scope to specific tenant
@@ -167,22 +164,6 @@ function UserMenu() {
               <div className="px-2 py-1 text-xs font-medium text-muted-foreground">
                 {tt("currentTenant")}
               </div>
-              {/* "All Tenants" option for cross-tenant admins */}
-              {isCrossTenant && (
-                <button
-                  onClick={() => {
-                    localStorage.removeItem(LOCAL_STORAGE_KEYS.TENANT_ID);
-                    window.location.reload();
-                  }}
-                  className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
-                >
-                  <Building2 className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                  <span className="flex-1 truncate text-left font-medium">{tt("allTenants")}</span>
-                  {(!currentTenantId || currentTenantId === "00000000-0000-0000-0000-000000000000") && (
-                    <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
-                  )}
-                </button>
-              )}
               {tenants.map((tenant) => (
                 <button
                   key={tenant.id}

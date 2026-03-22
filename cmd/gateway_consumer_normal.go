@@ -38,13 +38,21 @@ func processNormalMessage(
 	postTurn tools.PostTurnProcessor,
 	msgBus *bus.MessageBus,
 ) {
+	// Inject tenant from channel instance into context so all store operations
+	// (agent lookup, session creation, etc.) are tenant-scoped.
+	if msg.TenantID != uuid.Nil {
+		ctx = store.WithTenantID(ctx, msg.TenantID)
+	} else {
+		ctx = store.WithTenantID(ctx, store.MasterTenantID)
+	}
+
 	// Determine target agent via bindings or explicit AgentID
 	agentID := msg.AgentID
 	if agentID == "" {
 		agentID = resolveAgentRoute(cfg, msg.Channel, msg.ChatID, msg.PeerKind)
 	}
 
-	agentLoop, err := agents.Get(agentID)
+	agentLoop, err := agents.Get(ctx, agentID)
 	if err != nil {
 		slog.Warn("inbound: agent not found", "agent", agentID, "channel", msg.Channel)
 		return

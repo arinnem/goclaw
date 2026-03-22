@@ -521,7 +521,7 @@ func (l *Loop) maybeSummarize(ctx context.Context, sessionKey string) {
 
 		// Re-check: history may have been truncated by a concurrent summarize
 		// that finished between our threshold check and acquiring the lock.
-		sctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		sctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 120*time.Second)
 		defer cancel()
 
 		history := l.sessions.GetHistory(sctx, sessionKey)

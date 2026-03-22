@@ -161,27 +161,27 @@ export function ContactsPage() {
         </Select>
       </div>
 
-      {/* Selection toolbar */}
-      {selectedIds.size > 0 && (
-        <div className="mt-3 flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2">
-          <span className="text-sm font-medium">
-            {t("selectedCount", { count: selectedIds.size })}
-          </span>
-          <div className="ml-auto flex gap-2">
-            <Button size="sm" variant="default" className="gap-1" onClick={() => setMergeDialogOpen(true)}>
-              <Merge className="h-3.5 w-3.5" /> {t("merge.button")}
+      {/* Selection toolbar — always rendered to avoid layout shift */}
+      <div className="mt-3 flex items-center gap-2 rounded-md border px-3 py-2 transition-colors"
+        style={{ visibility: selectedIds.size > 0 ? "visible" : "hidden" }}
+      >
+        <span className="text-sm font-medium">
+          {t("selectedCount", { count: selectedIds.size })}
+        </span>
+        <div className="ml-auto flex gap-2">
+          <Button size="sm" variant="default" className="gap-1" onClick={() => setMergeDialogOpen(true)}>
+            <Merge className="h-3.5 w-3.5" /> {t("merge.button")}
+          </Button>
+          {allSelectedMerged && (
+            <Button size="sm" variant="outline" className="gap-1" onClick={handleUnmerge}>
+              <Unlink className="h-3.5 w-3.5" /> {t("merge.unmergeButton")}
             </Button>
-            {allSelectedMerged && (
-              <Button size="sm" variant="outline" className="gap-1" onClick={handleUnmerge}>
-                <Unlink className="h-3.5 w-3.5" /> {t("merge.unmergeButton")}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Table */}
-      <div className="mt-4">
+      <div className="mt-2">
         {showSkeleton ? (
           <TableSkeleton rows={8} />
         ) : contacts.length === 0 ? (

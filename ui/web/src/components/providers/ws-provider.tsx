@@ -53,8 +53,14 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
                 store.setTenantSelected(true);
               } else if (!client.crossTenant && tenants.length === 0) {
                 // No tenants — leave tenantSelected=false (blocked)
+              } else if (client.crossTenant && !savedScope && tenants.length > 0) {
+                // Cross-tenant admin without scope — auto-select first tenant
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                localStorage.setItem(LOCAL_STORAGE_KEYS.TENANT_ID, tenants[0]!.slug);
+                window.location.reload();
+                return;
               } else if (client.crossTenant && !savedScope) {
-                // Cross-tenant admin without scope — auto-select "All Tenants"
+                // Cross-tenant admin, no tenants available — use server default (MasterTenantID)
                 store.setTenantSelected(true);
               } else {
                 store.setTenantSelected(true);
@@ -111,6 +117,7 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
     <WsContext.Provider value={value}>
       <WsQueryInvalidation />
       <WsTeamEventCapture />
+      <WsTenantRevocationListener />
       {children}
     </WsContext.Provider>
   );
@@ -118,6 +125,19 @@ export function WsProvider({ children }: { children: React.ReactNode }) {
 
 function WsQueryInvalidation() {
   useWsQueryInvalidation();
+  return null;
+}
+
+/** Force logout when admin revokes user's tenant access. */
+function WsTenantRevocationListener() {
+  const handler = useCallback((raw: unknown) => {
+    const { payload } = raw as { event: string; payload: { user_id?: string } };
+    const state = useAuthStore.getState();
+    if (payload?.user_id && payload.user_id === state.userId) {
+      state.logout();
+    }
+  }, []);
+  useWsEvent("tenant.access.revoked", handler);
   return null;
 }
 

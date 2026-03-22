@@ -112,6 +112,30 @@ func (s *PGSessionStore) GetOrCreate(ctx context.Context, key string) *store.Ses
 	return data
 }
 
+// Get returns the session if it exists (cache or DB), nil otherwise. Never creates.
+func (s *PGSessionStore) Get(ctx context.Context, key string) *store.SessionData {
+	s.mu.RLock()
+	if cached, ok := s.cache[sessionCacheKey(ctx, key)]; ok {
+		s.mu.RUnlock()
+		return cached
+	}
+	s.mu.RUnlock()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Double-check after acquiring write lock
+	if cached, ok := s.cache[sessionCacheKey(ctx, key)]; ok {
+		return cached
+	}
+
+	data := s.loadFromDB(ctx, key)
+	if data != nil {
+		s.cache[sessionCacheKey(ctx, key)] = data
+	}
+	return data
+}
+
 func (s *PGSessionStore) AddMessage(ctx context.Context, key string, msg providers.Message) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

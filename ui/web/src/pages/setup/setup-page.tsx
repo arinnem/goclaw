@@ -48,14 +48,12 @@ function LanguageSelector() {
 
 function TenantSwitcher() {
   const { t } = useTranslation("setup");
-  const { currentTenantName, isMultiTenant, isCrossTenant } = useTenants();
+  const { currentTenantName, isMultiTenant } = useTenants();
   const navigate = useNavigate();
 
   if (!isMultiTenant) return null;
 
-  const label = isCrossTenant && !currentTenantName
-    ? t("allTenants", { defaultValue: "All Tenants" })
-    : currentTenantName;
+  const label = currentTenantName;
 
   const handleSwitch = () => {
     // Clear tenant selection and go to selector

@@ -19,7 +19,7 @@ import i18next from "i18next";
 import type { MCPServerData, MCPUserCredentialStatus, MCPUserCredentialInput } from "./hooks/use-mcp";
 
 /** Header keys whose values should be masked. */
-const SENSITIVE_HEADER_RE = /^(authorization|x-api-key|api-key|bearer|token|secret|password|credential)/i;
+const SENSITIVE_HEADER_RE = /^(authorization|bearer)|(key|secret|token|password|credential)/i;
 const isSensitiveHeader = (key: string) => SENSITIVE_HEADER_RE.test(key.trim());
 
 /** Env var keys whose values should be masked. */

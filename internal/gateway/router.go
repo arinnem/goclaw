@@ -77,14 +77,11 @@ func (r *MethodRouter) Handle(ctx context.Context, client *Client, req *protocol
 		}
 	}
 
-	// Inject locale + tenant into context
+	// Inject locale + tenant into context.
+	// All connect paths now guarantee client.tenantID is set (cross-tenant defaults to MasterTenantID),
+	// so WithCrossTenant is no longer needed here.
 	ctx = store.WithLocale(ctx, i18n.Normalize(client.locale))
-	if client.IsCrossTenant() && client.TenantID() != uuid.Nil {
-		// Cross-tenant admin with tenant_id scope: filter data by chosen tenant
-		ctx = store.WithTenantID(ctx, client.TenantID())
-	} else if client.IsCrossTenant() {
-		ctx = store.WithCrossTenant(ctx)
-	} else if client.TenantID() != uuid.Nil {
+	if client.TenantID() != uuid.Nil {
 		ctx = store.WithTenantID(ctx, client.TenantID())
 	}
 
@@ -141,13 +138,23 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 				tenantScope = params.TenantScope // backward compat
 			}
 			r.applyTenantScope(ctx, client, tenantScope)
+			// Always ensure tenant is set — prevents unscoped operations
+			// that use MasterTenantID fallback inconsistently with scoped sessions.
+			if client.tenantID == uuid.Nil {
+				client.tenantID = store.MasterTenantID
+			}
 		} else {
 			// Non-owner with gateway token: resolve tenant via hint or membership
 			hint := params.TenantID
 			if hint == "" {
 				hint = params.TenantScope
 			}
-			client.tenantID = r.resolveTenantHint(ctx, hint, params.UserID)
+			tid, errCode := r.resolveTenantHint(ctx, hint, params.UserID)
+			if errCode != "" {
+				client.SendResponse(protocol.NewErrorResponse(req.ID, errCode, "tenant access revoked"))
+				return
+			}
+			client.tenantID = tid
 		}
 		r.sendConnectResponse(ctx, client, req.ID)
 		return
@@ -183,6 +190,9 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 					apiKeyScope = params.TenantScope // backward compat
 				}
 				r.applyTenantScope(ctx, client, apiKeyScope)
+				if client.tenantID == uuid.Nil {
+					client.tenantID = store.MasterTenantID
+				}
 				slog.Debug("security.ws_connect_resolved",
 					"client", client.id,
 					"role", string(client.role),
@@ -233,7 +243,12 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 			client.userID = params.UserID
 			client.pairedSenderID = params.SenderID
 			client.pairedChannel = "browser"
-			client.tenantID = r.resolveTenantHint(ctx, params.TenantHint, params.UserID)
+			tid, errCode := r.resolveTenantHint(ctx, params.TenantHint, params.UserID)
+			if errCode != "" {
+				client.SendResponse(protocol.NewErrorResponse(req.ID, errCode, "tenant access revoked"))
+				return
+			}
+			client.tenantID = tid
 			slog.Info("browser pairing authenticated", "sender_id", params.SenderID, "client", client.id, "tenant_id", client.tenantID)
 			r.sendConnectResponse(ctx, client, req.ID)
 			return
@@ -268,7 +283,12 @@ func (r *MethodRouter) handleConnect(ctx context.Context, client *Client, req *p
 	client.role = permissions.RoleViewer
 	client.authenticated = true
 	client.userID = params.UserID
-	client.tenantID = r.resolveTenantHint(ctx, params.TenantHint, params.UserID)
+	tid, errCode := r.resolveTenantHint(ctx, params.TenantHint, params.UserID)
+	if errCode != "" {
+		client.SendResponse(protocol.NewErrorResponse(req.ID, errCode, "tenant access revoked"))
+		return
+	}
+	client.tenantID = tid
 	r.sendConnectResponse(ctx, client, req.ID)
 }
 
@@ -315,31 +335,33 @@ func isOwnerID(userID string, ownerIDs []string) bool {
 	return false
 }
 
-// resolveTenantHint resolves a tenant slug hint to a UUID with membership validation.
-// Non-admin users must be a member of the tenant; falls back to MasterTenantID otherwise.
-func (r *MethodRouter) resolveTenantHint(ctx context.Context, hint, userID string) uuid.UUID {
+// resolveTenantHint resolves a tenant slug/UUID hint to a UUID with membership validation.
+// Non-admin users must be a member of the tenant.
+// Returns (uuid.Nil, ErrTenantAccessRevoked) when the user is not a member of the requested tenant.
+// Returns (MasterTenantID, "") when no hint is provided.
+func (r *MethodRouter) resolveTenantHint(ctx context.Context, hint, userID string) (uuid.UUID, string) {
 	if hint == "" || r.tenantStore == nil {
-		return store.MasterTenantID
+		return store.MasterTenantID, ""
 	}
 	t, err := r.tenantStore.GetTenantBySlug(ctx, hint)
 	if err != nil || t == nil {
 		slog.Debug("tenant_hint not resolved, falling back to master", "hint", hint)
-		return store.MasterTenantID
+		return store.MasterTenantID, ""
 	}
 
 	// Validate membership: user must belong to the requested tenant.
 	// Deny tenant access for anonymous users (no userID) — fail-closed.
 	if userID == "" {
 		slog.Warn("security.tenant_hint_denied_anonymous", "hint", hint, "tenant_id", t.ID)
-		return store.MasterTenantID
+		return uuid.Nil, protocol.ErrTenantAccessRevoked
 	}
 	role, err := r.getUserTenantRole(ctx, t.ID, userID)
 	if err != nil || role == "" {
-		slog.Warn("security.tenant_hint_denied",
+		slog.Warn("security.tenant_access_revoked",
 			"hint", hint, "user", userID, "tenant_id", t.ID, "error", err)
-		return store.MasterTenantID
+		return uuid.Nil, protocol.ErrTenantAccessRevoked
 	}
-	return t.ID
+	return t.ID, ""
 }
 
 // getUserTenantRole returns the user's role in a tenant, using permission cache if available.

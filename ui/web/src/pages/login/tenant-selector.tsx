@@ -16,11 +16,7 @@ export function TenantSelectorPage() {
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
   const handleSelect = (slug: string) => {
-    if (slug === "__all__") {
-      localStorage.removeItem(LOCAL_STORAGE_KEYS.TENANT_ID);
-    } else {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.TENANT_ID, slug);
-    }
+    localStorage.setItem(LOCAL_STORAGE_KEYS.TENANT_ID, slug);
     useAuthStore.getState().setTenantSelected(true);
     // Reload to reconnect WS with the new tenant_scope
     window.location.replace(from || ROUTES.OVERVIEW);
@@ -59,28 +55,6 @@ export function TenantSelectorPage() {
     <LoginLayout subtitle={t("selectTenantDescription")}>
       <div className="space-y-3">
         <h2 className="text-center text-base font-medium">{t("selectTenant")}</h2>
-
-        {/* All Tenants option for cross-tenant admins */}
-        {isCrossTenant && (
-          <button
-            onClick={() => handleSelect("__all__")}
-            className="w-full rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-4 text-left transition-colors hover:bg-amber-100 dark:hover:bg-amber-950/50"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="font-semibold text-amber-900 dark:text-amber-100">
-                  {t("allTenantsOption")}
-                </p>
-                <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
-                  {t("allTenantsDescription")}
-                </p>
-              </div>
-              <span className="shrink-0 rounded-full bg-amber-200 dark:bg-amber-800 px-2 py-0.5 text-xs font-medium text-amber-900 dark:text-amber-100">
-                admin
-              </span>
-            </div>
-          </button>
-        )}
 
         {/* Individual tenant cards */}
         {availableTenants.map((tenant) => (
