@@ -327,6 +327,13 @@ func (m *TenantsMethods) handleUsersRemove(ctx context.Context, client *gateway.
 	}
 
 	m.emitCacheInvalidate(bus.CacheKindTenantUsers, params.UserID)
+
+	// Notify affected user's WS sessions to force logout
+	m.msgBus.Broadcast(bus.Event{
+		Name:    protocol.EventTenantAccessRevoked,
+		Payload: map[string]string{"user_id": params.UserID, "tenant_id": tid.String()},
+	})
+
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]string{"ok": "true"}))
 }
 

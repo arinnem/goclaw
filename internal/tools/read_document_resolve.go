@@ -13,10 +13,6 @@ import (
 
 // resolveDocumentFile finds the document file path from context MediaRefs.
 func (t *ReadDocumentTool) resolveDocumentFile(ctx context.Context, mediaID string) (path, mime string, err error) {
-	if t.mediaLoader == nil {
-		return "", "", fmt.Errorf("no media storage configured — cannot access document files")
-	}
-
 	refs := MediaDocRefsFromCtx(ctx)
 	if len(refs) == 0 {
 		return "", "", fmt.Errorf("no documents available in this conversation. The user may not have sent a document.")
@@ -39,9 +35,17 @@ func (t *ReadDocumentTool) resolveDocumentFile(ctx context.Context, mediaID stri
 		ref = &refs[len(refs)-1]
 	}
 
-	p, err := t.mediaLoader.LoadPath(ref.ID)
-	if err != nil {
-		return "", "", fmt.Errorf("document file not found: %v", err)
+	// Prefer persisted workspace path; fall back to legacy .media/ lookup.
+	p := ref.Path
+	if p == "" {
+		var err error
+		if t.mediaLoader == nil {
+			return "", "", fmt.Errorf("no media storage configured")
+		}
+		p, err = t.mediaLoader.LoadPath(ref.ID)
+		if err != nil {
+			return "", "", fmt.Errorf("document file not found: %v", err)
+		}
 	}
 
 	// Determine MIME type: prefer ref's stored MIME, fall back to extension.

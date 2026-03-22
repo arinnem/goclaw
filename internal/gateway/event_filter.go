@@ -93,6 +93,14 @@ func clientCanReceiveEvent(c *Client, event bus.Event) bool {
 		return true // no team context → broadcast
 	}
 
+	// Tenant access revocation: deliver to the affected user only.
+	if event.Name == protocol.EventTenantAccessRevoked {
+		if uid := extractMapField(event.Payload, "user_id"); uid != "" {
+			return uid == c.userID
+		}
+		return false
+	}
+
 	// Admin-only events: pairing, node, agent links.
 	if isAdminOnlyEvent(event.Name) {
 		return false // non-admin clients don't receive these

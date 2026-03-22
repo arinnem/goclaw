@@ -289,6 +289,15 @@ func (h *TenantsHandler) handleUsersRemove(w http.ResponseWriter, r *http.Reques
 
 	h.emitCacheInvalidate(bus.CacheKindTenantUsers, userID)
 	emitAudit(h.msgBus, r, "tenant.user.removed", "tenant", id.String())
+
+	// Notify affected user's WS sessions to force logout
+	if h.msgBus != nil {
+		h.msgBus.Broadcast(bus.Event{
+			Name:    protocol.EventTenantAccessRevoked,
+			Payload: map[string]string{"user_id": userID, "tenant_id": id.String()},
+		})
+	}
+
 	writeJSON(w, http.StatusOK, map[string]string{"ok": "true"})
 }
 

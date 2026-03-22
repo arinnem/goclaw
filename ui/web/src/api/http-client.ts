@@ -133,10 +133,10 @@ export class HttpClient {
     }
 
     if (!res.ok) {
-      if (res.status === 401) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      if (res.status === 401 || err.code === "TENANT_ACCESS_REVOKED") {
         this.onAuthFailure?.();
       }
-      const err = await res.json().catch(() => ({ error: res.statusText }));
       throw new ApiError(
         err.code ?? "HTTP_ERROR",
         err.error ?? err.message ?? res.statusText,

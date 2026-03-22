@@ -158,7 +158,7 @@ func (h *FilesHandler) findInWorkspace(workspace, basename string) string {
 		if d.IsDir() {
 			name := d.Name()
 			// Allow workspace root + known directory structures
-			if name == "teams" || name == "generated" || name == "system" || path == workspace {
+			if name == "teams" || name == "generated" || name == "system" || name == ".uploads" || path == workspace {
 				return nil
 			}
 			// Allow date directories (e.g. 2026-03-20)

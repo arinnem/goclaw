@@ -40,6 +40,7 @@ type BootstrapCleanupFunc func(ctx context.Context, agentID uuid.UUID, userID st
 type Loop struct {
 	id            string
 	agentUUID     uuid.UUID // set for context propagation
+	tenantID      uuid.UUID // agent's owning tenant
 	agentType     string    // "open" or "predefined"
 	provider      providers.Provider
 	model         string
@@ -215,9 +216,10 @@ type LoopConfig struct {
 	// Shell deny group overrides (nil = all defaults)
 	ShellDenyGroups map[string]bool
 
-	// Agent UUID for context propagation to tools
+	// Agent UUID + tenant for context propagation to tools
 	AgentUUID uuid.UUID
-	AgentType string // "open" or "predefined"
+	TenantID  uuid.UUID // agent's owning tenant — injected into execution context
+	AgentType string    // "open" or "predefined"
 
 	// Per-user file seeding + dynamic context loading
 	EnsureUserFiles   EnsureUserFilesFunc
@@ -307,6 +309,7 @@ func NewLoop(cfg LoopConfig) *Loop {
 	return &Loop{
 		id:                     cfg.ID,
 		agentUUID:              cfg.AgentUUID,
+		tenantID:               cfg.TenantID,
 		agentType:              cfg.AgentType,
 		provider:               cfg.Provider,
 		model:                  cfg.Model,

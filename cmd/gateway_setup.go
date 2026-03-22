@@ -201,6 +201,15 @@ func setupToolRegistry(
 		if et, ok := execTool.(*tools.ExecTool); ok {
 			et.DenyPaths(dataDir, ".goclaw/")
 			et.AllowPathExemptions(".goclaw/skills-store/")
+			// Harden: block access to internal workspace files via shell commands.
+			// Prevents `cat ../config.json`, `cat memory.db` etc. from user workspaces.
+			et.DenyPaths(
+				filepath.Join(workspace, "memory.db"),
+				filepath.Join(workspace, "memory.db-wal"),
+				filepath.Join(workspace, "memory.db-shm"),
+				filepath.Join(workspace, "config.json"),
+				filepath.Join(workspace, "delegate"),
+			)
 			if cfgPath := os.Getenv("GOCLAW_CONFIG"); cfgPath != "" {
 				et.DenyPaths(cfgPath)
 			}
@@ -214,11 +223,17 @@ func setupToolRegistry(
 	// deny paths add defense-in-depth.
 	internalDenyPaths := []string{
 		"config.json", "memory.db", "memory.db-wal", "memory.db-shm",
-		"memory/", ".media/", "delegate/",
+		"memory/", ".media/", ".uploads/", "delegate/",
+	}
+	// read_file: allow .media/ access (uploaded documents accessed via AllowPaths
+	// for backward compat; new uploads go to per-user .uploads/ within workspace).
+	readFileDenyPaths := []string{
+		"config.json", "memory.db", "memory.db-wal", "memory.db-shm",
+		"memory/", "delegate/",
 	}
 	if rf, ok := toolsReg.Get("read_file"); ok {
 		if t, ok := rf.(*tools.ReadFileTool); ok {
-			t.DenyPaths(internalDenyPaths...)
+			t.DenyPaths(readFileDenyPaths...)
 		}
 	}
 	if wf, ok := toolsReg.Get("write_file"); ok {

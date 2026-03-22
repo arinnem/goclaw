@@ -239,8 +239,15 @@ export class WsClient {
       this.tenantSlug = res?.tenant_slug ?? "";
       this.crossTenant = res?.cross_tenant ?? false;
       this.onStateChange("connected");
-    } catch {
+    } catch (e) {
       if (this.connectGeneration === generation) {
+        // Tenant access revoked → force logout instead of reconnect
+        if (e instanceof ApiError && e.code === "TENANT_ACCESS_REVOKED") {
+          this.intentionalClose = true;
+          this.ws?.close();
+          this.onAuthFailure?.();
+          return;
+        }
         this.ws?.close();
       }
     }
@@ -272,7 +279,7 @@ export class WsClient {
       pending.resolve(frame.payload);
     } else {
       const err = frame.error as ErrorShape;
-      if (err.code === "UNAUTHORIZED") {
+      if (err.code === "UNAUTHORIZED" || err.code === "TENANT_ACCESS_REVOKED") {
         this.onAuthFailure?.();
       }
       pending.reject(

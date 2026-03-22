@@ -48,9 +48,17 @@ func (t *ReadAudioTool) resolveAudioFile(ctx context.Context, mediaID string) (p
 		ref = &refs[len(refs)-1]
 	}
 
-	p, err := t.mediaLoader.LoadPath(ref.ID)
-	if err != nil {
-		return "", "", fmt.Errorf("audio file not found: %v", err)
+	// Prefer persisted workspace path; fall back to legacy .media/ lookup.
+	p := ref.Path
+	if p == "" {
+		var err error
+		if t.mediaLoader == nil {
+			return "", "", fmt.Errorf("no media storage configured")
+		}
+		p, err = t.mediaLoader.LoadPath(ref.ID)
+		if err != nil {
+			return "", "", fmt.Errorf("audio file not found: %v", err)
+		}
 	}
 
 	mime = ref.MimeType
