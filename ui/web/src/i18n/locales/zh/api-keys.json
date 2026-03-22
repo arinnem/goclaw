@@ -63,7 +63,25 @@
     "failedCreate": "创建 API Key失败",
     "failedRevoke": "撤销 API Key失败"
   },
-  "never": "永不",
+  "never": "永不过期",
+  "neverUsed": "从未使用",
   "tenantBadgeSystem": "系统",
-  "tenantBadgeUnknown": "未知"
+  "tenantBadgeUnknown": "未知",
+  "columns.expiry": "有效期",
+  "codeDialog": {
+    "title": "API Key 使用指南",
+    "description": "使用此 API Key 对网关 HTTP API 进行身份验证。",
+    "copy": "复制",
+    "copied": "已复制！",
+    "tabs": {
+      "curl": "cURL",
+      "typescript": "TypeScript",
+      "go": "Go"
+    },
+    "comments": {
+      "chat": "与 Agent 聊天（兼容 OpenAI）",
+      "listAgents": "获取 Agent 列表",
+      "listSessions": "获取会话列表"
+    }
+  }
 }

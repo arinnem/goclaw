@@ -64,6 +64,24 @@
     "failedRevoke": "Failed to revoke API key"
   },
   "never": "Never",
+  "neverUsed": "Never used",
   "tenantBadgeSystem": "System",
-  "tenantBadgeUnknown": "Unknown"
+  "tenantBadgeUnknown": "Unknown",
+  "columns.expiry": "Expiry",
+  "codeDialog": {
+    "title": "API Key Usage",
+    "description": "Use this API key to authenticate with the gateway HTTP API.",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "tabs": {
+      "curl": "cURL",
+      "typescript": "TypeScript",
+      "go": "Go"
+    },
+    "comments": {
+      "chat": "Chat with an agent (OpenAI-compatible)",
+      "listAgents": "List agents",
+      "listSessions": "List sessions"
+    }
+  }
 }

@@ -64,6 +64,24 @@
     "failedRevoke": "Không thể thu hồi API key"
   },
   "never": "Không giới hạn",
+  "neverUsed": "Chưa dùng",
   "tenantBadgeSystem": "Hệ thống",
-  "tenantBadgeUnknown": "Không xác định"
+  "tenantBadgeUnknown": "Không xác định",
+  "columns.expiry": "Hạn dùng",
+  "codeDialog": {
+    "title": "Hướng dẫn sử dụng API Key",
+    "description": "Dùng API key này để xác thực với gateway HTTP API.",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!",
+    "tabs": {
+      "curl": "cURL",
+      "typescript": "TypeScript",
+      "go": "Go"
+    },
+    "comments": {
+      "chat": "Chat với agent (tương thích OpenAI)",
+      "listAgents": "Danh sách agent",
+      "listSessions": "Danh sách phiên"
+    }
+  }
 }
