@@ -43,6 +43,10 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 	if l.agentUUID != uuid.Nil {
 		ctx = store.WithAgentID(ctx, l.agentUUID)
 	}
+	// Inject tenant into context for tool-level tenant scoping (spawn, MCP, etc.)
+	if l.tenantID != uuid.Nil {
+		ctx = store.WithTenantID(ctx, l.tenantID)
+	}
 	// Inject user ID into context for per-user scoping (memory, context files, etc.)
 	if req.UserID != "" {
 		ctx = store.WithUserID(ctx, req.UserID)
@@ -279,14 +283,12 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 	// 2. Process media: sanitize images, persist to media store.
 	var mediaRefs []providers.MediaRef
 	if len(req.Media) > 0 {
-		mediaRefs = l.persistMedia(req.SessionKey, req.Media)
-		// Load current-turn images from persisted refs.
+		mediaRefs = l.persistMedia(req.SessionKey, req.Media, tools.ToolWorkspaceFromCtx(ctx))
+		// Load current-turn images from persisted refs (Path is always set for new uploads).
 		var imageFiles []bus.MediaFile
 		for _, ref := range mediaRefs {
-			if ref.Kind == "image" {
-				if p, err := l.mediaStore.LoadPath(ref.ID); err == nil {
-					imageFiles = append(imageFiles, bus.MediaFile{Path: p, MimeType: ref.MimeType})
-				}
+			if ref.Kind == "image" && ref.Path != "" {
+				imageFiles = append(imageFiles, bus.MediaFile{Path: ref.Path, MimeType: ref.MimeType})
 			}
 		}
 		if images := loadImages(imageFiles); len(images) > 0 {
@@ -381,7 +383,10 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 	if len(mediaRefs) > 0 && l.mediaStore != nil {
 		var mediaPaths []string
 		for _, ref := range mediaRefs {
-			if p, err := l.mediaStore.LoadPath(ref.ID); err == nil {
+			// Prefer workspace-local path (.uploads/) over canonical .media/ path.
+			if ref.Path != "" {
+				mediaPaths = append(mediaPaths, ref.Path)
+			} else if p, err := l.mediaStore.LoadPath(ref.ID); err == nil {
 				mediaPaths = append(mediaPaths, p)
 			}
 		}
@@ -1042,6 +1047,12 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 			} else if mr := parseMediaResult(result.ForLLM); mr != nil {
 				mediaResults = append(mediaResults, *mr)
 			}
+			// Auto-attach workspace media to task (covers create_image/audio/video).
+			if teamWs := tools.ToolTeamWorkspaceFromCtx(ctx); teamWs != "" {
+				for _, mf := range result.Media {
+					tools.AutoAttachWorkspaceFile(ctx, l.teamStore, teamWs, mf.Path)
+				}
+			}
 			if result.Deliverable != "" {
 				deliverables = append(deliverables, result.Deliverable)
 			}
@@ -1238,6 +1249,12 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 					}
 				} else if mr := parseMediaResult(r.result.ForLLM); mr != nil {
 					mediaResults = append(mediaResults, *mr)
+				}
+				// Auto-attach workspace media to task (covers create_image/audio/video).
+				if teamWs := tools.ToolTeamWorkspaceFromCtx(ctx); teamWs != "" {
+					for _, mf := range r.result.Media {
+						tools.AutoAttachWorkspaceFile(ctx, l.teamStore, teamWs, mf.Path)
+					}
 				}
 				if r.result.Deliverable != "" {
 					deliverables = append(deliverables, r.result.Deliverable)

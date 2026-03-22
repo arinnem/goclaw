@@ -98,7 +98,7 @@ func (t *TeamTasksTool) executeCreate(ctx context.Context, args map[string]any) 
 	if assigneeKey == "" {
 		return ErrorResult("assignee is required — specify which team member should handle this task")
 	}
-	assigneeID, err := t.manager.resolveAgentByKey(assigneeKey)
+	assigneeID, err := t.manager.resolveAgentByKey(ctx, assigneeKey)
 	if err != nil {
 		return ErrorResult(fmt.Sprintf("assignee %q not found: %v", assigneeKey, err))
 	}
@@ -328,7 +328,19 @@ func (t *TeamTasksTool) executeComment(ctx context.Context, args map[string]any)
 		ActorID:     t.manager.agentKeyFromID(ctx, agentID),
 	})
 
-	return NewResult(fmt.Sprintf("Comment added to task %s.", taskID))
+	isLead := agentID == team.LeadAgentID
+	msg := fmt.Sprintf("Comment added to task #%d \"%s\" (id: %s).", task.TaskNumber, task.Subject, taskID)
+	switch {
+	case isLead && task.Status == store.TeamTaskStatusInProgress:
+		msg += " Note: the assignee is currently working and won't see this comment during execution. To redirect, wait for completion then use retry action with this task_id."
+	case isLead && task.Status == store.TeamTaskStatusCompleted:
+		msg += " Task is completed. Use retry action with this task_id to reopen and re-dispatch with your feedback."
+	case isLead && task.Status == store.TeamTaskStatusFailed:
+		msg += " Task failed. Use retry action with this task_id to re-dispatch with your feedback."
+	case !isLead && task.OwnerAgentID != nil && *task.OwnerAgentID == agentID:
+		msg += " Your comment will be included in the task report sent to the leader. Continue working on the task."
+	}
+	return NewResult(msg)
 }
 
 func (t *TeamTasksTool) executeProgress(ctx context.Context, args map[string]any) *Result {
@@ -430,7 +442,7 @@ func (t *TeamTasksTool) executeAttach(ctx context.Context, args map[string]any) 
 		return ErrorResult("failed to attach file: " + err.Error())
 	}
 
-	return NewResult(fmt.Sprintf("File attached to task %s.", taskID))
+	return NewResult(fmt.Sprintf("File attached to task #%d \"%s\" (id: %s).", task.TaskNumber, task.Subject, taskID))
 }
 
 func (t *TeamTasksTool) executeUpdate(ctx context.Context, args map[string]any) *Result {
@@ -524,5 +536,5 @@ func (t *TeamTasksTool) executeUpdate(ctx context.Context, args map[string]any) 
 		ActorID:   t.manager.agentKeyFromID(ctx, agentID),
 	})
 
-	return NewResult(fmt.Sprintf("Task %s updated.", taskID))
+	return NewResult(fmt.Sprintf("Task #%d \"%s\" updated (id: %s).", task.TaskNumber, task.Subject, taskID))
 }
