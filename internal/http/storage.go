@@ -22,17 +22,19 @@ import (
 // StorageHandler provides HTTP endpoints for browsing and managing
 // files inside the ~/.goclaw/ data directory.
 // Skills directories are browsable (read-only) but deletion is blocked.
+// sizeCacheEntry holds a cached storage size calculation for one tenant.
+type sizeCacheEntry struct {
+	total    int64
+	files    int
+	cachedAt time.Time
+}
+
 type StorageHandler struct {
 	baseDir string // global data dir (resolved absolute path to ~/.goclaw/)
 	token   string
 
-	// sizeCache caches the total storage size for 60 minutes.
-	sizeCache struct {
-		mu       sync.Mutex
-		total    int64
-		files    int
-		cachedAt time.Time
-	}
+	// sizeCache caches the total storage size per tenant for 60 minutes.
+	sizeCache sync.Map // tenantBaseDir (string) → *sizeCacheEntry
 }
 
 // NewStorageHandler creates a handler for workspace storage management.
@@ -216,28 +218,26 @@ func (h *StorageHandler) handleSize(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.WriteHeader(http.StatusOK)
 
-	// Check cache
-	h.sizeCache.mu.Lock()
-	if !h.sizeCache.cachedAt.IsZero() && time.Since(h.sizeCache.cachedAt) < sizeCacheTTL {
-		total := h.sizeCache.total
-		files := h.sizeCache.files
-		h.sizeCache.mu.Unlock()
-		writeSizeEvent(w, flusher, map[string]any{"total": total, "files": files, "done": true, "cached": true})
-		return
+	sizeBase := h.tenantBaseDir(r)
+
+	// Check per-tenant cache
+	if entry, ok := h.sizeCache.Load(sizeBase); ok {
+		ce := entry.(*sizeCacheEntry)
+		if time.Since(ce.cachedAt) < sizeCacheTTL {
+			writeSizeEvent(w, flusher, map[string]any{"total": ce.total, "files": ce.files, "done": true, "cached": true})
+			return
+		}
 	}
-	h.sizeCache.mu.Unlock()
 
 	// Walk and stream progress
 	var total int64
 	var fileCount int
 	lastFlush := time.Now()
 
-	sizeBase := h.tenantBaseDir(r)
 	filepath.WalkDir(sizeBase, func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return nil
 		}
-		// Check client disconnect
 		if r.Context().Err() != nil {
 			return filepath.SkipAll
 		}
@@ -252,7 +252,6 @@ func (h *StorageHandler) handleSize(w http.ResponseWriter, r *http.Request) {
 			total += info.Size()
 			fileCount++
 		}
-		// Emit progress every 50 files or 200ms
 		if fileCount%50 == 0 || time.Since(lastFlush) > 200*time.Millisecond {
 			writeSizeEvent(w, flusher, map[string]any{"current": total, "files": fileCount})
 			lastFlush = time.Now()
@@ -260,12 +259,8 @@ func (h *StorageHandler) handleSize(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
-	// Update cache
-	h.sizeCache.mu.Lock()
-	h.sizeCache.total = total
-	h.sizeCache.files = fileCount
-	h.sizeCache.cachedAt = time.Now()
-	h.sizeCache.mu.Unlock()
+	// Update per-tenant cache
+	h.sizeCache.Store(sizeBase, &sizeCacheEntry{total: total, files: fileCount, cachedAt: time.Now()})
 
 	// Send final event
 	writeSizeEvent(w, flusher, map[string]any{"total": total, "files": fileCount, "done": true, "cached": false})
