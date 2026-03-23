@@ -43,7 +43,7 @@ export function TaskDetailAttachments({ attachments }: TaskDetailAttachmentsProp
   if (attachments.length === 0) return null;
 
   return (
-    <CollapsibleSection icon={Paperclip} title={t("tasks.detail.attachments")} count={attachments.length}>
+    <CollapsibleSection icon={Paperclip} title={t("tasks.detail.attachments")} count={attachments.length} defaultOpen={false}>
       <div className="space-y-2">
         {attachments.map((a) => {
           const Icon = getMimeIcon(a.mime_type, a.path);

@@ -31,7 +31,7 @@ export function TenantsAdminPage() {
   const { t } = useTranslation("tenants");
   const { t: tc } = useTranslation("common");
   const navigate = useNavigate();
-  const { tenants, loading, refreshing, refresh, createTenant } = useTenantsAdmin();
+  const { tenants, loading, refreshing, refresh, createTenant, isOwner } = useTenantsAdmin();
 
   const spinning = useMinLoading(refreshing);
   const showSkeleton = useDeferredLoading(loading && tenants.length === 0);
@@ -67,9 +67,11 @@ export function TenantsAdminPage() {
         description={t("description")}
         actions={
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1">
-              <Plus className="h-3.5 w-3.5" /> {t("createTenant")}
-            </Button>
+            {isOwner && (
+              <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1">
+                <Plus className="h-3.5 w-3.5" /> {t("createTenant")}
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={refresh} disabled={spinning} className="gap-1">
               <RefreshCw className={spinning ? "animate-spin h-3.5 w-3.5" : "h-3.5 w-3.5"} />
               {tc("refresh")}

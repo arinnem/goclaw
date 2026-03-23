@@ -42,7 +42,8 @@
     "success": "Gộp liên hệ thành công",
     "unmergeSuccess": "Tách liên hệ thành công",
     "error": "Không thể gộp liên hệ",
-    "unmergeError": "Không thể tách liên hệ"
+    "unmergeError": "Không thể tách liên hệ",
+    "comingSoon": "Tính năng này đang được phát triển và chưa khả dụng."
   },
   "filters": {
     "allChannels": "Tất cả Channel",

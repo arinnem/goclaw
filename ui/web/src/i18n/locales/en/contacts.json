@@ -42,7 +42,8 @@
     "success": "Contacts merged successfully",
     "unmergeSuccess": "Contacts unmerged successfully",
     "error": "Failed to merge contacts",
-    "unmergeError": "Failed to unmerge contacts"
+    "unmergeError": "Failed to unmerge contacts",
+    "comingSoon": "This feature is under development and not yet available."
   },
   "filters": {
     "allChannels": "All Channels",

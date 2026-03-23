@@ -40,6 +40,7 @@ export function TaskDetailComments({ comments, onAddComment }: TaskDetailComment
       icon={MessageSquare}
       title={t("tasks.detail.comments")}
       count={comments.length || undefined}
+      defaultOpen={false}
     >
       {/* Comment list */}
       {comments.length > 0 && (

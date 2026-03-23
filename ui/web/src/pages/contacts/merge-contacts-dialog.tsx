@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Merge } from "lucide-react";
+import { Construction, Merge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +41,9 @@ export function MergeContactsDialog({
   const [selectedUserId, setSelectedUserId] = useState("");
   const [newDisplayName, setNewDisplayName] = useState("");
   const [newUserId, setNewUserId] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  // TODO: re-enable when merge feature is ready
+  // const [submitting, setSubmitting] = useState(false);
+  const setSubmitting = (_v: boolean) => {};
 
   // Reset form state when dialog opens
   useEffect(() => {
@@ -90,10 +92,8 @@ export function MergeContactsDialog({
     }
   };
 
-  const canSubmit =
-    mode === "existing"
-      ? !!selectedUserId
-      : !!(newUserId || defaultUserId);
+  // TODO: re-enable when merge feature is ready
+  // const canSubmit = mode === "existing" ? !!selectedUserId : !!(newUserId || defaultUserId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,7 +106,13 @@ export function MergeContactsDialog({
           <DialogDescription>{t("merge.dialogDescription")}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        {/* Coming soon banner */}
+        <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          <Construction className="h-4 w-4 shrink-0" />
+          <span className="font-medium">{t("merge.comingSoon")}</span>
+        </div>
+
+        <div className="space-y-4 py-2 pointer-events-none opacity-50">
           {/* Mode selection — simple radio buttons */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -181,7 +187,7 @@ export function MergeContactsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("merge.cancel", { defaultValue: "Cancel" })}
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || submitting}>
+          <Button onClick={handleSubmit} disabled>
             {t("merge.confirm")}
           </Button>
         </DialogFooter>
