@@ -66,6 +66,7 @@ volumes:
   goclaw-data:
   goclaw-workspace:
 
+
 networks:
   shared:
     name: shared
