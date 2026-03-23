@@ -168,7 +168,7 @@ func wireExtras(
 			// Sessions store clean paths; signing happens only at delivery time.
 			if m, ok := event.Payload.(map[string]string); ok {
 				if c, has := m["content"]; has && strings.Contains(c, "/v1/") {
-					m["content"] = httpapi.SignFileURLs(c, appCfg.Gateway.Token)
+					m["content"] = httpapi.SignFileURLs(c, httpapi.FileSigningKey())
 				}
 			}
 			msgBus.Broadcast(bus.Event{

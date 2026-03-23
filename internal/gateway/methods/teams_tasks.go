@@ -106,12 +106,10 @@ func (m *TeamsMethods) handleTaskGet(ctx context.Context, client *gateway.Client
 	attachments, _ := m.teamStore.ListTaskAttachments(ctx, taskID)
 
 	// Sign download URLs at delivery time (same pattern as chat file URLs).
-	if m.fileTokenSecret != "" {
-		for i := range attachments {
-			dlPath := fmt.Sprintf("/v1/teams/%s/attachments/%s/download", teamID, attachments[i].ID)
-			ft := httpapi.SignFileToken(dlPath, m.fileTokenSecret, httpapi.FileTokenTTL)
-			attachments[i].DownloadURL = dlPath + "?ft=" + ft
-		}
+	for i := range attachments {
+		dlPath := fmt.Sprintf("/v1/teams/%s/attachments/%s/download", teamID, attachments[i].ID)
+		ft := httpapi.SignFileToken(dlPath, httpapi.FileSigningKey(), httpapi.FileTokenTTL)
+		attachments[i].DownloadURL = dlPath + "?ft=" + ft
 	}
 
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{

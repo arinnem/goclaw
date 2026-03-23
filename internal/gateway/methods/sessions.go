@@ -99,12 +99,10 @@ func (m *SessionsMethods) handlePreview(ctx context.Context, client *gateway.Cli
 	summary := m.sessions.GetSummary(ctx, params.Key)
 
 	// Sign file URLs before delivery — sessions store clean paths.
-	if secret := m.cfg.Gateway.Token; secret != "" {
-		for i := range history {
-			history[i].Content = httpapi.SignFileURLs(history[i].Content, secret)
-		}
-		summary = httpapi.SignFileURLs(summary, secret)
+	for i := range history {
+		history[i].Content = httpapi.SignFileURLs(history[i].Content, httpapi.FileSigningKey())
 	}
+	summary = httpapi.SignFileURLs(summary, httpapi.FileSigningKey())
 
 	client.SendResponse(protocol.NewOKResponse(req.ID, map[string]any{
 		"key":      params.Key,

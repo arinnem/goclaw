@@ -2,17 +2,36 @@ package http
 
 import (
 	"crypto/hmac"
+	crypto_rand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 // FileTokenTTL is the default TTL for signed file tokens.
-const FileTokenTTL = 1 * time.Hour
+const FileTokenTTL = 5 * time.Minute
+
+var (
+	fileSigningKey     string
+	fileSigningKeyOnce sync.Once
+)
+
+// FileSigningKey returns a random 32-byte key for HMAC file token signing.
+// Generated once at startup, lives in memory only. Tokens expire on restart
+// which is acceptable for the short TTL — clients re-fetch signed URLs on reconnect.
+func FileSigningKey() string {
+	fileSigningKeyOnce.Do(func() {
+		b := make([]byte, 32)
+		crypto_rand.Read(b)
+		fileSigningKey = base64.RawURLEncoding.EncodeToString(b)
+	})
+	return fileSigningKey
+}
 
 // SignFileToken creates a short-lived HMAC token for file access.
 // Token format: {base64url_hmac_16bytes}.{unix_expiry} (~40 chars).

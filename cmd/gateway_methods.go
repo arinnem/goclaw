@@ -17,7 +17,6 @@ func registerAllMethods(server *gateway.Server, agents *agent.Router, sessStore 
 
 	// Phase 1: Core methods
 	chatMethods := methods.NewChatMethods(agents, sessStore, server.RateLimiter(), msgBus)
-	chatMethods.SetFileTokenSecret(cfg.Gateway.Token)
 	chatMethods.Register(router)
 	methods.NewAgentsMethods(agents, cfg, cfgPath, workspace, agentStore, contextFileInterceptor, msgBus).Register(router)
 	methods.NewSessionsMethods(sessStore, msgBus, cfg).Register(router)

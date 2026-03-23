@@ -8,7 +8,6 @@ import rehypeHighlight from "rehype-highlight";
 const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlight];
 import { useClipboard } from "@/hooks/use-clipboard";
-import { useAuthStore } from "@/stores/use-auth-store";
 import { toFileUrl } from "@/lib/file-helpers";
 import { Check, Copy, Download, FileText } from "lucide-react";
 import { ImageLightbox } from "./image-lightbox";
@@ -87,7 +86,6 @@ function fileNameFromHref(href: string): string {
 }
 
 export const MarkdownRenderer = memo(function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  const token = useAuthStore((s) => s.token);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const openLightbox = useCallback((src: string, alt: string) => setLightbox({ src, alt }), []);
   const [filePreview, setFilePreview] = useState<{ name: string; href: string; content: string; mediaType?: "image" | "audio" | "video" } | null>(null);
@@ -100,7 +98,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
       setFilePreview({ name, href, content: "", mediaType: media });
       return;
     }
-    // Text/code files: fetch content (href already includes ?token= from toFileUrl)
+    // Text/code files: fetch content (href already includes ?ft= from server signing)
     setFileLoading(true);
     fetch(href)
       .then((res) => {
@@ -131,7 +129,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
     },
     a({ href, children }: any) {
       if (isFileLink(href)) {
-        const resolvedHref = toFileUrl(href!, token);
+        const resolvedHref = toFileUrl(href!);
         const name = typeof children === "string" ? children : fileNameFromHref(href!);
         return (
           <span className="inline-flex items-center gap-0.5 rounded border bg-muted/50 text-[0.85em] font-medium">
@@ -161,7 +159,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
       );
     },
     img({ src, alt, ...props }: any) {
-      const resolvedSrc = isFileLink(src) ? toFileUrl(src!, token) : src;
+      const resolvedSrc = isFileLink(src) ? toFileUrl(src!) : src;
       const displayName = alt || fileNameFromHref(src ?? "");
       return (
         <span className="group/img relative inline-block overflow-hidden rounded-lg border shadow-sm">
@@ -225,7 +223,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
       }
       return <input type={type} {...props} />;
     },
-  }), [token, openLightbox, handleFileClick]);
+  }), [openLightbox, handleFileClick]);
 
   return (
     <div className={`md-render prose dark:prose-invert max-w-none break-words ${className ?? ""}`}>

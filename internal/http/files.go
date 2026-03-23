@@ -37,22 +37,18 @@ func (h *FilesHandler) RegisterRoutes(mux *http.ServeMux) {
 
 func (h *FilesHandler) auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Priority 1: short-lived signed file token (?ft=) — no gateway token exposure.
+		// Priority 1: short-lived signed file token (?ft=) — decoupled from gateway token.
 		if ft := r.URL.Query().Get("ft"); ft != "" {
 			path := "/v1/files/" + r.PathValue("path")
-			if VerifyFileToken(ft, path, h.token) {
+			if VerifyFileToken(ft, path, FileSigningKey()) {
 				next(w, r)
 				return
 			}
 			http.Error(w, "invalid or expired file token", http.StatusUnauthorized)
 			return
 		}
-		// Priority 2: Bearer header (API clients).
-		// Priority 3: ?token= query param (legacy, backward compat).
+		// Priority 2: Bearer header (API clients only).
 		provided := extractBearerToken(r)
-		if provided == "" {
-			provided = r.URL.Query().Get("token")
-		}
 		authedReq, ok := requireAuthBearer(h.token, "", provided, w, r)
 		if !ok {
 			return

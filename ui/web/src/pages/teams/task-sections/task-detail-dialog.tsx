@@ -228,7 +228,7 @@ export function TaskDetailDialog({
                       )}
                     </div>
                     <a
-                      href={a.download_url || `/v1/teams/${teamId}/attachments/${a.id}/download`}
+                      href={`/v1/teams/${teamId}/attachments/${a.id}/download`}
                       download
                       className="shrink-0 text-xs text-primary hover:underline"
                       onClick={(e) => e.stopPropagation()}

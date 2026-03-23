@@ -205,7 +205,7 @@ func (h *ChatCompletionsHandler) handleNonStream(w http.ResponseWriter, r *http.
 		Model:   model,
 		Choices: []chatChoice{{
 			Index:        0,
-			Message:      &chatMessage{Role: "assistant", Content: SignFileURLs(result.Content, h.token)},
+			Message:      &chatMessage{Role: "assistant", Content: SignFileURLs(result.Content, FileSigningKey())},
 			FinishReason: "stop",
 		}},
 	}
@@ -257,7 +257,7 @@ func (h *ChatCompletionsHandler) handleStream(w http.ResponseWriter, r *http.Req
 		writeSSEChunk(w, flusher, completionID, model, &chatMessage{Content: "Error: " + err.Error()}, "stop")
 	} else {
 		// Send content chunk
-		writeSSEChunk(w, flusher, completionID, model, &chatMessage{Content: SignFileURLs(result.Content, h.token)}, "stop")
+		writeSSEChunk(w, flusher, completionID, model, &chatMessage{Content: SignFileURLs(result.Content, FileSigningKey())}, "stop")
 	}
 
 	// Send [DONE]

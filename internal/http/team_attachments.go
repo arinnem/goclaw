@@ -33,7 +33,7 @@ func (h *TeamAttachmentsHandler) authMiddleware(next http.HandlerFunc) http.Hand
 		// Priority 1: HMAC-signed file token (?ft=) — no gateway token exposure.
 		if ft := r.URL.Query().Get("ft"); ft != "" {
 			path := r.URL.Path // full path for HMAC binding
-			if VerifyFileToken(ft, path, h.token) {
+			if VerifyFileToken(ft, path, FileSigningKey()) {
 				next(w, r)
 				return
 			}

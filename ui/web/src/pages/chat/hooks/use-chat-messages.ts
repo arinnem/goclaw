@@ -4,7 +4,6 @@ import { useWsEvent } from "@/hooks/use-ws-event";
 import { Methods, Events } from "@/api/protocol";
 import type { Message } from "@/types/session";
 import type { ChatMessage, AgentEventPayload, ToolStreamEntry, RunActivity, ActiveTeamTask, MediaItem } from "@/types/chat";
-import { useAuthStore } from "@/stores/use-auth-store";
 import { toFileUrl, mediaKindFromMime } from "@/lib/file-helpers";
 
 /**
@@ -16,7 +15,6 @@ import { toFileUrl, mediaKindFromMime } from "@/lib/file-helpers";
  */
 export function useChatMessages(sessionKey: string, agentId: string) {
   const ws = useWs();
-  const token = useAuthStore((s) => s.token);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streamText, setStreamText] = useState<string | null>(null);
   const [thinkingText, setThinkingText] = useState<string | null>(null);
@@ -92,7 +90,7 @@ export function useChatMessages(sessionKey: string, agentId: string) {
         // Convert persisted media_refs to mediaItems for gallery display
         if (m.role === "assistant" && m.media_refs && m.media_refs.length > 0) {
           chatMsg.mediaItems = m.media_refs.map((ref) => ({
-            path: toFileUrl(ref.path || ref.id, token),
+            path: toFileUrl(ref.path || ref.id),
             mimeType: ref.mime_type,
             fileName: ref.path?.split("/").pop() ?? ref.id,
             kind: (ref.kind as MediaItem["kind"]) || "document",
@@ -301,7 +299,7 @@ export function useChatMessages(sessionKey: string, agentId: string) {
           const rawMedia = event.payload?.media;
           const mediaItems: MediaItem[] | undefined = rawMedia?.length
             ? rawMedia.map((m) => ({
-                path: toFileUrl(m.path, token),
+                path: toFileUrl(m.path),
                 mimeType: m.content_type ?? "application/octet-stream",
                 fileName: m.path.split("/").pop() ?? "file",
                 size: m.size,
