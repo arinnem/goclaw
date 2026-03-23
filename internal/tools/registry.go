@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -178,7 +179,7 @@ func (r *Registry) ExecuteWithContext(ctx context.Context, name string, args map
 	}
 
 	start := time.Now()
-	result := tool.Execute(ctx, args)
+	result := safeExecute(tool, ctx, args)
 	duration := time.Since(start)
 
 	// Scrub credentials from tool output before returning to LLM
@@ -199,6 +200,24 @@ func (r *Registry) ExecuteWithContext(ctx context.Context, name string, args map
 	)
 
 	return result
+}
+
+// safeExecute runs tool.Execute with panic recovery. A panicking tool returns
+// an error result instead of crashing the process.
+func safeExecute(tool Tool, ctx context.Context, args map[string]any) (result *Result) {
+	defer func() {
+		if r := recover(); r != nil {
+			buf := make([]byte, 4096)
+			n := runtime.Stack(buf, false)
+			slog.Error("tool panicked",
+				"tool", tool.Name(),
+				"panic", fmt.Sprint(r),
+				"stack", string(buf[:n]),
+			)
+			result = ErrorResult(fmt.Sprintf("tool %q panicked: %v", tool.Name(), r))
+		}
+	}()
+	return tool.Execute(ctx, args)
 }
 
 // ProviderDefs returns tool definitions for LLM provider APIs.

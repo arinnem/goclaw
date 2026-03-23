@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -518,6 +519,17 @@ func (l *Loop) maybeSummarize(ctx context.Context, sessionKey string) {
 	// Summarize in background (holds the per-session lock until done)
 	go func() {
 		defer sessionMu.Unlock()
+		defer func() {
+			if r := recover(); r != nil {
+				buf := make([]byte, 4096)
+				n := runtime.Stack(buf, false)
+				slog.Error("summarization goroutine panicked",
+					"session", sessionKey,
+					"panic", fmt.Sprint(r),
+					"stack", string(buf[:n]),
+				)
+			}
+		}()
 
 		// Re-check: history may have been truncated by a concurrent summarize
 		// that finished between our threshold check and acquiring the lock.

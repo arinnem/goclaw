@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -1140,6 +1141,23 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 				wg.Add(1)
 				go func(idx int, tc providers.ToolCall) {
 					defer wg.Done()
+					defer func() {
+						if r := recover(); r != nil {
+							buf := make([]byte, 4096)
+							n := runtime.Stack(buf, false)
+							slog.Error("tool goroutine panicked",
+								"agent", l.id, "tool", tc.Name,
+								"panic", fmt.Sprint(r),
+								"stack", string(buf[:n]),
+							)
+							resultCh <- indexedResult{
+								idx:          idx,
+								tc:           tc,
+								registryName: tc.Name,
+								result:       tools.ErrorResult(fmt.Sprintf("tool %q panicked: %v", tc.Name, r)),
+							}
+						}
+					}()
 					argsJSON, _ := json.Marshal(tc.Arguments)
 					slog.Info("tool call", "agent", l.id, "tool", tc.Name, "args_len", len(argsJSON), "parallel", true)
 					spanStart := time.Now().UTC()
