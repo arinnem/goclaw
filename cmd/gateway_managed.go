@@ -472,6 +472,9 @@ func wireExtras(
 			teamMgr.InvalidateAgentCache()
 		})
 		slog.Info("team tools registered")
+
+		// Meta-team orchestration: auto-add leads, task cascading, aggregated completion.
+		wireMetaTeamSubscribers(msgBus, stores)
 	}
 
 	// User workspace cache: invalidate per-user workspace path on profile changes
