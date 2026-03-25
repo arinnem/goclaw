@@ -52,7 +52,7 @@ func (l *Loop) hasReadImageProvider() bool {
 // loadHistoricalImagesForTool collects image MediaRefs from historical messages
 // and loads them into context for the read_image tool. Merges with any images already
 // in context (from current turn). Limited to last maxMediaReloadMessages messages with image refs.
-func (l *Loop) loadHistoricalImagesForTool(ctx context.Context, currentRefs []providers.MediaRef, messages []providers.Message) context.Context {
+func (l *Loop) loadHistoricalImagesForTool(ctx context.Context, _ []providers.MediaRef, messages []providers.Message) context.Context {
 	// Start with current-turn images already in context.
 	existing := tools.MediaImagesFromCtx(ctx)
 

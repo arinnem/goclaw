@@ -59,7 +59,7 @@ func loadImages(files []bus.MediaFile) []providers.ImageContent {
 // All media types (images, documents, audio, video) are stored within the user's
 // workspace for filesystem-level tenant isolation.
 // workspace is the per-user workspace path from ToolWorkspaceFromCtx(ctx).
-func (l *Loop) persistMedia(sessionKey string, files []bus.MediaFile, workspace string) []providers.MediaRef {
+func (l *Loop) persistMedia(_ string, files []bus.MediaFile, workspace string) []providers.MediaRef {
 	if workspace == "" {
 		slog.Warn("media: no workspace, cannot persist media")
 		return nil

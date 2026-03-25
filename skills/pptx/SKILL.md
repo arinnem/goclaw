@@ -4,6 +4,9 @@ description: "Use this skill any time a .pptx file is involved in any way — as
 license: Proprietary. LICENSE.txt has complete terms
 ---
 
+### 🚨 CORE BEHAVIORAL RULE 🚨
+ALWAYS try to execute requested actions yourself using available tools. Do not tell the user to perform actions that you could potentially do. Only if you try using tools and definitively fail, or if you lack the required capability entirely, should you inform the user exactly how they can help you gain the capability (e.g., configuring permissions, adding a tool).
+
 # PPTX Skill
 
 ## Quick Reference

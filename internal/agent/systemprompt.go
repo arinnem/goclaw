@@ -25,31 +25,31 @@ type SystemPromptConfig struct {
 	AgentID       string
 	Model         string
 	Workspace     string
-	Channel       string                 // runtime channel instance name (e.g. "my-telegram-bot")
-	ChannelType   string                 // platform type (e.g. "zalo_personal", "telegram")
-	PeerKind      string                 // "direct" or "group"
-	OwnerIDs      []string               // owner sender IDs
-	Mode          PromptMode             // full or minimal
-	ToolNames     []string               // registered tool names
-	SkillsSummary string                 // XML from skills.Loader.BuildSummary()
-	HasMemory     bool                   // memory_search/memory_get available?
-	HasSpawn      bool                   // spawn tool available?
-	HasTeam        bool                   // agent belongs to a team? (skips generic spawn section)
-	TeamWorkspace  string                 // absolute path to team shared workspace (empty if not in team)
-	TeamMembers    []store.TeamMemberData // team member roster for task assignment
+	Channel       string                  // runtime channel instance name (e.g. "my-telegram-bot")
+	ChannelType   string                  // platform type (e.g. "zalo_personal", "telegram")
+	PeerKind      string                  // "direct" or "group"
+	OwnerIDs      []string                // owner sender IDs
+	Mode          PromptMode              // full or minimal
+	ToolNames     []string                // registered tool names
+	SkillsSummary string                  // XML from skills.Loader.BuildSummary()
+	HasMemory     bool                    // memory_search/memory_get available?
+	HasSpawn      bool                    // spawn tool available?
+	HasTeam       bool                    // agent belongs to a team? (skips generic spawn section)
+	TeamWorkspace string                  // absolute path to team shared workspace (empty if not in team)
+	TeamMembers   []store.TeamMemberData  // team member roster for task assignment
 	ContextFiles  []bootstrap.ContextFile // bootstrap files for # Project Context
-	ExtraPrompt   string                 // extra system prompt (subagent context, etc.)
-	AgentType     string                 // "open" or "predefined" — affects context file framing
+	ExtraPrompt   string                  // extra system prompt (subagent context, etc.)
+	AgentType     string                  // "open" or "predefined" — affects context file framing
 
-	HasSkillSearch     bool              // skill_search tool registered? (for search-mode prompt)
-	HasSkillManage     bool              // skill_manage tool registered + skill_evolve enabled for this agent
-	HasMCPToolSearch   bool              // mcp_tool_search tool registered? (MCP search mode)
-	HasKnowledgeGraph  bool              // knowledge_graph_search tool registered?
-	MCPToolDescs       map[string]string // MCP tool name → description (inline mode only)
+	HasSkillSearch    bool              // skill_search tool registered? (for search-mode prompt)
+	HasSkillManage    bool              // skill_manage tool registered + skill_evolve enabled for this agent
+	HasMCPToolSearch  bool              // mcp_tool_search tool registered? (MCP search mode)
+	HasKnowledgeGraph bool              // knowledge_graph_search tool registered?
+	MCPToolDescs      map[string]string // MCP tool name → description (inline mode only)
 
 	// Sandbox info — matching TS sandboxInfo in system-prompt.ts
-	SandboxEnabled       bool   // exec tool runs inside Docker sandbox?
-	SandboxContainerDir  string // container-side workdir (e.g. "/workspace")
+	SandboxEnabled         bool   // exec tool runs inside Docker sandbox?
+	SandboxContainerDir    string // container-side workdir (e.g. "/workspace")
 	SandboxWorkspaceAccess string // "none", "ro", "rw"
 
 	// Self-evolution: predefined agents can update SOUL.md (style/tone)
@@ -71,40 +71,40 @@ type SystemPromptConfig struct {
 // coreToolSummaries maps tool names to one-line descriptions.
 // Shown in the ## Tooling section of the system prompt.
 var coreToolSummaries = map[string]string{
-	"read_file":     "Read file contents",
-	"write_file":    "Create or overwrite files",
-	"list_files":    "List directory contents",
-	"exec":          "Run shell commands",
-	"memory_search": "Search indexed memory files (MEMORY.md + memory/*.md)",
-	"memory_get":    "Read specific sections of memory files",
-	"spawn":         "Spawn a self-clone subagent to handle a task in the background",
-	"web_search":    "Search the web",
-	"web_fetch":     "Fetch and extract content from a URL",
-	"datetime":      "Get current date/time with timezone support — use before creating cron jobs or time-sensitive operations",
-	"cron":          "Manage scheduled jobs and reminders — use for user-requested tasks at specific times or intervals (e.g. 'remind me at 9am', 'check weather every morning')",
-	"heartbeat":     "Manage agent heartbeat — periodic background monitoring with HEARTBEAT.md checklist. Use for autonomous proactive check-ins (e.g. 'monitor server status every 30 min'). Unlike cron, heartbeat auto-suppresses 'all OK' responses via HEARTBEAT_OK",
-	"skill_search":     "Search available skills by keyword (weather, translate, github, etc.)",
-	"skill_manage":     "Create, patch, or delete skills from conversation experience",
-	"publish_skill":    "Register a skill directory in the system database, making it discoverable",
-	"use_skill":        "Invoke a skill by name and follow its instructions",
-	"mcp_tool_search":  "Search for available MCP external integration tools by keyword",
-	"browser":          "Browse web pages interactively",
-	"tts":              "Convert text to speech audio",
-	"edit":             "Edit a file by replacing exact text matches",
-	"message":          "Send a PROACTIVE message to another channel/chat — do NOT use this to reply to the user, just respond directly",
-	"sessions_list":    "List sessions for this agent",
-	"session_status":   "Show session status (model, tokens, compaction count)",
-	"sessions_history": "Fetch message history for a session",
-	"sessions_send":    "Send a message into another session",
-	"read_image":       "Analyze images attached to the conversation. Call this when you see <media:image> tags",
-	"read_audio":       "Analyze audio files attached to the conversation. Call this when you see <media:audio> tags",
-	"read_video":       "Analyze video files attached to the conversation. Call this when you see <media:video> tags",
-	"create_video":     "Generate videos from text descriptions using AI",
-	"read_document":    "Analyze documents (PDF, DOCX, etc.) attached to the conversation. Call this when you see <media:document> tags. If this tool fails, use a relevant skill instead (e.g. pdf skill with exec tool). The path attribute in <media:document path=\"...\"> is a directly accessible file in your workspace — use it directly, no need to copy",
-	"create_image":            "Generate images from text descriptions using AI",
-	"create_audio":            "Generate music or sound effects from text descriptions using AI",
-	"knowledge_graph_search":  "Find people, projects, and their connections — use for relationship questions (who works with whom, project dependencies) that memory_search may miss",
-	"team_tasks":              "Team task board — track progress, manage dependencies (spawn auto-creates delegation tasks)",
+	"read_file":              "Read file contents",
+	"write_file":             "Create or overwrite files",
+	"list_files":             "List directory contents",
+	"exec":                   "Run shell commands",
+	"memory_search":          "Search indexed memory files (MEMORY.md + memory/*.md)",
+	"memory_get":             "Read specific sections of memory files",
+	"spawn":                  "Spawn a self-clone subagent to handle a task in the background",
+	"web_search":             "Search the web",
+	"web_fetch":              "Fetch and extract content from a URL",
+	"datetime":               "Get current date/time with timezone support — use before creating cron jobs or time-sensitive operations",
+	"cron":                   "Manage scheduled jobs and reminders — use for user-requested tasks at specific times or intervals (e.g. 'remind me at 9am', 'check weather every morning')",
+	"heartbeat":              "Manage agent heartbeat — periodic background monitoring with HEARTBEAT.md checklist. Use for autonomous proactive check-ins (e.g. 'monitor server status every 30 min'). Unlike cron, heartbeat auto-suppresses 'all OK' responses via HEARTBEAT_OK",
+	"skill_search":           "Search available skills by keyword (weather, translate, github, etc.)",
+	"skill_manage":           "Create, patch, or delete skills from conversation experience",
+	"publish_skill":          "Register a skill directory in the system database, making it discoverable",
+	"use_skill":              "Invoke a skill by name and follow its instructions",
+	"mcp_tool_search":        "Search for available MCP external integration tools by keyword",
+	"browser":                "Browse web pages interactively",
+	"tts":                    "Convert text to speech audio",
+	"edit":                   "Edit a file by replacing exact text matches",
+	"message":                "Send a PROACTIVE message to another channel/chat — do NOT use this to reply to the user, just respond directly",
+	"sessions_list":          "List sessions for this agent",
+	"session_status":         "Show session status (model, tokens, compaction count)",
+	"sessions_history":       "Fetch message history for a session",
+	"sessions_send":          "Send a message into another session",
+	"read_image":             "Analyze images attached to the conversation. Call this when you see <media:image> tags",
+	"read_audio":             "Analyze audio files attached to the conversation. Call this when you see <media:audio> tags",
+	"read_video":             "Analyze video files attached to the conversation. Call this when you see <media:video> tags",
+	"create_video":           "Generate videos from text descriptions using AI",
+	"read_document":          "Analyze documents (PDF, DOCX, etc.) attached to the conversation. Call this when you see <media:document> tags. If this tool fails, use a relevant skill instead (e.g. pdf skill with exec tool). The path attribute in <media:document path=\"...\"> is a directly accessible file in your workspace — use it directly, no need to copy",
+	"create_image":           "Generate images from text descriptions using AI",
+	"create_audio":           "Generate music or sound effects from text descriptions using AI",
+	"knowledge_graph_search": "Find people, projects, and their connections — use for relationship questions (who works with whom, project dependencies) that memory_search may miss",
+	"team_tasks":             "Team task board — track progress, manage dependencies (spawn auto-creates delegation tasks)",
 
 	// Legacy tool aliases — kept for backward compatibility with older clients
 	"edit_file":      "Alias for edit — Edit a file by replacing exact text matches",
@@ -355,6 +355,15 @@ func buildToolingSection(toolNames []string, hasSandbox bool, shellDenyGroups ma
 		"IMPORTANT: write_file content longer than ~12000 characters may be truncated by the API.",
 		"For large files, use append=true to build the file in chunks, or use the edit tool to modify sections.",
 		"",
+		"CONTINUOUS EXECUTION — MANDATORY FOR ALL MULTI-STEP OR LONG TASKS:",
+		"Whenever a user request requires multiple actions (writing, searching, file operations, analysis, sending messages, etc.):",
+		"1. Break the task into individual steps and execute them one by one using tool calls.",
+		"2. After each tool call completes, IMMEDIATELY continue with the next action. Do NOT pause, summarize, or ask for permission between steps.",
+		"3. To send interim results or progress updates to the user, use the `message` or `sessions_send` tool — NOT plain text output.",
+		"4. **CRITICAL: NEVER STOP AFTER JUST 1, 2, OR 3 ACTIONS IF THE TASK IS NOT 100% DONE.** Chain tool calls continuously until every step is complete.",
+		"5. **ANTI-YIELD RULE:** DO NOT output ANY conversational text until the ENTIRE task is 100% finished. Outputting plain text mid-task halts your autonomous loop.",
+		"6. For large file writes, use append=true to build the file in chunks rather than one giant write.",
+		"",
 		"IMPORTANT: The tool list above is the AUTHORITATIVE set of currently available tools, re-evaluated every turn.",
 		"If earlier messages in this conversation say a tool is \"not available\" or \"not configured\", IGNORE those statements — they are outdated.",
 		"Only this system prompt reflects the current tool availability. Trust this list, not conversation history.",
@@ -496,5 +505,3 @@ func buildWorkspaceSection(workspace string, sandboxEnabled bool, containerDir s
 		"",
 	}
 }
-
-

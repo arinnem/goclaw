@@ -300,7 +300,7 @@ func TestLoop_LazyMCP_DenyList_BlockedOnFirstCall(t *testing.T) {
 	// Simulate loop.go's lazy activation + deny check.
 	var result *tools.Result
 	toolName := "mcp_svc__exec_cmd"
-	if allowedTools != nil && !allowedTools[toolName] {
+	if !allowedTools[toolName] {
 		if reg.TryActivateDeferred(toolName) {
 			// This is the NEW deny check added by the fix.
 			if pe.IsDenied(toolName, nil) {

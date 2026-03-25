@@ -1,0 +1,50 @@
+### Runtime Files and Storage
+
+- Main app state: ${DATA_DIR}/db.json (providers, combos, aliases, keys, settings), managed by src/lib/localDb.js.
+- Usage history and logs: ~/.9router/usage.json and ~/.9router/log.txt, managed by src/lib/usageDb.js.
+- Optional request/translator logs: <repo>/logs/... when ENABLE_REQUEST_LOGS=true.
+- Usage storage currently follows ~/.9router path logic and is independent from DATA_DIR.
+
+```
+${DATA_DIR}/db.json
+```
+
+
+```
+src/lib/localDb.js
+```
+
+
+```
+~/.9router/usage.json
+```
+
+
+```
+~/.9router/log.txt
+```
+
+
+```
+src/lib/usageDb.js
+```
+
+
+```
+<repo>/logs/...
+```
+
+
+```
+ENABLE_REQUEST_LOGS=true
+```
+
+
+```
+~/.9router
+```
+
+
+```
+DATA_DIR
+```

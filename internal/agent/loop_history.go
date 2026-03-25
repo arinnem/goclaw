@@ -535,9 +535,10 @@ func (l *Loop) maybeSummarize(ctx context.Context, sessionKey string) {
 		var sb strings.Builder
 		var mediaKinds []string
 		for _, m := range toSummarize {
-			if m.Role == "user" {
+			switch m.Role {
+			case "user":
 				sb.WriteString(fmt.Sprintf("user: %s\n", m.Content))
-			} else if m.Role == "assistant" {
+			case "assistant":
 				sb.WriteString(fmt.Sprintf("assistant: %s\n", SanitizeAssistantContent(m.Content)))
 			}
 			for _, ref := range m.MediaRefs {

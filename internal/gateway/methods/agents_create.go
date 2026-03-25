@@ -79,7 +79,12 @@ func (m *AgentsMethods) handleCreate(ctx context.Context, client *gateway.Client
 
 		// Resolve owner: use first provided ID so external provisioning tools (e.g. goclaw-wizards)
 		// can set a real user as owner at creation time. Falls back to "system" for backward compat.
-		ownerID := "system"
+		// Resolve owner: default to the calling user, but allow external provisioning 
+		// tools to override via params.OwnerIDs. Falls back to "system".
+		ownerID := client.UserID()
+		if ownerID == "" {
+			ownerID = "system"
+		}
 		if len(params.OwnerIDs) > 0 && params.OwnerIDs[0] != "" {
 			ownerID = params.OwnerIDs[0]
 		}

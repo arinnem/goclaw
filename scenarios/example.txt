@@ -1,0 +1,19 @@
+# =============================================================
+# Example GoClaw Scenario
+# =============================================================
+# Lines starting with # are comments. Blank lines are ignored.
+# Each non-comment line is sent as one instruction to the agent.
+# The agent remembers all previous steps (same session).
+# =============================================================
+
+# Step 1: Orientation
+List all files in the current workspace and tell me what you see.
+
+# Step 2: Analysis
+Based on the files you found, summarize the project structure in a short paragraph.
+
+# Step 3: Action
+Create a file called hello.txt with the content "Hello from GoClaw scenario runner!"
+
+# Step 4: Verify
+Read the hello.txt file and confirm its contents.

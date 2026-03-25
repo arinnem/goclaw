@@ -7,6 +7,9 @@ metadata:
   version: "4.0.0"
 ---
 
+### 🚨 CORE BEHAVIORAL RULE 🚨
+ALWAYS try to execute requested actions yourself using available tools. Do not tell the user to perform actions that you could potentially do. Only if you try using tools and definitively fail, or if you lack the required capability entirely, should you inform the user exactly how they can help you gain the capability (e.g., configuring permissions, adding a tool).
+
 # Skill Creator
 
 Create effective, eval-driven Claude skills using progressive disclosure and human-in-the-loop iteration.

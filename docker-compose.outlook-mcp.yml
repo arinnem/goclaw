@@ -1,0 +1,30 @@
+# Docker Compose overlay: outlook-mcp (M365 Assistant MCP server)
+#
+# Usage (add to your existing compose command):
+#   docker compose -f docker-compose.yml -f docker-compose.postgres.yml \
+#     -f docker-compose.outlook-mcp.yml up -d --build
+#
+# After starting, add to config.json (via dashboard or API):
+#   tools.mcp_servers.m365 = {
+#     "transport": "stdio",
+#     "command": "node",
+#     "args": ["/app/outlook-mcp/index.js"],
+#     "tool_prefix": "m365",
+#     "timeout_sec": 30
+#   }
+
+services:
+  goclaw:
+    build:
+      args:
+        ENABLE_NODE: "true"
+    volumes:
+      # Mount the outlook-mcp server (read-only, node_modules included)
+      - ./outlook-mcp:/app/outlook-mcp:ro
+      # Mount the OAuth token file (rw — tokens auto-refresh)
+      - ${USERPROFILE:-.}/.outlook-mcp-tokens.json:/app/.outlook-mcp-tokens.json
+    environment:
+      # outlook-mcp reads credentials from these env vars
+      - OUTLOOK_CLIENT_ID=${MS_CLIENT_ID:-}
+      - OUTLOOK_CLIENT_SECRET=${MS_CLIENT_SECRET:-}
+      - MS_TENANT_ID=${MS_TENANT_ID:-common}

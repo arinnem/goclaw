@@ -32,6 +32,22 @@ Classify the user's intent into exactly ONE of these categories:
 
 Respond with ONLY the category name, nothing else.`
 
+const complexitySystemPrompt = `You are a task complexity classifier for an autonomous AI agent.
+Assess whether the user's request requires a complex, multi-step chain of tool actions.
+
+Examples of COMPLEX tasks (reply "true"): 
+- Coding, deep research, multi-file refactoring, or subagent delegation
+- Comprehensive analysis (e.g., "kiểm tra mail và tổng hợp thông tin theo các loại")
+- Searching multiple sources and compiling a report
+
+Examples of SIMPLE tasks (reply "false"):
+- Answering a basic question ("mấy giờ rồi", "what's the weather?")
+- Fetching or reading a single file
+- Merely checking or reading recent emails ("Kiểm tra mail mới nhất cho anh", "đọc email cuối cùng")
+- Sending a single quick message
+
+Reply with ONLY a boolean: "true" if the task is complex, or "false" if it is a simple task.`
+
 // cancelKeywords for fast-path detection of obvious cancel intents.
 // Only matched on very short messages (≤ 15 runes) to avoid false positives
 // like "làm đơn giản thôi" matching "thôi".
@@ -125,6 +141,38 @@ func ClassifyIntent(ctx context.Context, provider providers.Provider, model, use
 	default:
 		return IntentNewTask
 	}
+}
+
+// AssessTaskComplexity determines if a user request requires a complex, multi-step
+// tool chain (returns true) or is a simple request easily handled in 1-2 steps (returns false).
+// If classification fails or is ambiguous, defaults to true for safety.
+func AssessTaskComplexity(ctx context.Context, provider providers.Provider, model, userMessage string) bool {
+	ctx, cancel := context.WithTimeout(ctx, intentClassifyTimeout)
+	defer cancel()
+
+	resp, err := provider.Chat(ctx, providers.ChatRequest{
+		Messages: []providers.Message{
+			{Role: "system", Content: complexitySystemPrompt},
+			{Role: "user", Content: userMessage},
+		},
+		Model: model,
+		Options: map[string]any{
+			providers.OptMaxTokens:   10,
+			providers.OptTemperature: 0.0,
+		},
+	})
+	
+	// Default to complex if error occurs (safer for autonomous execution)
+	if err != nil {
+		return true
+	}
+
+	result := strings.TrimSpace(strings.ToLower(resp.Content))
+	if strings.Contains(result, "false") || result == "f" || result == "no" {
+		return false
+	}
+	
+	return true
 }
 
 // FormatStatusReply builds a user-friendly status response from the current agent activity.

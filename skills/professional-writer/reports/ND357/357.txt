@@ -1,0 +1,893 @@
+CHÍNH PHỦ
+-------	CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc 
+---------------
+Số: 357/2025/NĐ-CP	Hà Nội, ngày 31 tháng 12 năm 2025
+ 
+NGHỊ ĐỊNH
+VỀ XÂY DỰNG VÀ QUẢN LÝ HỆ THỐNG THÔNG TIN, CƠ SỞ DỮ LIỆU VỀ NHÀ Ở VÀ THỊ TRƯỜNG BẤT ĐỘNG SẢN
+Căn cứ Luật Tổ chức Chính phủ số 63/2025/QH15;
+Căn cứ Luật Tổ chức chính quyền địa phương số 72/2025/QH15;
+Căn cứ Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15;
+Căn cứ Luật Dữ liệu số 60/2024/QH15;
+Căn cứ Luật sửa đổi, bổ sung một số điều của Luật Đất đai số 31/2024/QH15, Luật Nhà ở số 27/2023/QH15, Luật Kinh doanh bất động sản số 29/2023/QH15 và Luật Các tổ chức tín dụng số 32/2024/QH15;
+Căn cứ Luật Nhà ở số 27/2023/QH15;
+Căn cứ Luật Kinh doanh bất động sản số 29/2023/QH15;
+Căn cứ Luật Giao dịch điện tử số 20/2023/QH15;
+Căn cứ Luật An ninh mạng số 24/2018/QH14;
+Theo đề nghị của Bộ trưởng Bộ Xây dựng;
+Chính phủ ban hành Nghị định về xây dựng và quản lý hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+Chương I
+NHỮNG QUY ĐỊNH CHUNG
+Điều 1. Phạm vi điều chỉnh
+Quy định chi tiết một số điều, khoản của Luật Kinh doanh bất động sản số 29/2023/QH15 gồm:
+1. Điều 72 về hạ tầng kỹ thuật công nghệ thông tin và hệ thống phần mềm phục vụ quản lý, vận hành, khai thác hệ thống thông tin về nhà ở và thị trường bất động sản.
+2. Điều 73 về cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+3. Điều 74 về xây dựng, quản lý, vận hành hệ thống thông tin về nhà ở và thị trường bất động sản.
+4. Điểm a, điểm b khoản 2 Điều 75 về khai thác hệ thống thông tin về nhà ở và thị trường bất động sản. 
+Điều 2. Đối tượng áp dụng
+Nghị định này áp dụng đối với cơ quan, tổ chức, cá nhân có liên quan đến việc xây dựng, quản lý và sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+Điều 3. Giải thích từ ngữ
+1. Tồn kho bất động sản là số lượng bất động sản, tổng giá trị của bất động sản đủ điều kiện đưa vào kinh doanh của chủ đầu tư dự án theo quy định của pháp luật nhưng chưa giao dịch.
+2. Giao diện lập trình ứng dụng (API - Application Programming Interface) là giao diện chương trình ứng dụng phục vụ kết nối, chia sẻ thông tin, dữ liệu giữa các hệ thống thông tin.
+3. Định danh điện tử trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản là hoạt động đăng ký, đối soát, tạo lập và gắn thông tin và dữ liệu cho thửa đất, căn nhà hoặc đối tượng tham gia giao dịch nhà ở và bất động sản (chủ thể danh tính điện tử) theo quy định về định danh và xác thực điện tử.
+4. Tài khoản định danh điện tử trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản là tập hợp thông tin định danh, bao gồm: tên đăng nhập, mật khẩu hoặc phương tiện xác thực khác được tạo lập trên cơ sở số định danh cá nhân, tổ chức, do cơ quan quản lý định danh và xác thực điện tử có thẩm quyền xác thực; được sử dụng để truy cập, sử dụng các tiện ích, ứng dụng của hệ thống định danh và xác thực điện tử và hệ thống thông tin đã được kết nối, chia sẻ theo quy định của pháp luật.
+5. Mã định danh điện  tử sản phẩm bất động sản (bao gồm nhà ở và phần diện tích sàn xây dựng trong công trình xây dựng) là chuỗi ký tự số và chữ tối đa không quá 40 ký tự được cấp riêng cho mỗi căn nhà (chung cư, riêng lẻ) hoặc bất động sản trong công trình xây dựng được quản lý trong hệ thống thông tin, cơ sở dữ liệu về nhà ở và bất động sản.
+Điều 4. Nguyên tắc xây dựng, quản lý và sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản
+1. Hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản được xây dựng và quản lý tập trung, thống nhất từ trung ương đến địa phương. Bộ Xây dựng là cơ quan xây dựng, quản lý, sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản trên phạm vi toàn quốc; Ủy ban nhân dân cấp tỉnh là cơ quan thu thập, cập nhật, quản lý, khai thác cơ sở dữ liệu về nhà ở và thị trường bất động sản trong phạm vi của địa phương.
+2. Bảo đảm phục vụ kịp thời công tác quản lý nhà nước, bảo đảm quốc phòng, an ninh, đáp ứng yêu cầu phát triển kinh tế - xã hội, công khai, minh bạch thông tin về nhà ở và thị trường bất động sản.
+3. Các cơ quan, tổ chức, cá nhân có liên quan được cấp quyền truy cập để khởi tạo, chia sẻ, cập nhật, cung cấp thông tin, dữ liệu và thực hiện tra cứu, quản lý theo phân quyền của cơ quan quản lý nhà nước.
+4. Hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản được xây dựng có tính mở và tiêu chuẩn, quy chuẩn về cơ sở dữ liệu, API, mô hình phân quyền; đáp ứng quy định theo khung kiến trúc dữ liệu quốc gia, các tiêu chuẩn an ninh bảo mật; có mô tả định mức kinh tế - kỹ thuật do cơ quan nhà nước có thẩm quyền ban hành; bảo đảm việc kết nối, chia sẻ dữ liệu với Cơ sở dữ liệu tổng hợp quốc gia và các cơ sở dữ liệu chuyên ngành khác có liên quan; dữ liệu có trong các cơ sở dữ liệu được kết nối, chia sẻ thì không thu thập lại.
+5. Các thông tin, dữ liệu được thu thập, cập nhật vào cơ sở dữ liệu về nhà ở và thị trường bất động sản phải được làm sạch dữ liệu; có nguồn xác thực hợp pháp, phản ánh đúng hiện trạng về pháp lý; đầy đủ các trường thông tin, được cập nhật thường xuyên theo quy định; mọi bản ghi dữ liệu được lưu vết truy cập, chỉnh sửa, cập nhật, đảm bảo khả năng truy xuất lịch sử thay đổi và biến động dữ liệu. 
+6. Các thông tin, dữ liệu được hình thành từ cơ sở dữ liệu về nhà ở và thị trường bất động sản là tài sản của nhà nước do Bộ Xây dựng quản lý.
+7. Cơ sở dữ liệu về nhà ở và thị trường bất động sản được quản lý chặt chẽ, bảo đảm an toàn thông tin, bảo vệ bí mật nhà nước, bảo mật thông tin cá nhân; bảo đảm hiệu quả, đơn giản, thuận tiện cho cơ quan, tổ chức, cá nhân trong thực hiện dịch vụ công, thủ tục hành chính và các hoạt động khác.
+8. Thông tin, số liệu được công bố công khai trên Cổng thông tin của hệ thống thông tin về nhà ở và thị trường bất động sản là các thông tin, số liệu tổng hợp.
+9. Việc xây dựng, quản lý, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản phải đảm bảo đúng mục đích, tuân theo các quy định về quản lý, kết nối và chia sẻ dữ liệu số của cơ quan nhà nước, pháp luật về dữ liệu, pháp luật về giao dịch điện tử và pháp luật về tiếp cận thông tin. 
+Chương II
+HẠ TẦNG KỸ THUẬT CÔNG NGHỆ THÔNG TIN, HỆ THỐNG PHẦN MỀM VÀ MÃ ĐỊNH DANH ĐIỆN TỬ, TÀI KHOẢN ĐỊNH DANH ĐIỆN TỬ
+Mục 1. HẠ TẦNG KỸ THUẬT CÔNG NGHỆ THÔNG TIN, HỆ THỐNG PHẦN MỀM
+Điều 5. Hạ tầng kỹ thuật công nghệ thông tin
+1. Hạ tầng kỹ thuật công nghệ thông tin của hệ thống thông tin về nhà ở và thị trường bất động sản phải đảm bảo tuân thủ quy định của Khung kiến trúc Chính phủ số Việt Nam.
+2. Hạ tầng kỹ thuật công nghệ thông tin của hệ thống thông tin về nhà ở và thị trường bất động sản bao gồm các nhóm thiết bị chủ yếu sau:
+a) Thiết bị xử lý trung tâm;
+b) Thiết bị lưu trữ, sao lưu, phục hồi dữ liệu;
+c) Thiết bị mạng, truyền dẫn, định tuyến, cân bằng tải;
+d) Thiết bị bảo mật, an ninh mạng, thiết bị mã hóa, xác thực;
+đ) Thiết bị môi trường, năng lượng và phụ trợ kỹ thuật;
+e) Thiết bị đầu cuối, thiết bị giao tiếp dữ liệu chuyên dụng;
+g) Máy tính trạm và các thiết bị khác có liên quan.
+Điều 6. Hệ thống phần mềm
+1. Hệ thống phần mềm của hệ thống thông tin về nhà ở và thị trường bất động sản phải đáp ứng tiêu chuẩn, quy chuẩn kỹ thuật quốc gia về công nghệ thông tin trong cơ quan nhà nước; bảo đảm khả năng tích hợp, chia sẻ dữ liệu với các hệ thống thông tin có liên quan, bao gồm:
+a) Tương thích với hạ tầng kỹ thuật công nghệ thông tin;
+b) Đáp ứng về giải pháp truy cập và dịch vụ phân phối dữ liệu;
+c) Đáp ứng về giải pháp chia sẻ, tích hợp;
+d) Đáp ứng quy mô triển khai trên phạm vi toàn quốc; 
+đ) Đáp ứng phục vụ cho các nhóm người dùng khác nhau trong quản lý, vận hành, cập nhật, khai thác thông tin, dữ liệu;
+e) Đa dạng hóa hình thức sử dụng, trải nghiệm trên các ứng dụng di động;
+g) Cho phép người dùng phản hồi, báo lỗi dữ liệu trong quá trình sử dụng.
+2. Hệ thống phần mềm của hệ thống thông tin về nhà ở và thị trường bất động sản bao gồm các nhóm ứng dụng chủ yếu sau:
+a) Nhóm quản lý, cập nhật cơ sở dữ liệu;
+b) Nhóm khai thác, cung cấp thông tin;
+c) Nhóm phục vụ quản lý, điều hành;
+d) Nhóm tích hợp và chia sẻ dữ liệu;
+đ) Nhóm hỗ trợ vận hành và bảo trì;
+e) Các nhóm phần mềm hỗ trợ khác có liên quan.
+Điều 7. Xây dựng, vận hành hạ tầng kỹ thuật công nghệ thông tin và hệ thống phần mềm
+1. Việc xây dựng và vận hành hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản bao gồm các hoạt động:
+a) Thiết lập, nâng cấp, duy trì hạ tầng kỹ thuật công nghệ thông tin;
+b) Xây dựng, nâng cấp hệ thống phần mềm để quản lý, vận hành, khai thác hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản;
+c) Đào tạo, tập huấn, bồi dưỡng nâng cao năng lực công chức, viên chức và người lao động được phân công thực hiện nhiệm vụ.
+2. Hạ tầng kỹ thuật công nghệ thông tin của hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản do Bộ Xây dựng chủ trì đề xuất, trang bị, được quản lý, vận hành tại Trung tâm dữ liệu quốc gia . Ủy ban nhân dân cấp tỉnh chủ động bố trí hệ thống máy tính có kết nối internet đảm bảo kết nối, chia sẻ, báo cáo và khai thác dữ liệu từ hệ thống thông tin về nhà ở và thị trường bất động sản.
+3. Hệ thống phần mềm của hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản do Bộ Xây dựng chủ trì phát triển, quản lý tập trung, thống nhất trên phạm vi toàn quốc.
+4. Bộ Xây dựng thực hiện duy trì hệ thống an toàn thông tin theo quy định của pháp luật về an ninh mạng. 
+5. Bộ Xây dựng đầu tư hoặc thuê hạ tầng kỹ thuật công nghệ thông tin, hệ thống phần mềm phục vụ quản lý, vận hành, khai thác; được phép lựa chọn tổ chức có đủ điều kiện năng lực để xây dựng, cung cấp dịch vụ hệ thống hạ tầng kỹ thuật công nghệ thông tin, hệ thống phần mềm phục vụ quản lý, vận hành, khai thác hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản theo quy định của pháp luật về ngân sách nhà nước, pháp luật đầu tư công, pháp luật đấu thầu, pháp luật an toàn thông tin mạng, pháp luật an ninh mạng, pháp luật về dữ liệu và quy định về quản lý đầu tư ứng dụng công nghệ thông tin sử dụng nguồn vốn ngân sách nhà nước.
+6. Bộ Xây dựng là chủ sở hữu dữ liệu, thực hiện quản trị nghiệp vụ chuyên ngành; các hoạt động kết nối kỹ thuật, điều phối, giám sát được thực hiện theo quy định của pháp luật hiện hành về kết nối, chia sẻ dữ liệu bắt buộc giữa các cơ quan thuộc hệ thống chính trị và các quy định về khung kiến trúc dữ liệu quốc gia, khung quản trị, quản lý dữ liệu quốc gia.
+Mục 2. MÃ ĐỊNH DANH ĐIỆN TỬ, TÀI KHOẢN ĐỊNH DANH ĐIỆN TỬ
+Điều 8. Mã định danh điện tử sản phẩm bất động sản là nhà ở 
+1. Mã định danh điện tử sản phẩm bất động sản là nhà ở được quy định tại Phụ lục I ban hành kèm theo Nghị định này gồm các nhóm trường thông tin:
+a) Mã định danh thửa đất;
+b) Mã số thông tin dự án, công trình xây dựng;
+c) Mã định danh địa điểm (nếu có);
+d) Dãy ký tự tự nhiên.
+2. Mã định danh điện tử sản phẩm bất động sản là nhà ở được tạo lập tự động trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản và Sở Xây dựng thực hiện gắn thông tin mã định danh điện tử sản phẩm bất động sản là nhà ở với các dự án phát triển nhà ở trên địa bàn cùng thời điểm ban hành văn bản thông báo về nhà ở đủ điều kiện bán nhà ở hình thành trong tương lai .
+Điều 9. Mã định danh điện tử sản phẩm bất động sản là phần diện tích sàn xây dựng trong công trình xây dựng
+1. Mã định danh điện tử sản phẩm bất động sản là phần diện tích sàn xây dựng trong công trình xây dựng được quy định tại Phụ lục I ban hành kèm theo Nghị định này gồm các nhóm trường thông tin:
+a) Mã định danh thửa đất; 
+b) Mã số thông tin dự án, công trình xây dựng;
+c) Mã định danh địa điểm (nếu có);
+d) Dãy ký tự tự nhiên.
+2. Mã định danh điện tử sản phẩm bất động sản là phần diện tích sàn xây dựng trong công trình xây dựng được tạo lập tự động trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản và Sở Xây dựng thực hiện gắn thông tin mã định danh là phần diện tích sàn xây dựng trong công trình xây dựng với phần diện tích sàn xây dựng trong công trình xây dựng trên địa bàn cùng thời điểm ban hành kết quả thẩm định báo cáo nghiên cứu khả thi đầu tư xây dựng .
+Điều 10. Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư
+1. Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư được quy định chi tiết tại Phụ lục I ban hành kèm theo Nghị định này gồm các trường thông tin:
+a) Số định danh tổ chức;
+b) Dãy ký tự tự nhiên thể hiện thời điểm ban hành văn bản thông báo đủ điều kiện thực hiện quản lý vận hành nhà chung cư do cơ quan có thẩm quyền ban hành.
+2. Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư được tạo lập tự động trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản và Sở Xây dựng thực hiện gắn thông tin mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư với nhà chung cư trên phạm vi của địa phương cùng thời điểm ban hành văn bản thông báo đủ điều kiện thực hiện quản lý vận hành nhà chung cư .
+Điều 11. Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản
+1. Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản được quy định chi tiết tại Phụ lục I ban hành kèm theo Nghị định này gồm các trường thông tin:
+a) Mã tỉnh/thành phố;
+b) Số định danh cá nhân/số định danh người nước ngoài;
+c) Dãy ký tự tự nhiên thể hiện ngày, tháng, năm cấp chứng chỉ; số hiệu chứng chỉ; bị thu hồi (nếu có). 
+2. Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản được tạo lập tự động trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản và Sở Xây dựng thực hiện gắn mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản vào thông tin của môi giới bất động sản ngay sau khi Sở Xây dựng phê duyệt danh sách các cá nhân được cấp chứng chỉ. 
+Điều 12. Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở
+1. Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở được quy định chi tiết tại Phụ lục I ban hành kèm theo Nghị định này gồm các trường thông tin:
+a) Số định danh cá nhân;
+b) Dãy ký tự tự nhiên thể hiện nhóm đối tượng thụ hưởng và chương trình chính sách hỗ trợ về nhà ở (Chương trình hỗ trợ nhà ở cho người có công; nhà ở cho hộ nghèo, cận nghèo; các chương trình hỗ trợ khác).
+2. Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở được tạo lập tự động trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản và cơ quan quản lý nhà nước có thẩm quyền được giao nhiệm vụ tại địa phương thực hiện tạo lập và gắn mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở vào cá nhân thụ hưởng.
+Điều 13. Tạo lập và gắn thông tin tài khoản định danh điện tử
+1. Các cơ quan, tổ chức, cá nhân tham gia xây dựng, quản lý và sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản phải có danh tính điện tử, được định danh điện tử tuân thủ theo quy định của pháp luật về định danh và xác thực điện tử.
+2. Bộ Xây dựng thực hiện quản lý, cấp mật khẩu và cấp quyền sử dụng tài khoản định danh điện tử trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản trên cơ sở số định danh cá nhân, số định danh tổ chức, mã số các đơn vị hành chính có liên quan do cơ quan quản lý nhà nước có thẩm quyền tạo lập; thực hiện phân quyền truy cập, kết nối, chia sẻ dữ liệu, bảo đảm đúng mục đích, phạm vi và thẩm quyền quản lý nhà nước cho các cơ quan, tổ chức, cá nhân bao gồm:
+a) Các bộ, ngành có liên quan;
+b) Ủy ban nhân dân cấp tỉnh;
+c) Các tổ chức, cá nhân có nhu cầu khai thác thông tin, dữ liệu chuyên ngành, chi tiết về nhà ở và thị trường bất động sản trên phạm vi toàn quốc.
+3. Ủy ban nhân dân cấp tỉnh thực hiện gắn thông tin tài khoản định danh điện tử phục vụ kết nối, cung cấp thông tin, dữ liệu về nhà ở và thị trường bất động sản cho các cơ quan, tổ chức trên địa bàn gồm:
+a) Các sở, ngành, phường, xã trên địa bàn có liên quan;
+b) Chủ đầu tư các dự án bất động sản, tổ chức kinh doanh dịch vụ bất động sản trên địa bàn;
+c) Việc gắn thông tin tài khoản định danh điện tử cho chủ đầu tư các dự án bất động sản trên địa bàn được thực hiện ngay sau khi dự án bất động sản được cơ quan quản lý nhà nước có thẩm quyền ban hành Quyết định chủ trương đầu tư hoặc chấp thuận chủ trương đầu tư hoặc chấp thuận đầu tư dự án bất động sản .
+Chương III
+CƠ SỞ DỮ LIỆU VỀ NHÀ Ở VÀ THỊ TRƯỜNG BẤT ĐỘNG SẢN
+Mục 1. CƠ SỞ DỮ LIỆU VỀ NHÀ Ở VÀ BẤT ĐỘNG SẢN
+Điều 14. Cơ sở dữ liệu về nhà ở
+1. Hệ thống các văn bản quy phạm pháp luật về nhà ở do Quốc hội, Chính phủ, Thủ tướng Chính phủ, các bộ, ngành, địa phương ban hành theo thẩm quyền.
+2. Chỉ tiêu phát triển các loại hình nhà ở theo Đề án; Chương trình, kế hoạch phát triển nhà ở đã được cơ quan có thẩm quyền phê duyệt và kết quả thực hiện bao gồm:
+a) Diện tích đất để phát triển nhà ở xã hội, nhà ở phục vụ tái định cư, nhà ở công vụ, cải tạo xây dựng nhà chung cư và nhà ở khác (nếu có);
+b) Diện tích nhà ở bình quân đầu người;
+c) Diện tích sàn nhà ở, số lượng nhà ở.
+3. Các loại hình phát triển nhà ở bao gồm:
+a) Nhà ở thương mại;
+b) Nhà ở xã hội, nhà lưu trú công nhân trong khu công nghiệp, nhà ở cho lực lượng vũ trang nhân dân, nhà ở do Tổng Liên đoàn lao động Việt Nam đầu tư xây dựng;
+c) Nhà ở công vụ;
+d) Nhà ở phục vụ tái định cư;
+đ) Cải tạo, xây dựng lại nhà chung cư;
+e) Nhà ở hỗn hợp;
+g) Nhà ở thuộc tài sản công;
+h) Các chương trình hỗ trợ về nhà ở: Nhà ở cho người có công với cách mạng và thân nhân liệt sĩ; nhà ở cho hộ nghèo, hộ cận nghèo tại các xã nghèo; nhà ở theo các chính sách hỗ trợ hộ nghèo xây dựng nhà ở phòng, tránh bão, lụt khu vực miền Trung và Chương trình xây dựng cụm, tuyến dân cư và nhà ở vùng ngập lũ đồng bằng sông Cửu Long; nhà ở theo các chương trình hỗ trợ khác (nếu có).
+4. Thông tin, dữ liệu về nhà ở trong tổng điều tra dân số và nhà ở; điều tra dân số và nhà ở giữa kỳ.
+Điều 15. Thông tin, dữ liệu về dự án nhà ở 
+1. Thông tin về dự án gồm:
+a) Tên dự án đã được chấp thuận chủ trương đầu tư/giao chủ đầu tư (đối với nhà ở xã hội);
+b) Tên chủ đầu tư dự án; số định danh tổ chức; mã số thông tin dự án, công trình xây dựng; mã định danh điện tử sản phẩm bất động sản;
+c) Tổng mức đầu tư dự án, vốn chủ sở hữu và vốn được huy động theo quy định của pháp luật về nhà ở;
+d) Quy mô sử dụng đất của dự án;
+đ) Địa điểm thực hiện dự án;
+e) Tiến độ triển khai thực hiện được cấp giấy phép xây dựng; đang triển khai xây dựng và đã hoàn thành nghiệm thu đưa vào sử dụng;
+g) Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt;
+h) Số lượng, diện tích (căn nhà/căn hộ/lô nền);
+i) Số lượng, diện tích (căn nhà/căn hộ/lô nền) đủ điều kiện đưa vào kinh doanh;
+k) Giá bán, giá thuê mua, giá thuê nhà ở xã hội; dự kiến thời gian bắt đầu và kết thúc tiếp nhận hồ sơ đăng ký, mua bán, thuê mua, thuê nhà ở xã hội.
+2. Thông tin về văn bản pháp lý của dự án gồm:
+a) Thông tin, dữ liệu về công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản;
+b) Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: Thông tin, dữ liệu bao gồm các nội dung quy định tại điểm a khoản này và các thông tin bổ sung sau: Văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận;
+c) Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có).
+Điều 16. Thông tin, dữ liệu về các loại nhà ở khác
+1. Thông tin, dữ liệu về dự án cải tạo, xây dựng lại nhà chung cư cũ
+a) Các nội dung quy định tại Điều 15 của Nghị định này;
+b) Thời gian phá dỡ, thời gian thực hiện và thời gian hoàn thành theo chấp thuận chủ trương đầu tư;
+c) Diện tích và số lượng nhà ở phục vụ tái định cư và nhà ở thương mại trong phương án được phê duyệt.
+2. Thông tin, dữ liệu về nhà ở công vụ
+a) Các nội dung quy định tại Điều 15 của Nghị định này;
+b) Số lượng, diện tích nhà ở công vụ đang quản lý;
+c) Số lượng, diện tích nhà ở công vụ đang bố trí cho thuê;
+d) Giá thuê nhà ở công vụ.
+3. Thông tin, dữ liệu về các chương trình hỗ trợ về nhà ở
+a) Kết quả thực hiện chính sách hỗ trợ nhà ở cho người có công với cách mạng;
+b) Kết quả thực hiện chính sách hỗ trợ nhà ở cho hộ nghèo, hộ cận nghèo;
+c) Kết quả thực hiện chính sách hỗ trợ hộ nghèo xây dựng nhà ở phòng, tránh bão, lụt khu vực miền Trung và Chương trình xây dựng cụm, tuyến dân cư và nhà ở vùng ngập lũ đồng bằng sông Cửu Long;
+d) Nhà ở theo các chương trình hỗ trợ khác (nếu có).
+4. Thông tin, dữ liệu về nhà ở trong tổng điều tra dân số và nhà ở; điều tra dân số và nhà ở giữa kỳ
+a) Theo mức độ kiên cố: Nhà ở kiên cố và bán kiên cố, nhà ở thiếu kiên cố và nhà ở đơn sơ;
+b) Theo loại nhà: Chung cư, riêng lẻ;
+c) Theo khu vực: Khu vực đô thị, khu vực nông thôn.
+Điều 17. Cơ sở dữ liệu về bất động sản
+1. Hệ thống các văn bản quy phạm pháp luật về thị trường bất động sản do Quốc hội, Chính phủ, Thủ tướng Chính phủ, các bộ, ngành, địa phương ban hành theo thẩm quyền.
+2. Các loại bất động sản, dự án bất động sản bao gồm:
+a) Dự án đầu tư xây dựng nhà ở;
+b) Dự án đầu tư xây dựng khu đô thị;
+c) Dự án đầu tư xây dựng khu dân cư nông thôn;
+d) Dự án đầu tư xây dựng công trình xây dựng có công năng phục vụ mục đích giáo dục, y tế, thể thao, văn hóa, văn phòng, thương mại, dịch vụ, du lịch, lưu trú, công nghiệp và công trình xây dựng có công năng phục vụ hỗn hợp;
+đ) Dự án đầu tư xây dựng kết cấu hạ tầng khu nhà ở để chuyển nhượng quyền sử dụng đất cho cá nhân tự xây dựng nhà ở;
+e) Dự án đầu tư xây dựng kết cấu hạ tầng khu công nghiệp, cụm công nghiệp, khu công nghệ cao;
+g) Chuyển nhượng toàn bộ hoặc một phần dự án bất động sản;
+h) Nhà ở, công trình xây dựng thuộc trường hợp khi giao dịch phải thông qua công chứng.
+Điều 18. Thông tin, dữ liệu về dự án bất động sản
+1. Đối với dự án đầu tư xây dựng nhà ở; dự án đầu tư xây dựng khu đô thị; dự án đầu tư xây dựng khu dân cư nông thôn; công trình xây dựng có công năng phục vụ hỗn hợp bao gồm các thông tin, dữ liệu quy định tại Điều 15 của Nghị định này.
+2. Đối với dự án đầu tư xây dựng văn phòng, thương mại, dịch vụ bao gồm các thông tin, dữ liệu quy định tại Điều 15 của Nghị định này.
+3. Đối với dự án bất động sản du lịch, lưu trú bao gồm các thông tin, dữ liệu quy định tại Điều 15 của Nghị định này.
+4. Đối với dự án bất động sản khác (giáo dục, y tế, thể thao, văn hóa và các công trình xây dựng khác) bao gồm:
+a) Thông tin, dữ liệu theo quy định tại điểm a, b, c, d, đ, e, g khoản 1 Điều 15, khoản 2 Điều 15 của Nghị định này;
+b) Số lượng, diện tích (công trình).
+5. Đối với dự án bất động sản công nghiệp; dự án đầu tư xây dựng kết cấu hạ tầng khu công nghiệp, cụm công nghiệp, khu công nghệ cao bao gồm:
+a) Thông tin, dữ liệu theo quy định tại điểm a, b, c, d, đ, e, g khoản 1 Điều 15, khoản 2 Điều 15 của Nghị định này;
+b) Số lượng, diện tích (nhà xưởng/lô).
+6. Đối với dự án đầu tư xây dựng kết cấu hạ tầng khu nhà ở để chuyển nhượng quyền sử dụng đất cho cá nhân tự xây dựng nhà ở theo quy định tại Điều 15 của Nghị định này.
+7. Đối với chuyển nhượng dự án bất động sản
+a) Thông tin, dữ liệu theo quy định tại Điều 15 của Nghị định này; 
+b) Thông tin về bên chuyển nhượng, bên nhận chuyển nhượng;
+c) Quyết định cho phép chuyển nhượng toàn bộ hoặc một phần dự án.
+Điều 19. Thông tin, dữ liệu về giao dịch bất động sản 
+1. Thông tin, dữ liệu về tình hình giao dịch bất động sản của dự án theo từng loại hình bất động sản bao gồm:
+a) Số lượng căn hộ/căn nhà/lô nền, diện tích;
+b) Giá giao dịch (triệu đồng/m2), tổng giá trị giao dịch;
+c) Số lượng căn hộ/căn nhà/lô nền, giá trị, tổng giá trị bất động sản tồn kho.
+2. Thông tin, dữ liệu về giao dịch bất động sản thông qua công chứng, chứng thực theo từng loại hình bất động sản bao gồm:
+a) Số lượng căn hộ/căn nhà/lô nền, diện tích;
+b) Giá giao dịch (triệu đồng/m2), tổng giá trị giao dịch.
+3. Thông tin về hợp đồng giao dịch bất động sản, bao gồm:
+a) Số, ký hiệu hợp đồng, mã định danh điện tử sản phẩm bất động sản, thời gian ký kết; loại hợp đồng giao dịch (mua bán, thuê, thuê lại, thuê mua, nhận chuyển nhượng);
+b) Thông tin về các bên tham gia hợp đồng: Tên tổ chức, cá nhân; số định danh tổ chức; số định danh cá nhân hoặc số định danh của người nước ngoài của bên mua, thuê, thuê lại, thuê mua, nhận chuyển nhượng bất động sản.
+Mục 2. THÔNG TIN VỀ SỞ HỮU NHÀ Ở
+Điều 20. Thông tin về sở hữu nhà ở của tổ chức, cá nhân
+1. Thông tin về tổ chức, cá nhân nước ngoài sở hữu nhà ở bao gồm:
+a) Thông tin nhận diện: Các giấy tờ chứng minh đối tượng và điều kiện được sở hữu nhà ở tại Việt Nam theo quy định pháp luật nhà ở;
+b) Loại hình nhà ở sở hữu; địa chỉ, diện tích, số lượng;
+c) Thời hạn sở hữu theo quy định của pháp luật;
+d) Tình trạng pháp lý của nhà ở (đã được cấp giấy chứng nhận, hay đang trong quá trình cấp);
+đ) Thông tin về quyền, nghĩa vụ phát sinh từ việc sở hữu;
+e) Danh mục các dự án đầu tư xây dựng nhà ở được Ủy ban nhân dân cấp tỉnh công bố theo quy định của pháp luật; số lượng nhà ở (nhà chung cư, nhà ở riêng lẻ) được bán cho tổ chức, cá nhân nước ngoài;
+g) Văn bản thông báo về việc cho thuê nhà ở hoặc chấm dứt hợp đồng cho thuê nhà ở thuộc sở hữu của cá nhân nước ngoài.
+2. Thông tin về tổ chức, cá nhân trong nước và người Việt Nam định cư ở nước ngoài sở hữu nhà ở bao gồm:
+a) Thông tin nhận diện: Họ tên/tên tổ chức, số định danh cá nhân/số định danh tổ chức, các giấy tờ chứng minh đối tượng và điều kiện được sở hữu nhà ở tại Việt Nam theo quy định pháp luật nhà ở;
+b) Loại hình nhà ở gắn liền với quyền sử dụng đất ở; địa chỉ, diện tích, số lượng;
+c) Thời hạn sở hữu và hình thức sở hữu (sở hữu riêng, sở hữu chung);
+d) Tình trạng pháp lý của nhà ở và đất ở gắn liền (đã được cấp giấy chứng nhận, hay đang trong quá trình cấp).
+3. Thông tin về tổ chức, cá nhân quản lý, sử dụng nhà ở thuộc tài sản công
+a) Số lượng, diện tích, mục đích sử dụng;
+b) Tình trạng quản lý, cho thuê, bán, chuyển đổi công năng, các trường hợp thu hồi (nếu có).
+Điều 21. Thông tin về thụ hưởng chính sách, hỗ trợ nhà ở
+1. Thông tin về cá nhân được thụ hưởng chính sách hỗ trợ nhà ở được quy định tại khoản 3 Điều 16 gồm:
+a) Số định danh cá nhân;
+b) Thông tin về chương trình, chính sách hỗ trợ về nhà ở.
+2. Thông tin về cá nhân được thụ hưởng chính sách về nhà ở xã hội bao gồm:
+a) Số định danh cá nhân;
+b) Hình thức: Mua, thuê mua;
+c) Tên dự án, địa điểm dự án nhà ở xã hội mà cá nhân đăng ký mua, thuê mua.
+Mục 3. THÔNG TIN VỀ TỔ CHỨC, CÁ NHÂN HOẠT ĐỘNG KINH DOANH DỊCH VỤ BẤT ĐỘNG SẢN VÀ DỊCH VỤ QUẢN LÝ VẬN HÀNH NHÀ CHUNG CƯ
+Điều 22. Thông tin, dữ liệu về tổ chức kinh doanh dịch vụ bất động sản
+1. Thông tin về sàn giao dịch bất động sản
+a) Thông tin về tổ chức, doanh nghiệp: Tên sàn giao dịch; số định danh tổ chức; số định danh cá nhân của người quản lý điều hành; địa chỉ; tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt);
+b) Số lượng nhân viên có chứng chỉ hành nghề môi giới bất động sản;
+c) Số lượng giao dịch bất động sản, giá trị giao dịch bất động sản được xác nhận thông qua sàn giao dịch bất động sản.
+2. Thông tin về tổ chức kinh doanh dịch vụ môi giới bất động sản
+a) Thông tin về tổ chức, doanh nghiệp: Tổ chức kinh doanh dịch vụ môi giới; số định danh tổ chức; số định danh cá nhân của người quản lý điều hành; địa chỉ; tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt);
+b) Số lượng nhân viên có chứng chỉ hành nghề môi giới bất động sản;
+c) Số lượng giao dịch bất động sản, giá trị giao dịch bất động sản.
+3. Thông tin về tổ chức kinh doanh dịch vụ tư vấn, quản lý bất động sản
+Thông tin về tổ chức, doanh nghiệp: Tên tổ chức kinh doanh dịch vụ tư vấn, quản lý bất động sản; số định danh tổ chức; số định danh cá nhân của người quản lý điều hành; địa chỉ; tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt).
+Điều 23. Thông tin, dữ liệu về cá nhân được cấp chứng chỉ hành nghề môi giới bất động sản
+Thông tin về số định danh cá nhân, mã định danh điện tử chứng chỉ hành nghề môi giới bất động sản được quy định tại khoản 1 Điều 11 của Nghị định này.
+Điều 24. Thông tin, dữ liệu về cơ sở đào tạo, bồi dưỡng kiến thức hành nghề môi giới bất động sản, điều hành sàn giao dịch bất động sản
+1. Thông tin về tổ chức, doanh nghiệp.
+a) Tên cơ sở đào tạo;
+b) Số định danh tổ chức;
+c) Số định danh cá nhân của người quản lý điều hành;
+d) Địa chỉ đăng ký hoạt động.
+2. Giấy chứng nhận đăng ký doanh nghiệp và các thông tin pháp lý có liên quan.
+Điều 25. Thông tin, dữ liệu về đơn vị quản lý vận hành nhà chung cư
+1. Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư quy định tại khoản 1 Điều 10 của Nghị định này.
+2. Danh sách nhân viên của từng đơn vị quản lý vận hành nhà chung cư trực tiếp tham gia công tác quản lý vận hành trong lĩnh vực xây dựng, kỹ thuật điện, nước, phòng cháy chữa cháy, vận hành thang máy: Họ và tên; số định danh cá nhân.
+3. Quyết định công nhận ban quản trị nhà chung cư.
+Chương IV
+KẾT NỐI, CHIA SẺ, CUNG CẤP THÔNG TIN, DỮ LIỆU VỀ NHÀ Ở VÀ THỊ TRƯỜNG BẤT ĐỘNG SẢN
+Điều 26. Nguồn thông tin, dữ liệu thu thập
+1. Nguồn thông tin, dữ liệu được thu thập liên quan đến lĩnh vực nhà ở và thị trường bất động sản gồm:
+a) Cơ sở dữ liệu tổng hợp quốc gia;
+b) Cơ sở dữ liệu quốc gia về đất đai;
+c) Cơ sở dữ liệu quốc gia về dân cư;
+d) Cơ sở dữ liệu quốc gia về hoạt động xây dựng;
+đ) Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp;
+e) Cơ sở dữ liệu quốc gia về đầu tư;
+g) Cơ sở dữ liệu quốc gia về xử lý vi phạm hành chính;
+h) Cơ sở dữ liệu chuyên ngành về tài chính, thuế, công chứng, ngân hàng;
+i) Cơ sở dữ liệu kết quả giải quyết thủ tục hành chính của cơ quan quản lý nhà nước;
+k) Các cơ sở dữ liệu quốc gia, cơ sở dữ liệu chuyên ngành khác có liên quan.
+2. Cơ quan quản lý hệ thống thông tin về nhà ở và thị trường bất động sản có trách nhiệm tiếp nhận các thông tin, dữ liệu do các cơ quan, tổ chức chia sẻ, cung cấp theo quy định để tích hợp vào cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+3. Ủy ban nhân dân cấp tỉnh thu thập, cập nhật bổ sung các thông tin, dữ liệu về nhà ở và thị trường bất động sản của địa phương phục vụ kịp thời cho công tác quản lý, phát triển kinh tế - xã hội.
+Điều 27. Dữ liệu chủ chuyên ngành, dữ liệu mở trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản
+1. Dữ liệu chủ chuyên ngành là dữ liệu chứa thông tin cơ bản nhất về nhà ở và thị trường bất động sản, làm cơ sở tham chiếu, đồng bộ dữ liệu nhà ở và thị trường bất động sản với các cơ sở dữ liệu quốc gia khác, cơ sở dữ liệu của các bộ, ngành, địa phương.
+2. Dữ liệu mở là dữ liệu về nhà ở và thị trường bất động sản được công bố rộng rãi cho cơ quan, tổ chức, cá nhân sử dụng, tái sử dụng, chia sẻ, miễn phí và được công khai trên hệ thống thông tin về nhà ở và thị trường bất động sản.
+Điều 28. Chia sẻ, kết nối, cung cấp thông tin, dữ liệu trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản của các bộ, ngành
+1. Bộ Công an phối hợp, chia sẻ thông tin, dữ liệu liên quan đến dân cư; định danh địa điểm (nếu có); xử lý vi phạm hành chính liên quan đến lĩnh vực nhà ở và kinh doanh bất động sản; số định danh cá nhân; số định danh người nước ngoài; số định danh tổ chức.
+2. Bộ Nông nghiệp và Môi trường phối hợp, chia sẻ thông tin, dữ liệu về cấp Giấy chứng nhận quyền sử dụng đất, quyền sở hữu tài sản gắn liền với đất cho người Việt Nam và tổ chức, cá nhân nước ngoài; thông tin về địa chỉ, số nhà ghi trên Giấy chứng nhận quyền sử dụng đất, quyền sở hữu tài sản gắn liền với đất; thông tin về thế chấp, giải chấp đối với Giấy chứng nhận quyền sử dụng đất, quyền sở hữu tài sản gắn liền với đất của bất động sản, dự án bất động sản; mã định danh thửa đất.
+3. Bộ Tài chính phối hợp, chia sẻ thông tin, dữ liệu về:
+a) Thông tin, dữ liệu về thuế đối với hoạt động chuyển nhượng bất động sản gồm: Thuế thu nhập cá nhân, tổ chức phải nộp đối với các loại bất động sản như đất ở đô thị, đất ở nông thôn và các loại bất động sản khác;
+b) Thông tin, dữ liệu về hoạt động đầu tư có vốn nước ngoài gồm: Thông tin về vốn đầu tư trực tiếp nước ngoài vào lĩnh vực kinh doanh bất động sản; tổng vốn đăng ký cấp mới của nhà đầu tư nước ngoài vào lĩnh vực bất động sản; tổng vốn điều chỉnh của nhà đầu tư nước ngoài vào lĩnh vực bất động sản; tổng vốn góp, mua cổ phần của nhà đầu tư nước ngoài vào lĩnh vực bất động sản; vốn đầu tư trực tiếp nước ngoài (FDI) đã giải ngân vào lĩnh vực bất động sản; tỷ trọng vốn đầu tư nước ngoài vào Việt Nam trong lĩnh vực kinh doanh bất động sản/toàn ngành kinh tế; thông tin hoạt động của doanh nghiệp có ngành nghề kinh doanh bất động sản: số lượng doanh nghiệp đăng ký hoạt động mới, số lượng doanh nghiệp tạm dừng hoạt động, số lượng doanh nghiệp giải thể;
+c) Thông tin, dữ liệu về phát hành trái phiếu doanh nghiệp trong lĩnh vực kinh doanh bất động sản gồm: Tên tổ chức phát hành; giá trị trái phiếu phát hành trên thị trường trong nước và thị trường quốc tế; tổng giá trị trái phiếu đã phát hành tính đến thời điểm báo cáo;
+d) Thông tin, dữ liệu về nhà ở trong tổng điều tra dân số và nhà ở; điều tra dân số và nhà ở giữa kỳ.
+4. Ngân hàng Nhà nước Việt Nam phối hợp, chia sẻ thông tin, dữ liệu về tín dụng trong lĩnh vực bất động sản, gồm:
+a) Dư nợ tín dụng đối với hoạt động đầu tư, kinh doanh bất động sản gồm: Dư nợ tín dụng đối với chủ đầu tư để đầu tư xây dựng sửa chữa nhà ở để bán, cho thuê, cho thuê mua; dư nợ tín dụng để đầu tư xây dựng, mua, thuê văn phòng, cao ốc để bán, cho thuê, cho thuê mua; dư nợ tín dụng để đầu tư xây dựng hạ tầng kỹ thuật, công trình xây dựng trong khu công nghiệp, cụm công nghiệp, khu chế xuất, khu công nghệ cao, khu kinh tế để bán, cho thuê, cho thuê mua; dư nợ tín dụng để đầu tư xây dựng, mua, thuê khu du lịch, sinh thái, nghỉ dưỡng để bán, cho thuê, cho thuê mua; dư nợ tín dụng để đầu tư xây dựng, mua, thuê nhà hàng, khách sạn để bán, cho thuê, cho thuê mua; dư nợ tín dụng đối với khách hàng mua, thuê nhà ở để bán, cho thuê; dư nợ tín dụng đối với khách hàng mua, nhận chuyển nhượng, thuê quyền sử dụng đất để kinh doanh; dư nợ tín dụng đầu tư kinh doanh bất động sản khác;
+b) Số dư bảo lãnh nhà ở hình thành trong tương lai;
+c) Tổng dư nợ tín dụng trong lĩnh vực kinh doanh bất động sản;
+d) Tỷ trọng dư nợ tín dụng đối với hoạt động kinh doanh trong lĩnh vực bất động sản so với tổng dư nợ tín dụng toàn ngành kinh tế (%).
+5. Bộ Tư pháp phối hợp, chia sẻ thông tin, dữ liệu về số lượng, giá trị giao dịch bất động sản thông qua hoạt động công chứng.
+Điều 29. Chia sẻ, kết nối, cung cấp thông tin, dữ liệu trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản của Ủy ban nhân dân cấp tỉnh
+Ủy ban nhân dân cấp tỉnh chia sẻ, cung cấp thông tin, dữ liệu quy định tại Chương III của Nghị định này cho Bộ Xây dựng để cập nhật, bổ sung vào cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+Điều 30. Chia sẻ, cung cấp thông tin, dữ liệu trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản của chủ đầu tư dự án bất động sản và tổ chức kinh doanh dịch vụ bất động sản
+1. Chủ đầu tư dự án bất động sản cung cấp thông tin, dữ liệu cho Ủy ban nhân dân tỉnh, thành phố trực thuộc trung ương nơi có dự án triển khai xây dựng để cập nhật, bổ sung vào cơ sở dữ liệu về nhà ở và thị trường bất động sản, bao gồm:
+a) Thông tin về giao dịch bất động sản của dự án theo quy định tại khoản 1 Điều 19 của Nghị định này;
+b) Thông tin, dữ liệu về dự án nhà ở quy định tại Điều 15 và khoản 1, khoản 2 Điều 16 của Nghị định này và thông tin, dữ liệu về dự án bất động sản quy định tại Điều 18 của Nghị định này. 
+2. Chủ đầu tư dự án bất động sản thực hiện công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định của pháp luật về kinh doanh bất động sản.
+3. Tổ chức kinh doanh dịch vụ bất động sản cung cấp thông tin, dữ liệu cho Ủy ban nhân dân tỉnh, thành phố trực thuộc trung ương theo quy định tại Điều 22 của Nghị định này.
+Điều 31. Phương thức, tần suất chia sẻ, kết nối, cung cấp thông tin, dữ liệu
+1. Phương thức chia sẻ, kết nối, cung cấp thông tin, dữ liệu bao gồm:
+a) Việc kết nối, chia sẻ thông tin, dữ liệu giữa các cơ quan quản lý nhà nước thực hiện thông qua API được tích hợp tại hệ thống thông tin về nhà ở và thị trường bất động sản theo quy định tại Phụ lục II kèm theo Nghị định này; 
+b) Việc kết nối, cung cấp thông tin, dữ liệu của các tổ chức, cá nhân cho cơ quan quản lý nhà nước thực hiện thông qua hệ thống phần mềm của hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+2. Các thông tin, dữ liệu quy định tại Điều 28, Điều 29 và Điều 30 của Nghị định này được chia sẻ, cung cấp qua API, hệ thống phần mềm theo thời gian thực khi phát sinh biến động.
+3. Trước khi thực hiện kết nối kỹ thuật, cơ quan, đơn vị chia sẻ, kết nối, cung cấp dữ liệu phải đăng tải siêu dữ liệu (Metadata) đầy đủ lên từ điển dữ liệu dùng chung theo quy định của pháp luật hiện hành.
+Điều 32. Xử lý thông tin, dữ liệu
+1. Các cơ quan, tổ chức, cá nhân chia sẻ, cung cấp thông tin, dữ liệu về nhà ở và thị trường bất động sản chịu trách nhiệm trước pháp luật về tính chính xác, tính hợp pháp của thông tin, dữ liệu.
+2. Ủy ban nhân dân cấp tỉnh có trách nhiệm kiểm tra, xử lý thông tin, dữ liệu trước khi được tích hợp và lưu trữ vào hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản để đảm bảo tính chính xác, hợp lý, thống nhất, bao gồm:
+a) Các thông tin, dữ liệu được rà soát, làm sạch đảm bảo không trùng lặp;
+b) Đảm bảo thông tin, dữ liệu cập nhập vào cơ sở dữ liệu về nhà ở và thị trường bất động sản được xác thực bằng chữ ký số, chứng thư chữ ký số của tổ chức cung cấp dịch vụ tin cậy;
+c) Đảm bảo thông tin, dữ liệu được xác thực điện tử về chủ thể cung cấp, ký số cấp dấu thời gian, lưu dấu vết truy cập.
+3. Trường hợp chỉnh sửa thông tin, dữ liệu trên hệ thống thông tin về nhà ở và thị trường bất động sản, cơ quan quản lý cơ sở dữ liệu về nhà ở và thị trường bất động sản tại địa phương có trách nhiệm phối hợp kiểm tra, rà soát, chỉnh sửa, cập nhật, bổ sung các thông tin, dữ liệu trên cơ sở đề nghị của các cơ quan, tổ chức có liên quan bằng văn bản.
+Chương V
+KHAI THÁC HỆ THỐNG THÔNG TIN, CƠ SỞ DỮ LIỆU VỀ NHÀ Ở VÀ THỊ TRƯỜNG BẤT ĐỘNG SẢN
+Điều 33. Khai thác thông tin, dữ liệu về nhà ở và thị trường bất động sản
+1. Bộ Xây dựng được khai thác toàn bộ thông tin, dữ liệu được tích hợp, kết nối, chia sẻ, cung cấp, cập nhật trên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản; các hoạt động khai thác dữ liệu liên quan đến dữ liệu cá nhân, dữ liệu chủ phải tuân thủ theo quy định của pháp luật về bảo vệ dữ liệu cá nhân và các quy định về khung kiến trúc dữ liệu quốc gia, khung quản trị, quản lý dữ liệu quốc gia; việc truy cập dữ liệu được thực hiện theo cơ chế phân quyền, giám sát và được mô tả mục đích rõ ràng; đối với dữ liệu nhạy cảm phải được ấn danh hoặc cấp quyền truy cập đặc biệt bao gồm:
+a) Dữ liệu chia sẻ, kết nối từ các cơ sở dữ liệu quốc gia về dân cư, đất đai, xây dựng, quy hoạch và các cơ sở dữ liệu chuyên ngành về đầu tư, tài chính, thuế, ngân hàng, công chứng của các bộ, ngành được quy định tại Điều 28 của Nghị định này;
+b) Thông tin, dữ liệu từ Ủy ban nhân dân cấp tỉnh được quy định tại Điều 29 của Nghị định này.
+2. Các bộ, ngành được quy định tại Điều 28 của Nghị định này được khai thác thông tin, dữ liệu phục vụ công tác quản lý nhà nước của ngành mình. Trường hợp khai thác dữ liệu về nhà ở và thị trường bất động sản ngoài phạm vi quản lý phải được sự chấp thuận của cơ quan quản lý hệ thống thông tin về nhà ở và thị trường bất động sản.
+3. Ủy ban nhân dân cấp tỉnh được khai thác toàn bộ dữ liệu về nhà ở và thị trường bất động sản trong phạm vi địa phương.
+4. Tổ chức, cá nhân có nhu cầu khai thác thông tin, dữ liệu mang tính chất chuyên ngành, chi tiết về nhà ở và thị trường bất động sản quy định tại Phụ lục VI đính kèm theo Nghị định này gửi phiếu yêu cầu theo mẫu phiếu tại Phụ lục III kèm theo Nghị định này cho Bộ Xây dựng theo các hình thức sau: Nộp trực tuyến trên Cổng dịch vụ công Quốc gia hoặc nộp trực tiếp tại bộ phận một cửa cơ quan Bộ Xây dựng hoặc nộp qua dịch vụ bưu chính hoặc nộp qua hệ thống giải quyết thủ tục hành chính của Bộ Xây dựng. 
+5. Các hình thức khai thác, sử dụng thông tin về nhà ở và thị trường bất động sản bao gồm:
+a) Khai thác, sử dụng trực tiếp thông qua Cổng thông tin của hệ thống thông tin về nhà ở và thị trường bất động sản;
+b) Khai thác, sử dụng qua kết nối, chia sẻ dữ liệu trực tuyến giữa các hệ thống thông tin;
+c) Khai thác, sử dụng qua việc gửi văn bản đến cơ quan có thẩm quyền.
+6. Trong thời hạn không quá 07 ngày kể từ khi nhận được đăng ký cấp quyền khai thác, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản, Bộ Xây dựng xem xét cấp quyền truy cập, khai thác, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản bằng hình thức điện tử hoặc theo mẫu Thông báo tại Phụ lục IV kèm theo Nghị định này, trường hợp từ chối cung cấp quyền khai thác, sử dụng phải trả lời và nêu rõ lý do theo mẫu Thông báo tại Phụ lục V kèm theo Nghị định này.
+7. Các thông tin thuộc bí mật nhà nước, thông tin liên quan đến dữ liệu định danh của công dân khác, thông tin liên quan hoạt động kinh doanh của doanh nghiệp không được khai thác trừ trường hợp phục vụ hoạt động của cơ quan quản lý nhà nước.
+8. Tổ chức nước ngoài chỉ được truy cập, khai thác thông tin, dữ liệu qua API an toàn hoặc bản sao ẩn danh; không được sao chép dữ liệu gốc chứa thông tin định danh.
+9. Việc chia sẻ, chuyển thông tin, dữ liệu xuyên biên giới phải tuân thủ quy định của pháp luật về dữ liệu trước khi cung cấp.
+Điều 34. Chi phí khai thác thông tin, dữ liệu
+1. Việc chia sẻ thông tin, dữ liệu giữa các cơ quan nhà nước là không thu phí, trừ trường hợp pháp luật có quy định khác.
+2. Tổ chức, cá nhân khai thác thông tin, dữ liệu quy định tại khoản 4 Điều 33 của Nghị định này phải trả các chi phí liên quan đến khai thác và sử dụng thông tin, dữ liệu theo quy định pháp luật về giá.
+Điều 35. Công bố thông tin về nhà ở và thị trường bất động sản
+1. Bộ Xây dựng công bố các thông tin tổng hợp về nhà ở và thị trường bất động sản trên phạm vi toàn quốc trên hệ thống thông tin về nhà ở và thị trường bất động sản tại địa chỉ website https://batdongsan.xaydung.gov.vn, định kỳ quý: Trước ngày 15 tháng đầu tiên của quý sau quý công bố.
+2. Ủy ban nhân dân cấp tỉnh công bố các thông tin tổng hợp về nhà ở và thị trường bất động sản trên phạm vi địa bàn trên Cổng thông tin của hệ thống thông tin về nhà ở và thị trường bất động sản và trang thông tin điện tử do địa phương quản lý định kỳ quý: Trước ngày 15 tháng đầu tiên của quý sau quý công bố.
+Chương VI
+TỔ CHỨC THỰC HIỆN
+Điều 36. Trách nhiệm của Bộ Xây dựng
+1. Chịu trách nhiệm trước Chính phủ thực hiện chức năng quản lý nhà nước về xây dựng, quản lý, sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+2. Thực hiện việc kiểm tra, đôn đốc, hướng dẫn các bộ, ngành có liên quan, địa phương trên phạm vi cả nước về xây dựng, quản lý, khai thác, kết nối, chia sẻ, cập nhật, sử dụng hệ thống thông tin về nhà ở và thị trường bất động sản; tổng hợp tình hình thực hiện của các bộ, ngành, địa phương trong việc chuẩn hóa, thu thập, chia sẻ, kết nối và liên thông dữ liệu; báo cáo Chính phủ xem xét, xử lý các khó khăn, vướng mắc trong quá trình thực hiện; sử dụng nguồn vốn được bố trí để xây dựng, nâng cấp hệ thống hạ tầng kỹ thuật công nghệ thông tin, hệ thống phần mềm, xây dựng cơ sở dữ liệu và duy trì hoạt động thường xuyên của hệ thống thông tin về nhà ở và thị trường bất động sản tuân theo các quy định hiện hành; đầu mối tiếp nhận, tổng hợp các thông tin về nhà ở và thị trường bất động sản do các bộ, ngành có liên quan, địa phương chia sẻ, cung cấp.
+3. Tổ chức xây dựng, nâng cấp hệ thống phần mềm thống nhất để quản lý, vận hành, khai thác hệ thống thông tin về nhà ở và thị trường bất động sản; xây dựng, nâng cấp hệ thống hạ tầng kỹ thuật công nghệ thông tin về nhà ở và thị trường bất động sản đáp ứng việc kết nối đến các bộ, ngành có liên quan, địa phương trên phạm vi cả nước; xây dựng cơ sở dữ liệu, quản lý, tổ chức vận hành hệ thống thông tin về nhà ở và thị trường bất động sản ở trung ương; chia sẻ, cung cấp thông tin về nhà ở và thị trường bất động sản cho các cơ quan, tổ chức, cá nhân theo quy định của pháp luật.
+4. Xây dựng kế hoạch và quản lý sử dụng nguồn vốn được bố trí để điều tra, xây dựng cơ sở dữ liệu, xây dựng, duy trì, nâng cấp hạ tầng kỹ thuật công nghệ thông tin, các phần mềm phục vụ quản lý, vận hành, khai thác hệ thống thông tin về nhà ở và thị trường bất động sản tuân theo các quy định hiện hành.
+5. Công bố các cơ quan, tổ chức, cá nhân vi phạm quy định của Nghị định này trên hệ thống thông tin về nhà ở và thị trường bất động sản.
+6. Chủ trì, phối hợp, đôn đốc các bộ, ngành có liên quan, địa phương thực hiện các nội dung quy định tại Nghị định này.
+Điều 37. Trách nhiệm của các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ
+1. Xây dựng, vận hành, chuẩn hóa dữ liệu đã có trước khi Nghị định này có hiệu lực trên hệ thống thông tin, cơ sở dữ liệu do mình quản lý đảm bảo kết nối chia sẻ thông tin, dữ liệu lên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+2. Chịu trách nhiệm trước Chính phủ về chia sẻ, kết nối, cung cấp các thông tin liên quan đến lĩnh vực nhà ở và thị trường bất động sản được quy định tại Nghị định này trong phạm vi chức năng quản lý của mình vào hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản; chỉ đạo các cơ quan thuộc ngành dọc đặt tại địa phương chia sẻ, cung cấp các thông tin theo quy định tại Nghị định này.
+3. Bộ Khoa học và Công nghệ thẩm định và công bố tiêu chuẩn quốc gia, thẩm định quy chuẩn kỹ thuật quốc gia; hỗ trợ các nhiệm vụ nghiên cứu khoa học và công nghệ cấp quốc gia về xây dựng, quản lý và sử dụng hệ thống thông tin nhà ở và thị trường bất động sản.
+Điều 38. Trách nhiệm của Ủy ban nhân dân cấp tỉnh
+1. Ủy ban nhân dân cấp tỉnh báo cáo Hội đồng nhân dân cùng cấp quyết định cấp kinh phí hàng năm từ ngân sách địa phương cho việc điều tra, thu thập thông tin phục vụ xây dựng cơ sở dữ liệu, quản lý, vận hành cơ sở dữ liệu về nhà ở và thị trường bất động sản và đầu tư, duy trì, nâng cấp hạ tầng kỹ thuật công nghệ thông tin quy định.
+2. Xây dựng và ban hành Quy chế phối hợp về xây dựng cơ sở dữ liệu, chia sẻ, cung cấp thông tin, dữ liệu về nhà ở và thị trường bất động sản trên địa bàn.
+3. Thu thập, chuẩn hóa thông tin, dữ liệu đã có trước khi Nghị định này có hiệu lực, chia sẻ, cung cấp lên hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản.
+4. Tổng hợp, báo cáo, cung cấp thông tin về nhà ở và thị trường bất động sản trên địa bàn theo quy định của Nghị định này.
+5. Tổ chức thực hiện hoặc giao cho cơ quan quản lý nhà nước về kinh doanh bất động sản cấp tỉnh thực hiện:
+a) Tổng hợp thông tin, số liệu về nhà ở và thị trường bất động sản trên địa bàn theo quy định của Nghị định này báo cáo Ủy ban nhân dân cấp tỉnh;
+b) Hướng dẫn, đôn đốc, kiểm tra các sở, ngành có liên quan, các tổ chức, doanh nghiệp kinh doanh bất động sản trên địa bàn thực hiện các quy định về xây dựng, quản lý và sử dụng hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản theo quy định của Nghị định này;
+c) Công bố các cơ quan, tổ chức, cá nhân vi phạm quy định của Nghị định này trên trang thông tin điện tử do địa phương quản lý;
+d) Đầu mối tiếp nhận các thông tin liên quan đến nhà ở và thị trường bất động sản trên địa bàn do cơ quan, tổ chức cung cấp;
+đ) Chia sẻ, cung cấp thông tin cho các cơ quan quản lý nhà nước theo quy định của pháp luật.
+6. Chỉ đạo thực hiện việc đảm bảo kết nối, liên thông giữa cơ sở dữ liệu về nhà ở và thị trường bất động sản trên địa bàn với các cơ sở dữ liệu chuyên ngành khác có liên quan.
+7. Thực hiện hoặc lựa chọn tổ chức có đủ năng lực khảo sát, thu thập, phân tích thông tin, phục vụ xây dựng cơ sở dữ liệu về nhà ở và thị trường bất động sản của địa phương.
+Điều 39. Trách nhiệm và quyền hạn của các tổ chức, cá nhân
+1. Các tổ chức, cá nhân có trách nhiệm:
+a) Thực hiện chia sẻ, báo cáo, cung cấp đầy đủ thông tin về nhà ở và thị trường bất động sản theo quy định, đúng thời hạn. Chịu hoàn toàn trách nhiệm với nội dung, số liệu do mình cung cấp, chia sẻ. Trường hợp vì sự kiện bất khả kháng hoặc trở ngại khách quan mà không chia sẻ, cung cấp thông tin đúng thời hạn theo quy định thì có văn bản báo cáo và chia sẻ, cung cấp thông tin ngay sau khi có điều kiện thực hiện;
+b) Chịu trách nhiệm trước pháp luật về tài khoản được cung cấp và chịu trách nhiệm về mọi hoạt động được thực hiện bằng tài khoản của mình. Trường hợp mật khẩu bị mất hoặc bị đánh cắp hoặc phát hiện có người sử dụng trái phép tài khoản của mình, phải thông báo kịp thời cho cơ quan quản lý và vận hành hệ thống thông tin về nhà ở và thị trường bất động sản;
+c) Không được làm sai lệch, hư hỏng, thất thoát thông tin, dữ liệu về nhà ở và thị trường bất động sản; chiếm giữ, tiêu hủy trái phép, làm hư hại thông tin, dữ liệu về nhà ở và thị trường bất động sản;
+d) Không được lợi dụng việc chia sẻ, cung cấp thông tin để sách nhiễu, trục lợi, phát tán các thông tin trái với các quy định của pháp luật; cản trở việc khai thác, sử dụng thông tin về nhà ở và thị trường bất động sản theo quy định;
+đ) Khai thác, sử dụng thông tin về nhà ở và thị trường bất động sản đúng với quy định của Nghị định này và các quy định khác của pháp luật;
+e) Không được chia sẻ, cung cấp cho bên thứ ba dữ liệu do cơ quan nhà nước có thẩm quyền chia sẻ, cung cấp cho mình để khai thác, sử dụng, trừ trường hợp được cơ quan quản lý hệ thống thông tin về nhà ở và thị trường bất động sản có thẩm quyền cho phép;
+g) Thông báo kịp thời cho cơ quan quản lý hệ thống thông tin về nhà ở và thị trường bất động sản về những sai sót của thông tin, dữ liệu đã chia sẻ, cung cấp.
+2. Các cơ quan, tổ chức, cá nhân có quyền:
+a) Từ chối yêu cầu chia sẻ, cung cấp thông tin, dữ liệu trái với quy định của Nghị định này và các quy định của pháp luật khác có liên quan;
+b) Khiếu nại, tố cáo theo quy định của pháp luật khi quyền khai thác, sử dụng thông tin của mình bị vi phạm.
+Điều 40. Quy định chuyển tiếp
+1. Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ, Ủy ban nhân dân cấp tỉnh thực hiện xây dựng, cập nhật, chuẩn hóa dữ liệu đã có trước khi Nghị định này có hiệu lực, đảm bảo các thông tin liên quan đến nhà ở và thị trường bất động sản được cung cấp đầy đủ, phục vụ tích hợp, kết nối chia sẻ cung cấp thông tin dữ liệu vào hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản chậm nhất đến ngày 01 tháng 7 năm 2026 .
+2. Trường hợp đến thời điểm Nghị định này có hiệu lực thi hành mà hệ thống phần mềm, cơ sở dữ liệu hoặc hạ tầng kỹ thuật của các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ chưa đáp ứng yêu cầu để thực hiện kết nối, chia sẻ dữ liệu theo quy định, các cơ quan, tổ chức, cá nhân có liên quan tiếp tục thực hiện chế độ báo cáo, cung cấp thông tin theo quy định tại Nghị định số 94/2024/NĐ-CP ngày 24 tháng 7 năm 2024 của Chính phủ cho đến khi hoàn thành việc nâng cấp, chuẩn hóa và kết nối theo đúng thời hạn quy định tại khoản 1 Điều này.
+Điều 41. Hiệu lực thi hành
+1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 3 năm 2026.
+2. Kể từ ngày Nghị định này có hiệu lực, Nghị định số 94/2024/NĐ-CP ngày 24 tháng 7 năm 2024 của Chính phủ quy định chi tiết một số điều của Luật Kinh doanh bất động sản về xây dựng và quản lý hệ thống thông tin, cơ sở dữ liệu về nhà ở và thị trường bất động sản hết hiệu lực thi hành trừ trường hợp quy định tại khoản 2 Điều 40 của Nghị định này. 
+Điều 42. Trách nhiệm thi hành
+1. Bộ trưởng Bộ Xây dựng có trách nhiệm hướng dẫn, kiểm tra, đôn đốc việc thi hành Nghị định này.
+2. Các Bộ trưởng, Thủ trưởng cơ quan ngang bộ, Thủ trưởng cơ quan thuộc Chính phủ, Chủ tịch Ủy ban nhân dân các tỉnh, thành phố trực thuộc trung ương trong phạm vi chức năng, quyền hạn của mình có trách nhiệm hướng dẫn và thi hành Nghị định này.
+ 
+
+Nơi nhận:
+- Ban Bí thư Trung ương Đảng; 
+- Thủ tướng, các Phó Thủ tướng Chính phủ; 
+- Các bộ, cơ quan ngang bộ, cơ quan thuộc Chính phủ; 
+- HĐND, UBND các tỉnh, thành phố trực thuộc trung ương; 
+- Văn phòng Trung ương và các Ban của Đảng; 
+- Văn phòng Tổng Bí thư; 
+- Văn phòng Chủ tịch nước; 
+- Hội đồng Dân tộc và các Ủy ban của Quốc hội; 
+- Văn phòng Quốc hội; 
+- Tòa án nhân dân tối cao; 
+- Viện kiểm sát nhân dân tối cao; 
+- Kiểm toán nhà nước; 
+- Ủy ban Trung ương Mặt trận Tổ quốc Việt Nam; 
+- Cơ quan trung ương của các tổ chức chính trị - xã hội; 
+- VPCP: BTCN, các PCN, Trợ lý TTg, TGĐ Cổng TTĐT, các Vụ, Cục, đơn vị trực thuộc, Công báo; 
+- Lưu: VT, KSTT (02b).	TM. CHÍNH PHỦ
+KT. THỦ TƯỚNG
+PHÓ THỦ TƯỚNG
+
+
+
+
+Trần Hồng Hà
+ 
+Phụ lục I
+(Kèm theo Nghị định số 357/2025/NĐ-CP Ngày 31 tháng 12 năm 2025 của Chính phủ)
+1. Cấu trúc mã định danh điện tử sản phẩm bất động sản
+Mã định danh điện tử sản phẩm bất động sản được định dạng theo quy tắc sau:
+- [Mã định danh thửa đất] - [Mã số thông tin dự án, công trình xây dựng] - [Mã định danh địa điểm (nếu có)] - [bất động sản là nhà ở]/[phần diện tích sàn xây dựng trong công trình xây dựng];
+- Dài tối đa 50 ký tự, gồm chữ in hoa không dấu và số (A-Z, 0-9);
+- Không chứa ký tự đặc biệt trừ dấu gạch ngang (-).
+a) Mã định danh điện tử sản phẩm bất động sản là nhà ở
+Mã định danh điện tử sản phẩm bất động sản là nhà ở được hình thành theo cấu trúc sau:
+[Mã định danh thửa đất] - [Mã số thông tin dự án, công trình xây dựng] - [Mã định danh địa điểm (nếu có)] - [Dãy ký tự tự nhiên];
+Trong đó, dãy ký tự tự nhiên là chuỗi gồm 8 ký tự định danh duy nhất số thứ tự sản phẩm trong dự án, công trình xây dựng.
+b) Mã định danh điện tử sản phẩm bất động sản là phần diện tích sàn xây dựng trong công trình xây dựng
+Mã định danh điện tử sản phẩm bất động sản là phần diện tích sàn xây dựng trong công trình xây dựng được hình thành theo cấu trúc sau:
+[Mã định danh thửa đất] - [Mã số thông tin dự án, công trình xây dựng] - [Mã định danh địa điểm (nếu có)] - [Dãy ký tự tự nhiên].
+Trong đó dãy ký tự tự nhiên là chuỗi 6 ký tự định danh duy nhất số thứ tự sản phẩm sàn xây dựng trong công trình xây dựng, liên kết với mã định danh công trình xây dựng.
+2. Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư
+Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư được hình thành theo cấu trúc sau:
+[Số định danh tổ chức] - [Dãy ký tự tự nhiên thể hiện thời điểm ban hành văn bản thông báo đủ điều kiện thực hiện quản lý vận hành nhà chung cư do cơ quan có thẩm quyền ban hành].
+Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư là chuỗi 15 ký tự gồm các nhóm trường thông tin sau:
+- Mười ba (13) ký tự: là số định danh tổ chức theo quy định của pháp luật về định danh, xác thực điện tử;
+- Hai (2) ký tự tiếp theo: là 2 ký tự nhận diện đơn vị cấp thông báo đủ điều kiện cho đơn vị quản lý vận hành nhà chung cư theo bảng ký tự nhận diện đơn vị tại mục 5.
+3. Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản
+Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản được hình thành theo cấu trúc sau:
+[Mã tỉnh/thành phố] - [Số định danh cá nhân/số định danh người nước ngoài] - [Dãy ký tự tự nhiên thể hiện ngày, tháng, năm cấp chứng chỉ; số hiệu chứng chỉ; bị thu hồi (nếu có)].
+Mã định danh điện tử của chứng chỉ hành nghề môi giới bất động sản là chuỗi 17 ký tự gồm các nhóm trường thông tin sau:
+- Hai ký tự đầu tiên: là 2 ký tự nhận diện đơn vị cấp chứng chỉ hành nghề môi giới bất động sản theo bảng ký tự nhận diện đơn vị tại mục 5.
+- Mười hai (12) ký tự tiếp theo: là số định danh cá nhân/số định danh người nước ngoài của cá nhân được cấp chứng chỉ hành nghề môi giới bất động sản.
+- Hai ký tự tiếp theo: là 2 số cuối của năm hết hạn của chứng chỉ hành nghề môi giới bất động sản.
+- Một ký tự cuối cùng: là 1 (nếu bị thu hồi).
+4. Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở
+Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở được hình thành theo cấu trúc sau:
+[Số định danh cá nhân] - [Dãy ký tự tự nhiên thể hiện nhóm đối tượng thụ hưởng và chương trình chính sách hỗ trợ về nhà ở (Chương trình hỗ trợ nhà ở cho người có công; nhà ở cho hộ nghèo, cận nghèo; các chương trình hỗ trợ khác).]
+Mã định danh điện tử của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở là chuỗi 14 ký tự gồm các nhóm trường thông tin sau:
+- Mười hai (12) ký tự đầu tiên: là số định danh cá nhân của cá nhân được thụ hưởng chính sách hỗ trợ nhà ở; 
+- Hai (2) ký tự tiếp theo: là ký tự nhận diện thể hiện chương trình chính sách hỗ trợ về nhà ở (Chương trình hỗ trợ nhà ở cho người có công; nhà ở cho hộ nghèo, cận nghèo; các chương trình hỗ trợ khác).
+Mã chương trình	Chính sách hỗ trợ nhà ở
+MA	Hỗ trợ nhà ở cho người có công với cách mạng, thân nhân liệt sĩ
+XB	Hỗ trợ hộ nghèo về nhà ở
+VC	Hỗ trợ nhà ở cho hộ nghèo, hộ cận nghèo trên địa bàn huyện nghèo
+CV	Hỗ trợ hộ nghèo xây dựng nhà ở phòng, tránh bão, lụt khu vực miền Trung
+LH	Xây dựng cụm, tuyến dân cư và nhà ở vùng ngập lũ vùng đồng bằng sông Cửu Long
+TQ	Giải quyết tình trạng thiếu đất ở, nhà ở, đất sản xuất, nước sinh hoạt
+NL	Thực hiện xóa nhà tạm, nhà dột nát do Mặt trận Tổ quốc Việt Nam thực hiện
+BG	Các chính sách hỗ trợ khác
+5. Bảng ký tự nhận diện đơn vị
+2 ký tự nhận diện	Đơn vị
+01	Sở Xây dựng An Giang
+02	Sở Xây dựng Bắc Ninh
+03	Sở Xây dựng Cà Mau
+04	Sở Xây dựng Cao Bằng
+05	Sở Xây dựng Đắk Lắk
+06	Sở Xây dựng Điện Biên
+07	Sở Xây dựng Đồng Nai
+08	Sở Xây dựng Đồng Tháp
+09	Sở Xây dựng Gia Lai
+10	Sở Xây dựng Hà Tĩnh
+11	Sở Xây dựng Hưng Yên
+12	Sở Xây dựng Khánh Hoà
+13	Sở Xây dựng Lai Châu
+14	Sở Xây dựng Lâm Đồng
+15	Sở Xây dựng Lạng Sơn
+16	Sở Xây dựng Lào Cai
+17	Sở Xây dựng Nghệ An
+18	Sở Xây dựng Ninh Bình
+19	Sở Xây dựng Phú Thọ
+20	Sở Xây dựng Quảng Ngãi
+21	Sở Xây dựng Quảng Ninh
+22	Sở Xây dựng Quảng Trị
+23	Sở Xây dựng Sơn La
+24	Sở Xây dựng Tây Ninh
+25	Sở Xây dựng Thái Nguyên
+26	Sở Xây dựng Thanh Hóa
+27	Sở Xây dựng thành phố Cần Thơ
+28	Sở Xây dựng thành phố Đà Nẵng
+29	Sở Xây dựng thành phố Hà Nội
+30	Sở Xây dựng thành phố Hải Phòng
+31	Sở Xây dựng Thành phố Hồ Chí Minh
+32	Sở Xây dựng thành phố Huế
+33	Sở Xây dựng Tuyên Quang
+34	Sở Xây dựng Vĩnh Long
+ 
+Phụ lục II
+(Kèm theo Nghị định số 357/2025/NĐ-CP Ngày 31 tháng 12 năm 2025 của Chính phủ)
+STT	Tên cơ sở dữ liệu	Trường dữ liệu	Đơn vị sở hữu dữ liệu	Đơn vị tiếp nhận		
+		Thông tin chung	Thông tin chi tiết				
+1	Thông tin các Đề án; chương trình, kế hoạch phát triển nhà ở đã được cơ quan có thẩm quyền phê duyệt. 
+(Khoản 2 Điều 14)	Diện tích đất	Nhà ở xã hội	- Chỉ tiêu;
+- Kết quả đạt được	UBND cấp tỉnh	Bộ Xây dựng		
+			Nhà ở phục vụ tái định cư					
+			Nhà ở công vụ					
+			Cải tạo xây dựng nhà chung cư					
+			Nhà ở khác (nếu có)					
+		Diện tích nhà ở bình quân đầu người	Đô thị					
+			Nông thôn					
+		Diện tích sàn nhà ở, số lượng nhà ở	Dự án nhà ở thương mại					
+			Dự án nhà ở xã hội:
+- Nhà ở cho người có TNT, công nhân khu công nghiệp
+- Nhà ở cho lực lượng VT nhân dân
+- Nhà lưu trú công nhân
+- Nhà ở do Tổng liên đoàn lao động Việt Nam đầu tư xây dựng					
+			Nhà ở phục vụ tái định cư					
+			Nhà ở công vụ					
+			Cải tạo xây dựng nhà chung cư					
+			Nhà ở hỗn hợp					
+			Nhà ở thuộc tài sản công					
+			Nhà ở do hộ gia đình, cá nhân tự xây dựng ngoài dự án (nếu có)					
+			Nhà ở theo các chương trình hỗ trợ về nhà ở:
+- Nhà ở cho người có công với cách mạng và thân nhân liệt sĩ;
+- Nhà ở cho hộ nghèo, hộ cận nghèo tại các xã nghèo;
+- Nhà ở theo các chính sách hỗ trợ hộ nghèo xây dựng nhà ở phòng, tránh bão, lụt khu vực miền Trung;
+- Chương trình xây dựng cụm; tuyến dân cư và nhà ở vùng ngập lũ đồng bằng sông Cửu Long;
+- Nhà ở theo các chương trình hỗ trợ khác (nếu có).					
+2	Thông tin, dữ liệu về nhà ở trong tổng điều tra dân số và nhà ở; điều tra dân số và nhà ở giữa kỳ 
+(Khoản 4 Điều 14)	Theo mức độ kiên cố	- Nhà ở kiên cố và bán kiên cố
+- Nhà ở thiếu kiên cố và đơn sơ	 	Bộ Tài chính	Bộ Xây dựng		
+		Theo loại nhà	- Chung cư;
+- Riêng lẻ.	 				
+		Theo khu vực	Toàn quốc và từng địa phương	- Đô thị
+- Nông thôn.				
+3	Thông tin, dữ liệu về dự án nhà ở (Điều 18 và khoản 1 Điều 16 và Điều 15)	- Dự án đầu tư xây dựng nhà ở;
+- Dự án đầu tư xây dựng khu đô thị;
+- Dự án đầu tư xây dựng khu dân cư nông thôn;
+- Công trình xây dựng có công năng phục vụ hỗn hợp. 
+- Dự án đầu tư xây dựng văn phòng, thương mại, dịch vụ. 
+- Dự án bất động sản du lịch, lưu trú. 
+- Dự án đầu tư xây dựng kết cấu hạ tầng khu nhà ở để chuyển nhượng quyền sử dụng đất cho cá nhân tự xây dựng nhà ở.	Thông tin về dự án	- Tên dự án;
+- Tên chủ đầu tư dự án;
+- Số định danh tổ chức;
+- Mã định danh điện tử sản phẩm bất động sản;
+- Tổng mức đầu tư dự án (vốn chủ sở hữu và vốn được huy động;
+- Quy mô sử dụng đất của dự án;
+- Địa điểm thực hiện dự án;
+- Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt; 
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền);
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền) đủ điều kiện đưa vào kinh doanh.
+- Giá bán, giá thuê mua, giá thuê nhà ở xã hội; dự kiến thời gian bắt đầu và kết thúc tiếp nhận hồ sơ đăng ký, mua bán, thuê mua, thuê nhà ở xã hội.	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Thông tin về văn bản pháp lý của dự án	(1) Thông tin, dữ liệu về công khai thông tin về bất động sản,dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản;
+(2) Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: thông tin, dữ liệu bao gồm các nội dung quy định mục (1) và các thông tin bổ sung: văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận;
+(3) Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có).	 	 		
+ 	 	Dự án cải tạo, xây dựng lại chung cư cũ	Thông tin về dự án	- Tên dự án;
+- Tên chủ đầu tư dự án;
+- Số định danh tổ chức;
+- Mã số thông tin dự án, công trình xây dựng;
+- Mã định danh điện tử sản phẩm bất động sản;
+- Tổng mức đầu tư dự án (vốn chủ sở hữu và vốn được huy động;
+- Quy mô sử dụng đất của dự án;
+- Địa điểm thực hiện dự án;
+- Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt;
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền);
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền) đủ điều kiện đưa vào kinh doanh.
+- Thời gian phá dỡ, thời gian thực hiện và thời gian hoàn thành theo chấp thuận chủ trương đầu tư;
+- Diện tích và số lượng nhà ở phục vụ tái định cư và nhà ở thương mại trong phương án được phê duyệt.	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Thông tin về văn bản pháp lý của dự án	- Thông tin, dữ liệu về công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản;
+- Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: thông tin, dữ liệu bao gồm các nội dung quy định tại điểm a khoản này và các thông tin bổ sung sau: văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận;
+- Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có).	 	 		
+ 	 	Dự án bất động sản khác (giáo dục, y tế, thể thao, văn hóa và các công trình xây dựng khác)	Thông tin về dự án	- Tên dự án;
+- Tên chủ đầu tư dự án;
+- Số định danh tổ chức;
+- Mã số thông tin dự án, công trình xây dựng;
+- Mã định danh điện tử sản phẩm bất động sản;
+- Tổng mức đầu tư dự án (vốn chủ sở hữu và vốn được huy động);
+- Quy mô sử dụng đất của dự án;
+- Địa điểm thực hiện dự án;
+- Tiến độ triển khai thực hiện được cấp giấy phép xây dựng; đang triển khai xây dựng và đã hoàn thành nghiệm thu đưa vào sử dụng;
+- Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt
+- Số lượng, diện tích (công trình).	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Thông tin về văn bản pháp lý của dự án	- Thông tin, dữ liệu về công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản;
+- Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: thông tin, dữ liệu bao gồm các nội dung quy định tại điểm a khoản này và các thông tin bổ sung sau: văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận;
+- Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có).	 	 		
+ 	 	Dự án bất động sản công nghiệp; dự án đầu tư xây dựng kết cấu hạ tầng khu công nghiệp, cụm công nghiệp, khu công nghệ cao	Thông tin về dự án	- Tên dự án;
+- Tên chủ đầu tư dự án;
+- Số định danh tổ chức;
+- Mã số thông tin dự án, công trình xây dựng;
+- Mã định danh điện tử sản phẩm bất động sản;
+- Tổng mức đầu tư dự án (vốn chủ sở hữu và vốn được huy động);
+- Quy mô sử dụng đất của dự án;
+- Địa điểm thực hiện dự án;
+- Tiến độ triển khai thực hiện được cấp giấy phép xây dựng; đang triển khai xây dựng và đã hoàn thành nghiệm thu đưa vào sử dụng;
+- Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt
+- Số lượng, diện tích (nhà xưởng/lô).	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Thông tin về văn bản pháp lý của dự án	(1) Thông tin, dữ liệu về công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản;
+(2) Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: thông tin, dữ liệu bao gồm các nội dung quy định mục (1) và các thông tin bổ sung: văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận;
+(3) Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có).	 	 		
+ 	 	Chuyển nhượng dự án bất động sản	Thông tin về dự án	- Tên dự án;
+- Tên chủ đầu tư dự án; 
+- Số định danh tổ chức; 
+- Mã số thông tin dự án, công trình xây dựng; 
+- Mã định danh điện tử sản phẩm bất động sản; 
+- Tổng mức đầu tư dự án (vốn chủ sở hữu và vốn được huy động;
+- Quy mô sử dụng đất của dự án;
+- Địa điểm thực hiện dự án;
+- Thời hạn hoạt động của dự án được cơ quan có thẩm quyền phê duyệt; 
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền);
+- Số lượng, diện tích (căn nhà/căn hộ/lô nền) đủ điều kiện đưa vào kinh doanh.
+- Giá bán, giá thuê mua, giá thuê nhà ở xã hội; dự kiến thời gian bắt đầu và kết thúc tiếp nhận hồ sơ đăng ký, mua bán, thuê mua, thuê nhà ở xã hội 
+- Thông tin về bên chuyển nhượng, bên nhận chuyển nhượng.	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Thông tin về văn bản pháp lý của dự án	(1) Thông tin, dữ liệu về công khai thông tin về bất động sản, dự án bất động sản đưa vào kinh doanh theo quy định pháp luật về kinh doanh bất động sản; (2) Trường hợp dự án nhận chuyển nhượng toàn bộ hoặc một phần dự án bất động sản: thông tin, dữ liệu bao gồm các nội dung quy định mục (1) và các thông tin bổ sung: văn bản của chủ đầu tư dự án đề nghị cho phép chuyển nhượng toàn bộ hoặc một phần dự án bất động sản; văn bản cam kết về việc tiếp tục triển khai đầu tư xây dựng, kinh doanh theo đúng nội dung dự án đã được chấp thuận; (3) Văn bản xử phạt vi phạm hành chính (nếu có); văn bản thế chấp, giải chấp (nếu có). (4) Quyết định cho phép chuyển nhượng toàn bộ hoặc một phần dự án.	 	 		
+4	Thông tin, dữ liệu về nhà ở công vụ
+(Khoản 2 Điều 16)	Nhà ở công vụ đang quản lý	- Biệt thự;
+- Chung cư;
+ - Nhà ở liền kề.	- Số lượng;
+- Diện tích;
+- Giá cho thuê.	UBND cấp tỉnh	Bộ Xây dựng		
+		Nhà ở công vụ đang bố trí cho thuê	- Biệt thự;
+- Chung cư;
+- Nhà ở liền kề.	- Số lượng;
+- Diện tích;
+- Giá cho thuê.				
+5	Thông tin, dữ liệu về các chương trình hỗ trợ về nhà ở
+(Khoản 3 Điều 16)	Chính sách hỗ trợ nhà ở cho người có công với cách mạng	- Kế hoạch
+- Kết quả thực hiện	 	UBND cấp tỉnh	Bộ Xây dựng		
+		Chính sách hỗ trợ nhà ở cho hộ nghèo, hộ cận nghèo						
+		Chính sách hỗ trợ hộ nghèo xây dựng nhà ở phòng, tránh bão, lụt khu vực miền Trung						
+		Chương trình xây dựng cụm, tuyến dân cư và nhà ở vùng ngập lũ đồng bằng sông Cửu Long						
+		Nhà ở theo các chương trình hỗ trợ khác						
+6	Thông tin, dữ liệu về giao dịch bất động sản
+(Điều 19)	- Thông tin, dữ liệu về tình hình giao dịch bất động sản của dự án theo từng loại hình bất động sản	Thông tin về hợp đồng	- Số, ký hiệu hợp đồng;
+- Mã định danh điện tử sản phẩm bất động sản;
+ - Thời gian ký kết;
+- Loại hợp đồng giao dịch (mua bán, thuê, thuê lại, thuê mua, nhận chuyển nhượng);	UBND cấp tỉnh	Bộ Xây dựng		
+			Thông tin về các bên tham gia hợp đồng	- Tên tổ chức, cá nhân;
+- Số định danh tổ chức;
+- Số định danh cá nhân hoặc số định danh người nước ngoài của bên mua, thuê, thuê lại, thuê mua, nhận chuyển nhượng bất động sản.				
+			Thông tin về bất động sản	- Số lượng, diện tích;
+- Giá giao dịch (triệu đồng/m2), tổng giá trị giao dịch;
+- Số lượng, diện tích bất động sản tồn kho.				
+		- Thông tin, dữ liệu về giao dịch bất động sản thông qua công chứng, chứng thực theo từng loại hình bất động sản	Thông tin về hợp đồng	- Số, ký hiệu hợp đồng;
+- Mã định danh điện tử sản phẩm bất động sản;
+- Thời gian ký kết;
+- Loại hợp đồng giao dịch (mua bán, thuê, thuê lại, thuê mua, nhận chuyển nhượng);	UBND cấp tỉnh	Bộ Xây dựng		
+			Thông tin về các bên tham gia hợp đồng	- Tên tổ chức, cá nhân;
+- Số định danh tổ chức;
+- Số định danh cá nhân hoặc số định danh người nước ngoài của bên mua, thuê, thuê lại, thuê mua, nhận chuyển nhượng bất động sản.				
+			Thông tin về bất động sản	- Số lượng, diện tích;
+- Giá giao dịch (triệu đồng/m2), tổng giá trị giao dịch;				
+7	Thông tin về sở hữu nhà ở của tổ chức, cá nhân
+(Điều 20)	Thông tin, dữ liệu về tổ chức, cá nhân nước ngoài sở hữu nhà ở	Thông tin nhận diện	Họ tên/tên tổ chức	UBND cấp tỉnh	Bộ Xây dựng		
+				Số định danh cá nhân/số định danh tổ chức				
+				Giấy tờ pháp lý				
+			Loại hình nhà ở sở hữu	Chung cư				
+				Riêng lẻ				
+			Địa chỉ	 				
+			Diện tích	 				
+			Số lượng	 				
+			Thời hạn sở hữu	 				
+			Tình trạng pháp lý của nhà ở	Được cấp giấy chứng nhận				
+				Đang trong quá trình cấp				
+			Thông tin về quyền, nghĩa vụ phát sinh từ việc sở hữu	 				
+			Thông tin, dữ liệu về danh mục các dự án đầu tư xây dựng nhà ở được Ủy ban nhân dân cấp tỉnh công bố	Tên dự án				
+				Số lượng chung cư được bán cho người nước ngoài				
+				Số lượng nhà riêng lẻ được bán cho người nước ngoài	 	 		
+			Văn bản thông báo về việc cho thuê nhà ở hoặc chấm dứt hợp đồng cho thuê nhà ở thuộc sở hữu của cá nhân nước ngoài	 				
+		Thông tin về tổ chức, cá nhân trong nước và người Việt Nam định cư ở nước ngoài sở hữu nhà ở	Thông tin nhận diện	Họ tên/tên tổ chức	UBND cấp tỉnh	Bộ Xây dựng		
+				Số định danh cá nhân/số định danh tổ chức				
+				Giấy tờ pháp lý				
+			Loại hình nhà ở gắn liền với quyền sử dụng đất ở	Chung cư				
+				Riêng lẻ				
+			Địa chỉ	 				
+			Diện tích	 				
+			Số lượng	 				
+			Thời hạn sở hữu	 				
+			Hình thức sở hữu	Sở hữu chung				
+				Sở hữu riêng				
+			Tình trạng pháp lý của nhà ở	Được cấp giấy chứng nhận				
+				Đang trong quá trình cấp				
+		Nhà ở thuộc tài sản công	Cho thuê	- Số lượng;
+- Diện tích.	UBND cấp tỉnh	Bộ Xây dựng		
+			Nhà ở đã bán					
+			Chuyển đổi công năng					
+			Thu hồi					
+8	Thông tin về thụ hưởng chính sách, hỗ trợ nhà ở
+(Điều 21)	Thông tin về cá nhân được thụ hưởng chính sách hỗ trợ nhà ở theo các chương trình hỗ trợ về nhà ở	Số định danh cá nhân	 	UBND cấp tỉnh	Bộ Xây dựng		
+			Thông tin về Chương trình, chính sách hỗ trợ về nhà ở					
+ 	 	Thông tin về cá nhân được thụ hưởng chính sách về nhà ở xã hội	Số định danh cá nhân	 	 	 		
+			Hình thức	Mua				
+				Thuê mua				
+			Tên dự án nhà ở xã hội	 				
+			Địa điểm xây dựng dự án	 				
+9	Thông tin, dữ liệu về tổ chức kinh doanh dịch vụ bất động sản (Điều 22)	Sàn giao dịch bất động sản	Thông tin về tổ chức, doanh nghiệp:	- Tên sàn giao dịch;
+- Số định danh tổ chức;
+- Số định danh cá nhân của người quản lý điều hành;
+- Địa chỉ;
+- Tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt).	UBND cấp tỉnh	Bộ Xây dựng		
+			Nhân sự	- Số lượng nhân viên có chứng chỉ hành nghề môi giới bất động sản.				
+			Giao dịch	- Số lượng				
+				- Giá trị				
+		Tổ chức kinh doanh dịch vụ môi giới bất động sản	Thông tin về tổ chức, doanh nghiệp	- Tổ chức kinh doanh dịch vụ môi giới;
+- Số định danh tổ chức;
+- Số định danh cá nhân của người quản lý điều hành;
+- Địa chỉ;
+- Tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt);	UBND cấp tỉnh	Bộ Xây dựng		
+ 	 	 	Nhân sự	- Số lượng nhân viên có chứng chỉ hành nghề môi giới bất động sản.	 	 		
+			Giao dịch	- Số lượng
+- Giá trị				
+		Tổ chức kinh doanh dịch vụ tư vấn, quản lý bất động sản	Thông tin về tổ chức, doanh nghiệp	- Tên tổ chức kinh doanh dịch vụ tư vấn;
+- Số định danh tổ chức;
+- Số định danh cá nhân của người quản lý điều hành;
+- Địa chỉ;
+- Tình trạng hoạt động (đang hoạt động, tạm ngừng, chấm dứt);	UBND cấp tỉnh	Bộ Xây dựng		
+10	Thông tin, dữ liệu về cá nhân được cấp chứng chỉ hành nghề môi giới bất động sản (Điều 23)	Thông tin, dữ liệu về cá nhân được cấp chứng chỉ hành nghề môi giới bất động sản	- Số định danh cá nhân.
+- Mã định danh điện tử chứng chỉ hành nghề môi giới bất động sản.	 	UBND cấp tỉnh	Bộ Xây dựng		
+11	Thông tin, dữ liệu về cơ sở đào tạo, bồi dưỡng kiến thức hành nghề môi giới bất động sản, điều hành sàn giao dịch bất động sản
+(Điều 24)	Thông tin về tổ chức, doanh nghiệp	- Tên cơ sở đào tạo;
+- Số định danh tổ chức;
+- Số định danh cá nhân của người quản lý điều hành;
+- Địa chỉ đăng ký hoạt động.	 	UBND cấp tỉnh	Bộ Xây dựng		
+		Giấy chứng nhận đăng ký doanh nghiệp và các thông tin pháp lý có liên quan	 	 				
+12	Thông tin, dữ liệu về đơn vị quản lý vận hành nhà chung cư
+(Điều 25)	Mã định danh điện tử của đơn vị quản lý vận hành nhà chung cư	 	 	UBND cấp tỉnh	Bộ Xây dựng		
+		Danh sách nhân viên	Lĩnh vực xây dựng	- Họ và tên;
+- Số định danh cá nhân				
+			Kỹ thuật điện, nước					
+			Phòng cháy, chữa cháy					
+			Vận hành thang máy					
+		Quyết định công nhận ban quản trị nhà chung cư	 	 				
+13	Thông tin, dữ liệu liên quan đến dân cư, định danh địa điểm (Khoản 1 Điều 28)	Thông tin về dân cư; địa điểm; xử lý vi phạm hành chính liên quan đến lĩnh vực nhà ở và kinh doanh bất động sản; số định danh cá nhân; số định danh người nước ngoài; số định danh tổ chức.	Bộ Công An	Bộ Xây dựng		
+14	Thông tin, dữ liệu về cấp Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất cho người Việt Nam và tổ chức, cá nhân nước ngoài (Khoản 2 Điều 28)	Thông tin Giấy chứng nhận quyền sử dụng đất, quyền sở hữu tài sản gắn liền với đất	- Địa chỉ, số nhà;
+- Thông tin về thế chấp, giải chấp đối với Giấy chứng nhận quyền sử dụng đất, quyền sở hữu tài sản gắn liền với đất của bất động sản, dự án bất động sản;
+- Mã định danh thửa đất.	 	Bộ Nông nghiệp và Môi trường	Bộ Xây dựng		
+15	Thông tin, dữ liệu về thuế đối với hoạt động chuyển nhượng bất động sản
+(Điểm a khoản 3 Điều 28)	Thuế thu nhập cá nhân, tổ chức phải nộp đối với các loại bất động sản	Đất ở đô thị	 	Bộ Tài chính	Bộ Xây dựng		
+			Đất ở nông thôn	 				
+			Bất động sản khác	 				
+16	Thông tin, dữ liệu về hoạt động đầu tư có vốn nước ngoài
+(Điểm b khoản 3 Điều 28)	Thông tin về vốn đầu tư trực tiếp nước ngoài vào lĩnh vực kinh doanh bất động sản	Tổng vốn đăng ký cấp mới của nhà đầu tư nước ngoài vào lĩnh vực bất động sản;	- Số báo cáo trong kỳ
+- Số lũy kế từ đầu năm	Bộ Tài chính	Bộ Xây dựng		
+			Tổng vốn điều chỉnh của nhà đầu tư nước ngoài vào lĩnh vực bất động sản;	 				
+			Tổng vốn góp, mua cổ phần của nhà đầu tư nước ngoài vào lĩnh vực bất động sản;	 				
+			Vốn đầu tư trực tiếp nước ngoài (FDI) đã giải ngân vào lĩnh vực bất động sản; tỷ trọng vốn đầu tư nước ngoài vào Việt Nam trong lĩnh vực kinh doanh bất động sản/toàn ngành kinh tế;	 	 	 		
+			Tỷ trọng vốn đầu tư nước ngoài vào Việt Nam trong lĩnh vực kinh doanh bất động sản/toàn ngành kinh tế;	 				
+		Thông tin hoạt động của doanh nghiệp có ngành nghề kinh doanh bất động sản	Số lượng doanh nghiệp đăng ký hoạt động mới;	 				
+			Số lượng doanh nghiệp tạm dừng hoạt động;					
+			Số lượng doanh nghiệp giải thể;					
+17	Thông tin, dữ liệu về phát hành trái phiếu doanh nghiệp trong lĩnh vực kinh doanh bất động sản
+(Điểm c khoản 3 Điều 28)	Tên tổ chức phát hành	 	 	Bộ Tài chính	Bộ Xây dựng		
+		Số lượng trái phiếu phát hành	Thị trường trong nước;	 				
+			Thị trường quốc tế;					
+		Tổng giá trị trái phiếu phát hành (Số liệu được tổng hợp tính đến thời điểm báo cáo)	 	 				
+18	Thông tin, dữ liệu về tín dụng trong lĩnh vực bất động sản; thế chấp, giải chấp (Khoản 4 Điều 28)	Dư nợ tín dụng đối với hoạt động đầu tư, kinh doanh bất động sản	- Dư nợ tín dụng đối với chủ đầu tư để đầu tư xây dựng sửa chữa nhà ở để bán, cho thuê, cho thuê mua;
+- Dư nợ tín dụng để đầu tư xây dựng, mua, thuê văn phòng, cao ốc để bán, cho thuê, cho thuê mua;
+- Dư nợ tín dụng để đầu tư xây dựng hạ tầng kỹ thuật, công trình xây dựng trong khu công nghiệp, cụm công nghiệp, khu chế xuất, khu công nghệ cao, khu kinh tế để bán, cho thuê, cho thuê mua;
+- Dư nợ tín dụng để đầu tư xây dựng, mua, thuê khu du lịch, sinh thái, nghỉ dưỡng để bán, cho thuê, cho thuê mua;
+- Dư nợ tín dụng để đầu tư xây dựng, mua, thuê nhà hàng, khách sạn để bán, cho thuê, cho thuê mua;
+- Dư nợ tín dụng đối với khách hàng mua, thuê nhà ở để bán, cho thuê;
+- Dư nợ tín dụng đối với khách hàng mua, nhận chuyển nhượng, thuê quyền sử dụng đất để kinh doanh;
+- Dư nợ tín dụng đầu tư kinh doanh bất động sản khác.	 	Ngân hàng Nhà nước
+Việt Nam	Bộ Xây dựng		
+		Số dư bảo lãnh nhà ở hình thành trong tương lai	 	 				
+		Tổng dư nợ tín dụng trong lĩnh vực kinh doanh bất động sản	 	 				
+ 	 	Tỷ trọng dư nợ tín dụng đối với hoạt động kinh doanh trong lĩnh vực bất động sản so với tổng dư nợ tín dụng toàn ngành kinh tế (%).	 	 	 	 		
+		Thông tin liên quan đến thế chấp, giải chấp của dự án bất động sản tại các ngân hàng, tổ chức tín dụng	 	 				
+19	Thông tin, dữ liệu về số lượng, giá trị giao dịch bất động sản thông qua hoạt động công chứng (Khoản 5 Điều 28)	Nhà ở thương mại	- Nhà ở (biệt thự, liền kề, nhà ở độc lập);	- Số lượng;
+- Giá trị giao dịch bất động sản	Bộ Tư pháp	Bộ Xây dựng		
+			- Chung cư;					
+			- Đất ở (theo hình thức phân lô, bán nền).					
+		Nhà ở xã hội	- Nhà ở (liền kề, nhà ở độc lập);					
+			- Chung cư.					
+		Công trình thương mại, dịch vụ, văn phòng	- Văn phòng;					
+			- Trung tâm thương mại;					
+			- Văn phòng kết hợp lưu trú;					
+			- Căn hộ lưu trú.					
+		 	- Biệt thự du lịch;					
+		Du lịch nghỉ dưỡng	- Căn hộ du lịch.					
+		Khu công nghiệp	- Nhà xưởng sản xuất;					
+			- Đất (dùng cho mục đích sản xuất, kinh doanh tại khu công nghiệp).					
+									
+ 
+Phụ lục III
+(Kèm theo Nghị định số 357/2025/NĐ-CP Ngày 31 tháng 12 năm 2025 của Chính phủ)
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+---------------
+...., ngày .... tháng .... năm ...
+PHIẾU ĐỀ NGHỊ
+Cấp quyền khai thác thông tin, dữ liệu về nhà ở và thị trường bất động sản
+Kính gửi: Bộ Xây dựng.
+1. Tên tổ chức, cá nhân yêu cầu cung cấp dữ liệu:..........................................
+Đại diện là ông (bà): ........................................................................................
+Số CMND/CCCD/Căn cước/Hộ chiếu.............................................................
+cấp ngày ...../...../....... tại ...............................; quốc tịch ................................
+2. Địa chỉ: .......................................................................................................
+3. Số điện thoại .........................; fax ..................; E-mail: .............................
+4. Danh mục và nội dung thông tin, dữ liệu cần cung cấp:
+Đánh dấu “X” vào nội dung cần cung cấp thông tin:
+□ Thông tin pháp lý của dự án: ..................... (tên dự án)
+□ Tình hình giao dịch của dự án ................... (tên dự án)
+□ Giá bán bình quân của dự án .................... (tên dự án)
+□ Cơ cấu loại hình bất động sản của dự án (tên dự án):......... (tên dự án)
+□ Thông tin, dữ liệu về chứng chỉ môi giới bất động sản
+□ Các thông tin, dữ liệu khác: ............. (liệt kê theo yêu cầu của tổ chức/cá nhân đăng ký)
+5. Mục đích sử dụng thông tin, dữ liệu:.........................................................
+6. Thời hạn truy cập, sử dụng thông tin:
+□ 01 tháng □ 03 tháng □ 06 tháng □ 12 tháng
+7. Hình thức khai thác, sử dụng và phương thức nhận kết quả:
+□ Bản giấy                                □ Nhận tại nơi cung cấp             □ Lưu trữ điện tử USB
+□ Gửi EMS theo địa chỉ                         □ Tài khoản truy cập                  □ Email
+8. Cam kết sử dụng dữ liệu: Tôi cam đoan không sử dụng dữ liệu được cung cấp trái với quy định của pháp luật và không cung cấp cho bất kỳ bên thứ ba nào khác.
+ 
+ 	NGƯỜI YÊU CẦU
+(Ký, ghi rõ họ tên
+và đóng dấu nếu là cơ quan, tổ chức)
+ 
+Phụ lục IV
+(Kèm theo Nghị định số 357/2025/NĐ-CP ngày 31 tháng 12 năm 2025 của Chính phủ)
+BỘ XÂY DỰNG
+-------	CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+---------------
+Số: ..........	....., ngày ..... tháng ...... năm ...
+ 
+THÔNG BÁO
+Cấp quyền khai thác, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản
+Kính gửi: ...........................................
+Ngày..../..../......, Bộ Xây dựng nhận được Phiếu đề nghị cấp quyền khai thác thông tin, dữ liệu về nhà ở và thị trường bất động sản của........... (Tên tổ chức, cá nhân yêu cầu cung cấp dữ liệu; đại diện là ông (bà): .... Số CMND/CCCD/Căn cước/Hộ chiếu ......cấp ngày .../...../.... tại ........; Quốc tịch ....; Địa chỉ; điện thoại liên hệ; email...).
+Sau khi xem xét, Bộ Xây dựng đồng ý cung cấp các thông tin, dữ liệu về nhà ở và thị trường bất động sản cho ........... (tổ chức, cá nhân) bao gồm:
+1. Thông tin, dữ liệu: ........... (liệt kê theo khả năng đáp ứng cung cấp thông tin của Bộ Xây dựng)
+2. Thời hạn sử dụng thông tin: □ 01 tháng □ 03 tháng □ 06 tháng □ 12 tháng
+Thời gian bắt đầu cung cấp thông tin: ....../....../........
+3. Hình thức khai thác, sử dụng:
+□ Bản giấy                                □ Nhận tại nơi cung cấp             □ Lưu trữ điện tử USB
+□ Gửi EMS theo địa chỉ                         □ Tài khoản truy cập                  □ Email
+4. Mức tiền chi trả cho dịch vụ cung cấp thông tin, dữ liệu về nhà ở và thị trường bất động sản:............... đồng.
+5. Hình thức nộp tiền:
+- Chủ hồ sơ nộp lệ phí vào tài khoản Kho bạc nhà nước
+- Số tài khoản:
+6. Đề nghị .......... (tổ chức, cá nhân) sử dụng thông tin, dữ liệu được cung cấp đúng quy định của pháp luật; không cung cấp cho bất kỳ bên thứ ba nào khác.
+ 
+
+Nơi nhận:
+- Như trên;
+- Lưu:....	QUYỀN HẠN, CHỨC VỤ CỦA NGƯỜI KÝ
+(Ký và ghi rõ họ tên)
+ 
+Phụ lục V
+(Kèm theo Nghị định số 357/2025/NĐ-CP Ngày 31 tháng 12 năm 2025 của Chính phủ)
+BỘ XÂY DỰNG
+-------	CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+---------------
+Số: ..........	....., ngày ..... tháng ...... năm ...
+ 
+THÔNG BÁO
+Từ chối cấp quyền khai thác, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản
+Kính gửi: ..............................................
+Ngày..../..../......, Bộ Xây dựng nhận được Phiếu đề nghị cấp quyền khai thác thông tin, dữ liệu về nhà ở và thị trường bất động sản của ...........(Tên tổ chức, cá nhân yêu cầu cung cấp dữ liệu; đại diện là ông (bà): .... số CMND/CCCD/Căn cước/Hộ chiếu ..... cấp ngày .../...../.... tại .............; Quốc tịch ...........; Địa chỉ; điện thoại liên hệ; email............).
+Sau khi xem xét, Bộ Xây dựng từ chối cấp quyền khai thác, sử dụng thông tin, dữ liệu về nhà ở và thị trường bất động sản cho ......(tên tổ chức, cá nhân).
+Lý do:
+□ Chưa đủ thông tin, dữ liệu để cung cấp theo yêu cầu của tổ chức, cá nhân....
+□ Tổ chức, cá nhân .... chưa cung cấp đầy đủ thông tin theo yêu cầu tại Phiếu đề nghị cấp quyền khai thác thông tin, dữ liệu về nhà ở và thị trường bất động sản
+□ Lý do khác:.....................................................................................
+Bộ Xây dựng thông báo để ............... (tổ chức, cá nhân) được biết.
+ 
+
+Nơi nhận:
+- Như trên;
+- Lưu:....	QUYỀN HẠN, CHỨC VỤ CỦA NGƯỜI KÝ
+(Ký và ghi rõ họ tên)
+ 
+Phụ lục VI
+DANH MỤC DỮ LIỆU THU PHÍ TRONG HỆ THỐNG THÔNG TIN VỀ NHÀ Ở VÀ THỊ TRƯỜNG BẤT ĐỘNG SẢN
+(Kèm theo Nghị định số 357/2025/NĐ-CP ngày 31 tháng 12 năm 2025 của Chính phủ)
+STT	Nội dung	Trường thông tin
+1	Danh mục dự án đã được chấp thuận chủ trương đầu tư	- Thông tin chi tiết của dự án (Tên dự án, chủ đầu tư dự án, mã số doanh nghiệp, mã định danh sản phẩm bất động sản, tổng vốn đầu tư dự án, quy mô sử dụng đất của dự án, địa điểm thực hiện dự án, thời hạn hoạt động, quy mô chi tiết về số lượng và diện tích loại hình bất động sản.
+- Thông tin pháp lý của dự án
+2	Danh mục dự án đã được cấp phép xây dựng	- Thông tin chi tiết của dự án (Tên dự án, chủ đầu tư dự án, mã số doanh nghiệp, mã định danh sản phẩm bất động sản, tổng vốn đầu tư dự án, quy mô sử dụng đất của dự án, địa điểm thực hiện dự án, thời hạn hoạt động, số lượng, diện tích (căn nhà/căn hộ/lô nền).
+- Thông tin pháp lý của dự án.
+3	Danh mục dự án đang triển khai	- Thông tin chi tiết của dự án (Tên dự án, chủ đầu tư dự án, mã số doanh nghiệp, mã định danh sản phẩm bất động sản, tổng vốn đầu tư dự án, quy mô sử dụng đất của dự án, địa điểm thực hiện dự án, thời hạn hoạt động, số lượng, diện tích (căn nhà/căn hộ/lô nền), số lượng, diện tích (căn nhà/căn hộ/lô nền) đủ điều kiện đưa vào kinh doanh và tồn kho.
+- Thông tin pháp lý của dự án.
+4	Danh mục dự án đã hoàn thành	- Thông tin chi tiết của dự án (Tên dự án, chủ đầu tư dự án, mã số doanh nghiệp, mã định danh sản phẩm bất động sản, tổng vốn đầu tư dự án, quy mô sử dụng đất của dự án, địa điểm thực hiện dự án, thời hạn hoạt động, số lượng, diện tích (căn nhà/căn hộ/lô nền), số lượng, diện tích (căn nhà/căn hộ/lô nền) đã hoàn thành và tồn kho.
+- Thông tin pháp lý của dự án.
+5	Lịch sử giao dịch của sản phẩm bất động sản theo mã định danh sản phẩm bất động sản	- Mã định danh sản phẩm bất động sản;
+- Thông tin về sản phẩm bất động sản (địa chỉ, vị trí, pháp lý, diện tích, tầng cao,...);
+- Lịch sử giao dịch bất động sản (giá bán, cho thuê, thuê mua cụ thể theo mốc thời gian giao dịch).
+ 
+ 
