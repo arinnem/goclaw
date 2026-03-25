@@ -177,7 +177,7 @@ var DenyGroupRegistry = map[string]*DenyGroup{
 			regexp.MustCompile(`\bpnpm\s+(add|install)\b`),
 			regexp.MustCompile(`\bpip3?\s+uninstall\b`),
 			regexp.MustCompile(`\bnpm\s+uninstall\b`),
-			regexp.MustCompile(`\bpython[23]?\b.*-m\s+pip\b`),
+			regexp.MustCompile(`\bpython[23]?\b.*-m\s+pip\s+(install|uninstall)\b`),
 		},
 	},
 	"persistence": {
