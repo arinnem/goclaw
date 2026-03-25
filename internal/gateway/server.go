@@ -170,7 +170,9 @@ func (s *Server) BuildMux() *http.ServeMux {
 
 	// Register all HTTP API handlers (agents, skills, teams, storage, etc.)
 	for _, h := range s.handlers {
-		h.RegisterRoutes(mux)
+		if h != nil {
+			h.RegisterRoutes(mux)
+		}
 	}
 
 	// MCP bridge: expose GoClaw tools to Claude CLI via streamable-http.
