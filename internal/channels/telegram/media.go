@@ -63,7 +63,7 @@ func (c *Channel) resolveMedia(ctx context.Context, msg *telego.Message) ([]Medi
 	}
 
 	// Photo: take highest resolution (last element)
-	if msg.Photo != nil && len(msg.Photo) > 0 {
+	if len(msg.Photo) > 0 {
 		photo := msg.Photo[len(msg.Photo)-1]
 		filePath, err := c.downloadMedia(ctx, photo.FileID, maxBytes)
 		if err != nil {
@@ -366,7 +366,7 @@ func extractDocumentContent(filePath, fileName string) (string, error) {
 // confusing context-history media with actionable current-message media (<media:image>).
 func lightweightMediaTags(msg *telego.Message) string {
 	var tags []string
-	if msg.Photo != nil && len(msg.Photo) > 0 {
+	if len(msg.Photo) > 0 {
 		tags = append(tags, "[sent an image]")
 	}
 	if msg.Video != nil {
@@ -403,7 +403,7 @@ func lightweightMediaTags(msg *telego.Message) string {
 func lightweightTagForType(mediaType string, msg *telego.Message) string {
 	switch mediaType {
 	case "image":
-		if msg.Photo != nil && len(msg.Photo) > 0 {
+		if len(msg.Photo) > 0 {
 			return "[sent an image]"
 		}
 	case "video":

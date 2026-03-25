@@ -280,12 +280,8 @@ func renderTableAsCode(lines []string) string {
 func parseTableRow(line string) []string {
 	line = strings.TrimSpace(line)
 	// Remove leading/trailing pipes
-	if strings.HasPrefix(line, "|") {
-		line = line[1:]
-	}
-	if strings.HasSuffix(line, "|") {
-		line = line[:len(line)-1]
-	}
+	line = strings.TrimPrefix(line, "|")
+	line = strings.TrimSuffix(line, "|")
 
 	parts := strings.Split(line, "|")
 	cells := make([]string, len(parts))

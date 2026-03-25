@@ -6,8 +6,6 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/config"
 )
 
-//go:fix inline
-func boolPtr(b bool) *bool { return new(b) }
 
 func TestResolveTopicConfig_Defaults(t *testing.T) {
 	cfg := config.TelegramConfig{
