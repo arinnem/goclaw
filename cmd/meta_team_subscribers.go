@@ -91,7 +91,119 @@ func wireMetaTeamSubscribers(
 		)
 	})
 
-	// --- Subscriber 2: Aggregated completion ---
+	// --- Subscriber 2: Cascade on assignment ---
+	// When a meta-team task is assigned to a team lead, create a sub-task in that lead's own team.
+	if stores.MetaTaskLinks != nil {
+		msgBus.Subscribe("meta-team.cascade-task", func(evt bus.Event) {
+			if evt.Name != protocol.EventTeamTaskAssigned {
+				return
+			}
+			payload, ok := evt.Payload.(protocol.TeamTaskEventPayload)
+			if !ok {
+				return
+			}
+
+			ctx := store.WithTenantID(context.Background(), evt.TenantID)
+
+			// Is this task in the meta-team?
+			metaTeam := findMetaTeam(ctx, stores.Teams)
+			if metaTeam == nil {
+				return
+			}
+			if payload.TeamID != metaTeam.ID.String() {
+				return // not a meta-team task, skip
+			}
+
+			metaTaskID, err := uuid.Parse(payload.TaskID)
+			if err != nil {
+				return
+			}
+
+			// Fetch the meta-task details for subject/description
+			metaTask, err := stores.Teams.GetTask(ctx, metaTaskID)
+			if err != nil || metaTask == nil {
+				slog.Warn("meta-team.cascade: cannot fetch meta-task", "task_id", metaTaskID, "err", err)
+				return
+			}
+
+			// Check if already cascaded (idempotent — prevent duplicates on re-assign)
+			existingLinks, err := stores.MetaTaskLinks.ListLinksByMetaTask(ctx, metaTaskID)
+			if err == nil && len(existingLinks) > 0 {
+				slog.Debug("meta-team.cascade: already cascaded", "meta_task_id", metaTaskID, "links", len(existingLinks))
+				return
+			}
+
+			// Resolve the assigned agent — OwnerAgentKey may be UUID string or agent key
+			var assignedAgent *store.AgentData
+			if agentUUID, err := uuid.Parse(payload.OwnerAgentKey); err == nil {
+				assignedAgent, _ = stores.Agents.GetByID(ctx, agentUUID)
+			}
+			if assignedAgent == nil {
+				assignedAgent, _ = stores.Agents.GetByKey(ctx, payload.OwnerAgentKey)
+			}
+			if assignedAgent == nil {
+				slog.Warn("meta-team.cascade: cannot resolve assigned agent", "key", payload.OwnerAgentKey)
+				return
+			}
+
+			// Find the lead's own team (not the meta-team)
+			leadTeam, err := stores.Teams.GetTeamForAgent(ctx, assignedAgent.ID)
+			if err != nil || leadTeam == nil {
+				slog.Warn("meta-team.cascade: cannot find team for agent", "agent", assignedAgent.AgentKey, "err", err)
+				return
+			}
+			// GetTeamForAgent prioritizes teams where agent is lead, but skip meta-team
+			if leadTeam.ID == metaTeam.ID {
+				slog.Warn("meta-team.cascade: agent only belongs to meta-team, no sub-team found", "agent", assignedAgent.AgentKey)
+				return
+			}
+
+			// Create sub-task in the lead's team (unassigned, pending — lead picks up naturally)
+			subTask := &store.TeamTaskData{
+				TeamID:      leadTeam.ID,
+				Subject:     metaTask.Subject,
+				Description: metaTask.Description,
+				Status:      store.TeamTaskStatusPending,
+				Priority:    metaTask.Priority,
+				Channel:     metaTask.Channel,
+				ChatID:      metaTask.ChatID,
+				UserID:      metaTask.UserID,
+				TaskType:    metaTask.TaskType,
+				Metadata: map[string]any{
+					"meta_task_id":   metaTaskID.String(),
+					"meta_team_id":   metaTeam.ID.String(),
+					"cascaded_from":  "meta-team",
+				},
+			}
+			subTask.ID = uuid.New()
+
+			if err := stores.Teams.CreateTask(ctx, subTask); err != nil {
+				slog.Warn("meta-team.cascade: failed to create sub-task", "err", err)
+				return
+			}
+
+			// Insert meta_task_links row
+			if err := stores.MetaTaskLinks.CreateLink(ctx, &store.MetaTaskLinkData{
+				MetaTaskID: metaTaskID,
+				SubTaskID:  subTask.ID,
+				SubTeamID:  leadTeam.ID,
+				Status:     store.TeamTaskStatusPending,
+			}); err != nil {
+				slog.Warn("meta-team.cascade: failed to create link", "err", err)
+				return
+			}
+
+			slog.Info("meta-team.cascade: sub-task created",
+				"meta_task_id", metaTaskID,
+				"sub_task_id", subTask.ID,
+				"sub_team", leadTeam.Name,
+				"lead", assignedAgent.AgentKey,
+				"subject", subTask.Subject,
+			)
+		})
+	}
+
+	// --- Subscriber 3: Aggregated completion ---
 	// When a sub-task completes, check if ALL sub-tasks for its meta-task are done.
 	if stores.MetaTaskLinks != nil {
 		msgBus.Subscribe("meta-team.aggregate-completion", func(evt bus.Event) {
