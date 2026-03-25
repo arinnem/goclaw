@@ -23,7 +23,7 @@ Single binary. Production-tested. Agents that orchestrate for you.
   <a href="https://opentelemetry.io/"><img src="https://img.shields.io/badge/OpenTelemetry-000000?style=flat-square&logo=opentelemetry&logoColor=white" alt="OpenTelemetry" /></a>
   <a href="https://www.anthropic.com/"><img src="https://img.shields.io/badge/Anthropic-191919?style=flat-square&logo=anthropic&logoColor=white" alt="Anthropic" /></a>
   <a href="https://openai.com/"><img src="https://img.shields.io/badge/OpenAI_Compatible-412991?style=flat-square&logo=openai&logoColor=white" alt="OpenAI" /></a>
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey?style=flat-square" alt="License: CC BY-NC 4.0" />
 </p>
 
 A Go port of [OpenClaw](https://github.com/openclaw/openclaw) with enhanced security, multi-tenant PostgreSQL, and production-grade observability.
@@ -108,6 +108,10 @@ A Go port of [OpenClaw](https://github.com/openclaw/openclaw) with enhanced secu
   <img src="_statics/architecture.jpg" alt="GoClaw Architecture" width="800" />
 </p>
 
+<p align="center">
+  <img src="_statics/goclaw_multi_tenant.png" alt="GoClaw Multi-Tenant" width="800" />
+</p>
+
 ## Quick Start
 
 **Prerequisites:** Go 1.26+, PostgreSQL 18 with pgvector, Docker (optional)
@@ -128,16 +132,46 @@ source .env.local && ./goclaw
 chmod +x prepare-env.sh && ./prepare-env.sh
 
 # Add at least one GOCLAW_*_API_KEY to .env, then:
-docker compose -f docker-compose.yml -f docker-compose.postgres.yml \
-  -f docker-compose.selfservice.yml up -d
+make up
 
 # Web Dashboard at http://localhost:3000
 # Health check: curl http://localhost:18790/health
 ```
 
+`make up` creates a Docker network, embeds the correct version from git tags, builds and starts all services, and runs database migrations automatically.
+
+**Common commands:**
+
+```bash
+make up                # Start all services (build + migrate)
+make down              # Stop all services
+make logs              # Tail logs (goclaw service)
+make reset             # Wipe volumes and rebuild from scratch
+```
+
+**Optional services** — enable with `WITH_*` flags:
+
+| Flag | Service | What it does |
+|------|---------|-------------|
+| `WITH_BROWSER=1` | Headless Chrome | Enables `browser` tool for web scraping, screenshots, automation |
+| `WITH_OTEL=1` | Jaeger | OpenTelemetry tracing UI for debugging LLM calls and latency |
+| `WITH_SANDBOX=1` | Docker sandbox | Isolated container for running untrusted code from agents |
+| `WITH_TAILSCALE=1` | Tailscale | Expose gateway over Tailscale private network |
+| `WITH_REDIS=1` | Redis | Redis-backed caching layer |
+
+Flags can be combined and work with all commands:
+
+```bash
+# Start with browser automation and tracing
+make up WITH_BROWSER=1 WITH_OTEL=1
+
+# Stop everything including optional services
+make down WITH_BROWSER=1 WITH_OTEL=1
+```
+
 When `GOCLAW_*_API_KEY` environment variables are set, the gateway auto-onboards without interactive prompts — detects provider, runs migrations, and seeds default data.
 
-> For build variants (OTel, Tailscale, Redis), Docker image tags, and compose overlays, see the [Deployment Guide](https://docs.goclaw.sh/#deploy-docker-compose).
+> For detailed configuration and Docker image tags, see the [Deployment Guide](https://docs.goclaw.sh/#deploy-docker-compose).
 
 ## Multi-Agent Orchestration
 
@@ -241,4 +275,4 @@ GoClaw is built upon the original [OpenClaw](https://github.com/openclaw/opencla
 
 ## License
 
-MIT
+[CC BY-NC 4.0](LICENSE) — Creative Commons Attribution-NonCommercial 4.0 International

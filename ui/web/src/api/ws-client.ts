@@ -30,7 +30,8 @@ export class WsClient {
   tenantId = "";
   tenantName = "";
   tenantSlug = "";
-  crossTenant = false;
+  isOwner = false;
+  serverVersion = "";
 
   private readonly maxReconnectDelay = 30_000;
   private readonly baseReconnectDelay = 1_000;
@@ -205,7 +206,8 @@ export class WsClient {
         tenant_id?: string;
         tenant_name?: string;
         tenant_slug?: string;
-        cross_tenant?: boolean;
+        is_owner?: boolean;
+        server?: { name?: string; version?: string };
       }>("connect", {
         token: this.getToken(),
         user_id: this.getUserId(),
@@ -237,7 +239,8 @@ export class WsClient {
       this.tenantId = res?.tenant_id ?? "";
       this.tenantName = res?.tenant_name ?? "";
       this.tenantSlug = res?.tenant_slug ?? "";
-      this.crossTenant = res?.cross_tenant ?? false;
+      this.isOwner = res?.is_owner ?? false;
+      this.serverVersion = res?.server?.version ?? "";
       this.onStateChange("connected");
     } catch (e) {
       if (this.connectGeneration === generation) {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo, memo } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -91,6 +91,13 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
   const [filePreview, setFilePreview] = useState<{ name: string; href: string; content: string; mediaType?: "image" | "audio" | "video" } | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
 
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Abort any in-flight file fetch on unmount
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
+
   const handleFileClick = useCallback((href: string, name: string) => {
     // Media files: open preview directly without fetching text content
     const media = isMediaFile(name);
@@ -98,15 +105,20 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content, classN
       setFilePreview({ name, href, content: "", mediaType: media });
       return;
     }
+    // Abort any in-flight fetch before starting a new one
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     // Text/code files: fetch content (href already includes ?ft= from server signing)
     setFileLoading(true);
-    fetch(href)
+    fetch(href, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(res.statusText);
         return res.text();
       })
       .then((text) => setFilePreview({ name, href, content: text }))
-      .catch(() => { /* fetch failed — file may not exist, ignore */ })
+      .catch((err) => { if (err.name !== "AbortError") { /* fetch failed — file may not exist, ignore */ } })
       .finally(() => setFileLoading(false));
   }, []);
 

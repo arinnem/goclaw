@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { LOCAL_STORAGE_KEYS } from "@/lib/constants";
+import { clearSetupSkippedState } from "@/lib/setup-skip";
 import type { TenantMembership } from "@/types/tenant";
 
-type UserRole = "admin" | "operator" | "viewer" | "";
+type UserRole = "owner" | "admin" | "operator" | "viewer" | "";
 
 interface AuthState {
   token: string;
@@ -14,7 +15,7 @@ interface AuthState {
   tenantId: string;
   tenantName: string;
   tenantSlug: string;
-  isCrossTenant: boolean;
+  isOwner: boolean;
   availableTenants: TenantMembership[];
   tenantSelected: boolean; // true after user picks a tenant (or auto-selected)
 
@@ -22,7 +23,7 @@ interface AuthState {
   setPairing: (senderID: string, userId: string) => void;
   setConnected: (connected: boolean, serverInfo?: { name?: string; version?: string }) => void;
   setRole: (role: UserRole) => void;
-  setTenant: (id: string, name: string, slug: string, isCrossTenant: boolean) => void;
+  setTenant: (id: string, name: string, slug: string, isOwner: boolean) => void;
   setAvailableTenants: (tenants: TenantMembership[]) => void;
   setTenantSelected: (selected: boolean) => void;
   logout: () => void;
@@ -38,7 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   tenantId: "",
   tenantName: "",
   tenantSlug: "",
-  isCrossTenant: false,
+  isOwner: false,
   availableTenants: [],
   tenantSelected: !!localStorage.getItem(LOCAL_STORAGE_KEYS.TENANT_ID),
 
@@ -62,8 +63,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ role });
   },
 
-  setTenant: (id, name, slug, isCrossTenant) => {
-    set({ tenantId: id, tenantName: name, tenantSlug: slug, isCrossTenant });
+  setTenant: (id, name, slug, isOwner) => {
+    set({ tenantId: id, tenantName: name, tenantSlug: slug, isOwner });
   },
 
   setAvailableTenants: (tenants) => {
@@ -80,9 +81,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem(LOCAL_STORAGE_KEYS.SENDER_ID);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.TENANT_ID);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.TENANT_HINT);
+    clearSetupSkippedState();
     set({
       token: "", userId: "", senderID: "", connected: false, role: "", serverInfo: null,
-      tenantId: "", tenantName: "", tenantSlug: "", isCrossTenant: false, availableTenants: [],
+      tenantId: "", tenantName: "", tenantSlug: "", isOwner: false, availableTenants: [],
       tenantSelected: false,
     });
   },

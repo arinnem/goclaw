@@ -31,6 +31,9 @@ func (s *createCaptureStore) GetByKey(_ context.Context, _ string) (*store.Agent
 func (s *createCaptureStore) GetByID(_ context.Context, _ uuid.UUID) (*store.AgentData, error) {
 	return nil, nil
 }
+func (s *createCaptureStore) GetByIDUnscoped(_ context.Context, _ uuid.UUID) (*store.AgentData, error) {
+	return nil, nil
+}
 func (s *createCaptureStore) GetByKeys(_ context.Context, _ []string) ([]store.AgentData, error) {
 	return nil, nil
 }
@@ -94,6 +97,9 @@ func (s *createCaptureStore) UpdateUserProfileMetadata(_ context.Context, _ uuid
 }
 func (s *createCaptureStore) EnsureUserProfile(_ context.Context, _ uuid.UUID, _ string) error {
 	return nil
+}
+func (s *createCaptureStore) PropagateContextFile(_ context.Context, _ uuid.UUID, _ string) (int, error) {
+	return 0, nil
 }
 
 // ---- helpers ----

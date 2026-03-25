@@ -151,6 +151,18 @@ func (t *BrowserTool) Execute(ctx context.Context, args map[string]any) *tools.R
 		}
 	}
 
+	// Apply per-action timeout for heavy operations
+	switch action {
+	case "open", "navigate", "snapshot", "screenshot", "act":
+		timeout := t.manager.ActionTimeout()
+		if ms, ok := args["timeoutMs"].(float64); ok && ms > 0 {
+			timeout = time.Duration(ms) * time.Millisecond
+		}
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
 	switch action {
 	case "status":
 		return t.handleStatus()

@@ -41,7 +41,7 @@ func NewPGSessionStore(db *sql.DB) *PGSessionStore {
 // The last hyphen-delimited segment is the base36 timestamp used as convId.
 // Idempotent — no-op if no legacy keys exist.
 func (s *PGSessionStore) migrateLegacyWSKeys() {
-	res, err := s.db.Exec(`
+	res, err := s.db.ExecContext(context.Background(), `
 		UPDATE sessions
 		SET session_key = regexp_replace(
 			session_key,
@@ -103,7 +103,7 @@ func (s *PGSessionStore) GetOrCreate(ctx context.Context, key string) *store.Ses
 	s.cache[sessionCacheKey(ctx, key)] = data
 
 	msgsJSON, _ := json.Marshal([]providers.Message{})
-	s.db.Exec(
+	s.db.ExecContext(ctx,
 		`INSERT INTO sessions (id, session_key, messages, created_at, updated_at, team_id, tenant_id)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (tenant_id, session_key) DO NOTHING`,
 		uuid.Must(uuid.NewV7()), key, msgsJSON, now, now, teamID, tenantIDForInsert(ctx),
@@ -139,6 +139,12 @@ func (s *PGSessionStore) Get(ctx context.Context, key string) *store.SessionData
 func (s *PGSessionStore) AddMessage(ctx context.Context, key string, msg providers.Message) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	// Stamp message creation time if not already set.
+	if msg.CreatedAt == nil {
+		now := time.Now().UTC()
+		msg.CreatedAt = &now
+	}
 
 	data := s.getOrInit(ctx, key)
 	data.Messages = append(data.Messages, msg)

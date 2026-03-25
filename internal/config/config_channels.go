@@ -4,8 +4,8 @@ package config
 // When a group accumulates more than Threshold pending messages, older messages are
 // summarized by an LLM and replaced with a compact summary, keeping KeepRecent raw messages.
 type PendingCompactionConfig struct {
-	Threshold  int    `json:"threshold,omitempty"`   // trigger compaction when entries exceed this (default 50)
-	KeepRecent int    `json:"keep_recent,omitempty"` // keep this many recent raw messages after compaction (default 15)
+	Threshold  int    `json:"threshold,omitempty"`   // trigger compaction when entries exceed this (default 200)
+	KeepRecent int    `json:"keep_recent,omitempty"` // keep this many recent raw messages after compaction (default 40)
 	MaxTokens  int    `json:"max_tokens,omitempty"`  // max output tokens for LLM summarization (default 4096)
 	Provider   string `json:"provider,omitempty"`    // LLM provider name (e.g. "openai"); empty = use agent's provider
 	Model      string `json:"model,omitempty"`       // model for summarization; empty = use agent's model
@@ -394,9 +394,12 @@ type WebFetchPolicyConfig struct {
 
 // BrowserToolConfig controls the browser automation tool.
 type BrowserToolConfig struct {
-	Enabled   bool   `json:"enabled"`              // enable the browser tool (default false)
-	Headless  bool   `json:"headless,omitempty"`   // run Chrome in headless mode (ignored when RemoteURL is set)
-	RemoteURL string `json:"remote_url,omitempty"` // CDP endpoint for remote Chrome sidecar, e.g. "ws://chrome:9222"
+	Enabled         bool   `json:"enabled"`                    // enable the browser tool (default false)
+	Headless        bool   `json:"headless,omitempty"`         // run Chrome in headless mode (ignored when RemoteURL is set)
+	RemoteURL       string `json:"remote_url,omitempty"`       // CDP endpoint for remote Chrome sidecar, e.g. "ws://chrome:9222"
+	ActionTimeoutMs int    `json:"action_timeout_ms,omitempty"` // per-action timeout in ms (default 30000)
+	IdleTimeoutMs   int    `json:"idle_timeout_ms,omitempty"`   // idle page auto-close in ms (default 600000, 0=disabled)
+	MaxPages        int    `json:"max_pages,omitempty"`         // max open pages per tenant (default 5)
 }
 
 // ToolPolicySpec defines a tool policy at any level (global, per-agent, per-provider).

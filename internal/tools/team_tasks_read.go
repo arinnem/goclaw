@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -143,8 +144,45 @@ func (t *TeamTasksTool) toDetailItem(ctx context.Context, task *store.TeamTaskDa
 	}
 }
 
+// buildCreateHint generates task creation guidance with member+model info.
+// Injected into search/list results so weaker models (MiniMax, Qwen) get
+// actionable hints before calling create.
+func (t *TeamTasksTool) buildCreateHint(ctx context.Context, teamID, leadAgentID, callerAgentID uuid.UUID) string {
+	members, err := t.manager.cachedListMembers(ctx, teamID, callerAgentID)
+	if err != nil || len(members) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("[Task creation guide]\nAvailable members and their models:\n")
+	for _, m := range members {
+		if m.AgentID == leadAgentID {
+			continue // skip lead from member list
+		}
+		model := ""
+		if ag, err := t.manager.cachedGetAgentByID(ctx, m.AgentID); err == nil {
+			model = ag.Model
+		}
+		entry := fmt.Sprintf("- %s (%s)", m.AgentKey, model)
+		if m.Frontmatter != "" {
+			fm := m.Frontmatter
+			if len([]rune(fm)) > 80 {
+				fm = string([]rune(fm)[:80]) + "…"
+			}
+			entry += " — " + fm
+		}
+		sb.WriteString(entry + "\n")
+	}
+	sb.WriteString("\nBefore creating a task:\n")
+	sb.WriteString("1. DESCRIPTION: Include clear objective, relevant context, constraints, and expected output format. The member will only see this description — make it self-contained.\n")
+	sb.WriteString("2. COMPLEXITY: If a task requires multiple steps or different skills, break it into separate tasks with blocked_by.\n")
+	sb.WriteString("3. MODEL MATCH: Assign complex reasoning/analysis tasks to members with stronger models. Simple tasks can go to any.\n")
+	sb.WriteString("4. INDEPENDENCE: Each task must be completable without asking the lead for clarification.")
+	return sb.String()
+}
+
 func (t *TeamTasksTool) executeList(ctx context.Context, args map[string]any) *Result {
-	team, _, err := t.manager.resolveTeam(ctx)
+	team, agentID, err := t.manager.resolveTeam(ctx)
 	if err != nil {
 		return ErrorResult(err.Error())
 	}
@@ -207,6 +245,9 @@ func (t *TeamTasksTool) executeList(ctx context.Context, args map[string]any) *R
 	}
 	if hasMore {
 		resp["has_more"] = true
+	}
+	if hint := t.buildCreateHint(ctx, team.ID, team.LeadAgentID, agentID); hint != "" {
+		resp["hint"] = hint
 	}
 
 	out, _ := json.Marshal(resp)
@@ -322,7 +363,7 @@ func (t *TeamTasksTool) executeGet(ctx context.Context, args map[string]any) *Re
 }
 
 func (t *TeamTasksTool) executeSearch(ctx context.Context, args map[string]any) *Result {
-	team, _, err := t.manager.resolveTeam(ctx)
+	team, agentID, err := t.manager.resolveTeam(ctx)
 	if err != nil {
 		return ErrorResult(err.Error())
 	}
@@ -358,9 +399,14 @@ func (t *TeamTasksTool) executeSearch(ctx context.Context, args map[string]any) 
 		items = append(items, t.toListItem(ctx, task))
 	}
 
-	out, _ := json.Marshal(map[string]any{
+	resp := map[string]any{
 		"tasks": items,
 		"count": len(items),
-	})
+	}
+	if hint := t.buildCreateHint(ctx, team.ID, team.LeadAgentID, agentID); hint != "" {
+		resp["hint"] = hint
+	}
+
+	out, _ := json.Marshal(resp)
 	return SilentResult(string(out))
 }

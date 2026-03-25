@@ -19,20 +19,19 @@ import (
 // TenantsHandler handles tenant CRUD and membership endpoints.
 type TenantsHandler struct {
 	tenantStore store.TenantStore
-	token       string
 	msgBus      *bus.MessageBus
 	workspace   string // base workspace directory for tenant dirs
 }
 
 // NewTenantsHandler creates a handler for tenant management endpoints.
-func NewTenantsHandler(tenantStore store.TenantStore, token string, msgBus *bus.MessageBus, workspace string) *TenantsHandler {
-	return &TenantsHandler{tenantStore: tenantStore, token: token, msgBus: msgBus, workspace: workspace}
+func NewTenantsHandler(tenantStore store.TenantStore, msgBus *bus.MessageBus, workspace string) *TenantsHandler {
+	return &TenantsHandler{tenantStore: tenantStore, msgBus: msgBus, workspace: workspace}
 }
 
 // RegisterRoutes registers all tenant management routes on the given mux.
 func (h *TenantsHandler) RegisterRoutes(mux *http.ServeMux) {
 	admin := func(next http.HandlerFunc) http.HandlerFunc {
-		return requireAuth(h.token, permissions.RoleAdmin, next)
+		return requireAuth(permissions.RoleAdmin, next)
 	}
 	mux.HandleFunc("GET /v1/tenants", admin(h.handleList))
 	mux.HandleFunc("POST /v1/tenants", admin(h.handleCreate))
@@ -45,7 +44,7 @@ func (h *TenantsHandler) RegisterRoutes(mux *http.ServeMux) {
 
 func (h *TenantsHandler) handleList(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.list")})
 		return
 	}
@@ -64,7 +63,7 @@ func (h *TenantsHandler) handleList(w http.ResponseWriter, r *http.Request) {
 
 func (h *TenantsHandler) handleCreate(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.create")})
 		return
 	}
@@ -119,7 +118,7 @@ func (h *TenantsHandler) handleCreate(w http.ResponseWriter, r *http.Request) {
 
 func (h *TenantsHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.get")})
 		return
 	}
@@ -140,7 +139,7 @@ func (h *TenantsHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 
 func (h *TenantsHandler) handleUpdate(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.update")})
 		return
 	}
@@ -190,7 +189,7 @@ func (h *TenantsHandler) handleUpdate(w http.ResponseWriter, r *http.Request) {
 
 func (h *TenantsHandler) handleUsersList(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.users.list")})
 		return
 	}
@@ -215,7 +214,7 @@ func (h *TenantsHandler) handleUsersList(w http.ResponseWriter, r *http.Request)
 
 func (h *TenantsHandler) handleUsersAdd(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.users.add")})
 		return
 	}
@@ -264,7 +263,7 @@ func (h *TenantsHandler) handleUsersAdd(w http.ResponseWriter, r *http.Request) 
 
 func (h *TenantsHandler) handleUsersRemove(w http.ResponseWriter, r *http.Request) {
 	locale := extractLocale(r)
-	if !store.IsCrossTenant(r.Context()) {
+	if !store.IsOwnerRole(r.Context()) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": i18n.T(locale, i18n.MsgPermissionDenied, "tenants.users.remove")})
 		return
 	}

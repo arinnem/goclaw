@@ -74,7 +74,13 @@
     "title": "系统健康",
     "tools": "工具",
     "uptime": "运行时间",
+    "version": "版本",
     "runtimes": "运行时"
   },
-  "title": "概览"
+  "title": "概览",
+  "embedding": {
+    "title": "Embedding",
+    "notConfigured": "未配置",
+    "configure": "在Providers中配置 →"
+  }
 }

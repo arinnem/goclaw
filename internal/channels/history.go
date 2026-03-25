@@ -24,11 +24,12 @@ import (
 const maxHistoryKeys = 1000
 
 // DefaultGroupHistoryLimit is the default pending message limit per group.
-const DefaultGroupHistoryLimit = 100
+const DefaultGroupHistoryLimit = 200
 
 const (
-	flushInterval = 3 * time.Second // periodic flush interval
-	flushBatchMax = 20              // flush when buffer reaches this size
+	flushInterval        = 3 * time.Second  // periodic flush interval
+	flushBatchMax        = 20               // flush when buffer reaches this size
+	compactSweepInterval = 10 * time.Minute // periodic compaction sweep for post-restart safety
 )
 
 // HistoryEntry represents a single tracked group message.
@@ -113,6 +114,13 @@ func MakeHistory(channelName string, s store.PendingMessageStore, tenantID uuid.
 		return NewPersistentHistory(channelName, s, tenantID)
 	}
 	return NewPendingHistory()
+}
+
+// SetTenantID updates the tenant scope for DB operations.
+// Called by InstanceLoader after channel creation to fix initialization order
+// (factory captures uuid.Nil because SetTenantID on BaseChannel hasn't been called yet).
+func (ph *PendingHistory) SetTenantID(id uuid.UUID) {
+	ph.tenantID = id
 }
 
 // tenantCtx returns a context with the tenant ID set for DB operations.

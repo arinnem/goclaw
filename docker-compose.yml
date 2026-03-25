@@ -11,6 +11,7 @@
 #
 #   Without dashboard:  docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d
 #   With OTel tracing:  docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.otel.yml up -d --build
+#   With Claude CLI:    add -f docker-compose.claude-cli.yml to auto-sync host ~/.claude credentials
 
 services:
   goclaw:
@@ -22,7 +23,11 @@ services:
         ENABLE_OTEL: "${ENABLE_OTEL:-false}"
         ENABLE_PYTHON: "${ENABLE_PYTHON:-true}"
         ENABLE_FULL_SKILLS: "${ENABLE_FULL_SKILLS:-false}"
+<<<<<<< HEAD
         ENABLE_CODING_AGENTS: "${ENABLE_CODING_AGENTS:-false}"
+=======
+        VERSION: "${GOCLAW_VERSION:-dev}"
+>>>>>>> fabec18606800d115dbb23e288edd41a222f5624
     ports:
       - "${GOCLAW_PORT:-18790}:18790"
     env_file:
@@ -59,7 +64,7 @@ services:
           pids: 200
     networks:
       - default
-      - shared
+      - goclaw-net
     restart: unless-stopped
 
 volumes:
@@ -68,6 +73,6 @@ volumes:
 
 
 networks:
-  shared:
-    name: shared
+  goclaw-net:
+    name: goclaw-net
     driver: bridge

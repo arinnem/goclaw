@@ -13,6 +13,7 @@ import { parseSessionKey } from "@/lib/session-key";
 import { formatDate, formatTokens } from "@/lib/format";
 import type { SessionInfo, SessionPreview, Message } from "@/types/session";
 import type { ChatMessage, AgentEventPayload, ToolStreamEntry } from "@/types/chat";
+import { messageToTimestamp } from "@/lib/message-utils";
 
 /** Check if a message is an internal system message (subagent results, cron, etc.) */
 function isSystemMessage(msg: ChatMessage): boolean {
@@ -24,9 +25,13 @@ function isSystemMessage(msg: ChatMessage): boolean {
 function isDisplayable(msg: ChatMessage): boolean {
   // Hide tool role messages (shown inline with assistant)
   if (msg.role === "tool") return false;
-  // Hide messages with empty/whitespace content
-  if (!msg.content?.trim()) return false;
-  return true;
+  // Show if there is text content
+  if (msg.content?.trim()) return true;
+  // Assistant messages with tool calls or thinking should still be displayed
+  if (msg.role === "assistant") {
+    return !!(msg.toolDetails?.length || msg.tool_calls?.length || msg.thinking?.trim());
+  }
+  return false;
 }
 
 interface SessionDetailPageProps {
@@ -73,7 +78,7 @@ export function SessionDetailPage({
             allMsgs.map((m, i) => {
               const chatMsg: ChatMessage = {
                 ...m,
-                timestamp: Date.now() - (allMsgs.length - i) * 1000,
+                timestamp: messageToTimestamp(m, i, allMsgs.length),
               };
               // Reconstruct toolDetails for assistant messages with tool_calls
               if (m.role === "assistant" && m.tool_calls && m.tool_calls.length > 0) {

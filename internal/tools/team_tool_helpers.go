@@ -53,20 +53,6 @@ func (m *TeamToolManager) agentDisplayName(ctx context.Context, key string) stri
 // Version helpers
 // ============================================================
 
-// IsTeamV2 checks if team has version >= 2 in settings.
-// Returns false for nil team, nil/empty settings, or version < 2.
-func IsTeamV2(team *store.TeamData) bool {
-	if team == nil || team.Settings == nil {
-		return false
-	}
-	var s struct {
-		Version int `json:"version"`
-	}
-	if json.Unmarshal(team.Settings, &s) != nil {
-		return false
-	}
-	return s.Version >= 2
-}
 
 // ============================================================
 // Follow-up settings helpers
@@ -78,12 +64,8 @@ const (
 )
 
 // followupDelayMinutes returns the team's followup_interval_minutes setting, or the default.
-// Returns 0 for v1 teams (followup disabled).
 func (m *TeamToolManager) followupDelayMinutes(team *store.TeamData) int {
-	if !IsTeamV2(team) {
-		return 0
-	}
-	if team.Settings == nil {
+	if team == nil || team.Settings == nil {
 		return defaultFollowupDelayMinutes
 	}
 	var settings map[string]any
@@ -97,12 +79,8 @@ func (m *TeamToolManager) followupDelayMinutes(team *store.TeamData) int {
 }
 
 // followupMaxReminders returns the team's followup_max_reminders setting, or the default.
-// Returns 0 for v1 teams (followup disabled).
 func (m *TeamToolManager) followupMaxReminders(team *store.TeamData) int {
-	if !IsTeamV2(team) {
-		return 0
-	}
-	if team.Settings == nil {
+	if team == nil || team.Settings == nil {
 		return defaultFollowupMaxReminders
 	}
 	var settings map[string]any
@@ -130,12 +108,8 @@ const (
 )
 
 // checkEscalation parses the team's escalation_mode and escalation_actions settings.
-// Returns EscalationNone for v1 teams.
 func (m *TeamToolManager) checkEscalation(team *store.TeamData, action string) EscalationResult {
-	if !IsTeamV2(team) {
-		return EscalationNone
-	}
-	if team.Settings == nil {
+	if team == nil || team.Settings == nil {
 		return EscalationNone
 	}
 	var settings map[string]any

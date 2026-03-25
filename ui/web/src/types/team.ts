@@ -33,6 +33,9 @@ export interface TeamAccessSettings {
     enabled?: boolean;
     auto_dispatch?: boolean;
   };
+  blocker_escalation?: {
+    enabled?: boolean;
+  };
 }
 
 export interface TeamData {

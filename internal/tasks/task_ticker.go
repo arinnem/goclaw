@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	defaultRecoveryInterval = 5 * time.Minute
-	defaultStaleThreshold   = 2 * time.Hour
-	followupCooldown        = 5 * time.Minute
-	defaultFollowupInterval = 30 * time.Minute
+	defaultRecoveryInterval    = 5 * time.Minute
+	defaultStaleThreshold      = 2 * time.Hour
+	defaultInReviewThreshold   = 4 * time.Hour
+	followupCooldown           = 5 * time.Minute
+	defaultFollowupInterval    = 30 * time.Minute
 )
 
 // TaskTicker periodically recovers stale tasks and re-dispatches pending work.
@@ -89,26 +90,31 @@ func (t *TaskTicker) loop() {
 }
 
 func (t *TaskTicker) recoverAll(forceRecover bool) {
-	ctx := context.Background()
-
-	// Step 1: Batch followups (before recovery — recovery resets in_progress→pending,
-	// which would make followup tasks invisible since followup queries status='in_progress').
-	t.processFollowups(ctx)
+	// Step 1: Batch followups with own timeout (before recovery — recovery resets
+	// in_progress→pending, which would make followup tasks invisible since followup
+	// queries status='in_progress').
+	followupCtx, followupCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	t.processFollowups(followupCtx)
+	followupCancel()
 
 	// Step 2: Batch recovery — single query across all v2 active teams.
+	// Separate timeout so followup duration doesn't eat into recovery budget.
+	recoverCtx, recoverCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer recoverCancel()
+
 	var recovered []store.RecoveredTaskInfo
 	var err error
 	if forceRecover {
-		recovered, err = t.teams.ForceRecoverAllTasks(ctx)
+		recovered, err = t.teams.ForceRecoverAllTasks(recoverCtx)
 	} else {
-		recovered, err = t.teams.RecoverAllStaleTasks(ctx)
+		recovered, err = t.teams.RecoverAllStaleTasks(recoverCtx)
 	}
 	if err != nil {
 		slog.Warn("task_ticker: batch recovery", "force", forceRecover, "error", err)
 	}
 	if len(recovered) > 0 {
 		slog.Info("task_ticker: recovered tasks", "count", len(recovered), "force", forceRecover)
-		t.notifyLeaders(ctx, recovered, "recovered (lock expired)",
+		t.notifyLeaders(recoverCtx, recovered, "recovered (lock expired)",
 			"These tasks were reset to pending because the assigned agent stopped responding.\n"+
 				"To re-dispatch: use team_tasks(action=\"retry\", task_id=\"<task_id>\") for each task above.\n"+
 				"To cancel: use team_tasks(action=\"update\", task_id=\"<task_id>\", status=\"cancelled\").\n"+
@@ -117,21 +123,49 @@ func (t *TaskTicker) recoverAll(forceRecover bool) {
 
 	// Step 3: Batch mark stale — pending tasks older than 2h.
 	staleThreshold := time.Now().Add(-defaultStaleThreshold)
-	stale, err := t.teams.MarkAllStaleTasks(ctx, staleThreshold)
+	stale, err := t.teams.MarkAllStaleTasks(recoverCtx, staleThreshold)
 	if err != nil {
 		slog.Warn("task_ticker: batch mark stale", "error", err)
 	}
 	if len(stale) > 0 {
 		slog.Info("task_ticker: marked stale", "count", len(stale))
-		t.notifyLeaders(ctx, stale, "marked stale (no progress for 2+ hours)",
+		t.notifyLeaders(recoverCtx, stale, "marked stale (no progress for 2+ hours)",
 			"These tasks have been pending too long without being picked up.\n"+
 				"To re-dispatch: use team_tasks(action=\"retry\", task_id=\"<task_id>\").\n"+
 				"To cancel: use team_tasks(action=\"update\", task_id=\"<task_id>\", status=\"cancelled\").\n"+
 				"To view current board: use team_tasks(action=\"list\").")
-		t.broadcastStaleEvents(ctx, stale)
+		t.broadcastStaleEvents(recoverCtx, stale)
 	}
 
-	// Step 4: Prune old cooldown entries to prevent memory leak.
+	// Step 4: Mark in_review tasks stale after 4 hours.
+	inReviewThreshold := time.Now().Add(-defaultInReviewThreshold)
+	staleReview, err := t.teams.MarkInReviewStaleTasks(recoverCtx, inReviewThreshold)
+	if err != nil {
+		slog.Warn("task_ticker: batch mark in_review stale", "error", err)
+	}
+	if len(staleReview) > 0 {
+		slog.Info("task_ticker: marked in_review stale", "count", len(staleReview))
+		t.notifyLeaders(recoverCtx, staleReview, "in review too long (4+ hours) — marked stale",
+			"These tasks have been waiting for approval too long.\n"+
+				"To approve: use team_tasks(action=\"approve\", task_id=\"<task_id>\").\n"+
+				"To reject: use team_tasks(action=\"reject\", task_id=\"<task_id>\", text=\"reason\").\n"+
+				"To retry: use team_tasks(action=\"retry\", task_id=\"<task_id>\").")
+		t.broadcastStaleEvents(recoverCtx, staleReview)
+	}
+
+	// Step 5: Fix orphaned blocked tasks where all blockers are terminal.
+	fixed, err := t.teams.FixOrphanedBlockedTasks(recoverCtx)
+	if err != nil {
+		slog.Warn("task_ticker: fix orphaned blocked tasks", "error", err)
+	}
+	if len(fixed) > 0 {
+		slog.Info("task_ticker: auto-unblocked orphaned tasks", "count", len(fixed))
+		t.notifyLeaders(recoverCtx, fixed, "auto-unblocked (all blockers resolved)",
+			"These blocked tasks were automatically unblocked because all their dependencies completed.\n"+
+				"They are now pending and will be dispatched if assigned.")
+	}
+
+	// Step 6: Prune old cooldown entries to prevent memory leak.
 	t.pruneCooldowns()
 }
 

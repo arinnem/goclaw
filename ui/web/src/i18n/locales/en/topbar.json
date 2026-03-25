@@ -2,6 +2,7 @@
   "expandSidebar": "Expand sidebar",
   "collapseSidebar": "Collapse sidebar",
   "openMenu": "Open menu",
+  "systemSettings": "System Settings",
   "toggleTheme": "Toggle theme",
   "logout": "Logout",
   "logoutConfirm": "Are you sure you want to logout?",
@@ -11,6 +12,19 @@
   "pendingPairingRequest": "{{count}} pending pairing request",
   "pendingPairingRequests": "{{count}} pending pairing requests",
   "apiKeys": "API Keys",
+  "documents": "Documents",
+  "about": {
+    "menuItem": "About",
+    "title": "About GoClaw",
+    "version": "Version",
+    "sourceCode": "Source Code",
+    "license": "License",
+    "documentation": "Documentation",
+    "reportBug": "Report a Bug",
+    "upToDate": "Up to date",
+    "updateAvailable": "Update available: {{version}}",
+    "viewRelease": "View release notes →"
+  },
   "languages": {
     "en": "English",
     "vi": "Tiếng Việt",

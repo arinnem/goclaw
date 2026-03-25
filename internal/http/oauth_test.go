@@ -83,6 +83,14 @@ func (m *mockProviderStore) DeleteProvider(_ context.Context, id uuid.UUID) erro
 	return fmt.Errorf("not found")
 }
 
+func (m *mockProviderStore) ListAllProviders(_ context.Context) ([]store.LLMProviderData, error) {
+	var out []store.LLMProviderData
+	for _, p := range m.providers {
+		out = append(out, *p)
+	}
+	return out, nil
+}
+
 type mockSecretsStore struct {
 	data map[string]string
 }
@@ -114,14 +122,18 @@ func (m *mockSecretsStore) GetAll(_ context.Context) (map[string]string, error) 
 
 // --- helper ---
 
-func newTestOAuthHandler(token string) *OAuthHandler {
-	return NewOAuthHandler(token, newMockProviderStore(), newMockSecretsStore(), nil, nil)
+func newTestOAuthHandler(t *testing.T, token string) *OAuthHandler {
+	t.Helper()
+	old := pkgGatewayToken
+	pkgGatewayToken = token
+	t.Cleanup(func() { pkgGatewayToken = old })
+	return NewOAuthHandler(newMockProviderStore(), newMockSecretsStore(), nil, nil)
 }
 
 // --- tests ---
 
 func TestOAuthHandlerStatusNoToken(t *testing.T) {
-	h := newTestOAuthHandler("")
+	h := newTestOAuthHandler(t, "")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -142,7 +154,7 @@ func TestOAuthHandlerStatusNoToken(t *testing.T) {
 }
 
 func TestOAuthHandlerAuth(t *testing.T) {
-	h := newTestOAuthHandler("secret-token")
+	h := newTestOAuthHandler(t, "secret-token")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -167,7 +179,7 @@ func TestOAuthHandlerAuth(t *testing.T) {
 }
 
 func TestOAuthHandlerLogoutNoProvider(t *testing.T) {
-	h := newTestOAuthHandler("")
+	h := newTestOAuthHandler(t, "")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -188,7 +200,7 @@ func TestOAuthHandlerLogoutNoProvider(t *testing.T) {
 }
 
 func TestOAuthHandlerRouteRegistration(t *testing.T) {
-	h := newTestOAuthHandler("")
+	h := newTestOAuthHandler(t, "")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -212,7 +224,7 @@ func TestOAuthHandlerRouteRegistration(t *testing.T) {
 }
 
 func TestOAuthHandlerStartReturnsAuthURL(t *testing.T) {
-	h := newTestOAuthHandler("")
+	h := newTestOAuthHandler(t, "")
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 

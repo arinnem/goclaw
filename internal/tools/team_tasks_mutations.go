@@ -119,6 +119,12 @@ func (t *TeamTasksTool) executeCreate(ctx context.Context, args map[string]any) 
 	if !isMember {
 		return ErrorResult(fmt.Sprintf("agent %q is not a member of this team", assigneeKey))
 	}
+	// Prevent lead from self-assigning — causes dual-session execution + loop.
+	// buildCreateHint already hides the lead from the member list hint,
+	// but weaker models may still attempt self-assignment.
+	if assigneeID == team.LeadAgentID {
+		return ErrorResult("team lead cannot assign tasks to itself — delegate to a team member instead. You are the team lead; handle this work directly or assign to one of your members.")
+	}
 
 	requireApproval, _ := args["require_approval"].(bool)
 	status := store.TeamTaskStatusPending
@@ -269,7 +275,7 @@ func (t *TeamTasksTool) executeCreate(ctx context.Context, args map[string]any) 
 					ActorType:     "system",
 					ActorID:       "fallback_dispatch",
 				})
-				t.manager.dispatchTaskToAgent(ctx, task, team.ID, assigneeID)
+				t.manager.dispatchTaskToAgent(ctx, task, team, assigneeID)
 			}
 		}
 	}
@@ -309,10 +315,16 @@ func (t *TeamTasksTool) executeComment(ctx context.Context, args map[string]any)
 		return ErrorResult("task does not belong to your team")
 	}
 
+	commentType, _ := args["type"].(string)
+	if commentType != "blocker" {
+		commentType = "note"
+	}
+
 	if err := t.manager.teamStore.AddTaskComment(ctx, &store.TeamTaskCommentData{
-		TaskID:  taskID,
-		AgentID: &agentID,
-		Content: text,
+		TaskID:      taskID,
+		AgentID:     &agentID,
+		Content:     text,
+		CommentType: commentType,
 	}); err != nil {
 		return ErrorResult("failed to add comment: " + err.Error())
 	}
@@ -331,6 +343,19 @@ func (t *TeamTasksTool) executeComment(ctx context.Context, args map[string]any)
 		ActorID:     t.manager.agentKeyFromID(ctx, agentID),
 	})
 
+	// Record action flag after successful store operation.
+	recordTaskAction(ctx, func(f *TaskActionFlags) {
+		f.Commented = true
+		if commentType == "blocker" {
+			f.Escalated = true
+		}
+	})
+
+	// Blocker escalation: auto-fail task + notify leader.
+	if commentType == "blocker" {
+		return t.handleBlockerComment(ctx, team, task, taskID, agentID, text)
+	}
+
 	isLead := agentID == team.LeadAgentID
 	msg := fmt.Sprintf("Comment added to task #%d \"%s\" (id: %s).", task.TaskNumber, task.Subject, taskID)
 	switch {
@@ -345,6 +370,7 @@ func (t *TeamTasksTool) executeComment(ctx context.Context, args map[string]any)
 	}
 	return NewResult(msg)
 }
+
 
 func (t *TeamTasksTool) executeProgress(ctx context.Context, args map[string]any) *Result {
 	team, agentID, err := t.manager.resolveTeam(ctx)
@@ -386,6 +412,8 @@ func (t *TeamTasksTool) executeProgress(ctx context.Context, args map[string]any
 	if err := t.manager.teamStore.UpdateTaskProgress(ctx, taskID, team.ID, percent, step); err != nil {
 		return ErrorResult("failed to update progress: " + err.Error())
 	}
+	// Record action flag after successful store operation.
+	recordTaskAction(ctx, func(f *TaskActionFlags) { f.Progressed = true })
 
 	ownerKey := ""
 	if task.OwnerAgentID != nil {
@@ -452,6 +480,19 @@ func (t *TeamTasksTool) executeAttach(ctx context.Context, args map[string]any) 
 	}); err != nil {
 		return ErrorResult("failed to attach file: " + err.Error())
 	}
+
+	t.manager.broadcastTeamEvent(ctx, protocol.EventTeamTaskAttachmentAdded, protocol.TeamTaskEventPayload{
+		TeamID:     team.ID.String(),
+		TaskID:     taskID.String(),
+		TaskNumber: task.TaskNumber,
+		Subject:    task.Subject,
+		UserID:     store.UserIDFromContext(ctx),
+		Channel:    ToolChannelFromCtx(ctx),
+		ChatID:     chatID,
+		Timestamp:  time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		ActorType:  "agent",
+		ActorID:    t.manager.agentKeyFromID(ctx, agentID),
+	})
 
 	return NewResult(fmt.Sprintf("File attached to task #%d \"%s\" (id: %s).", task.TaskNumber, task.Subject, taskID))
 }

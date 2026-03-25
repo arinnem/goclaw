@@ -162,7 +162,7 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 						hasTeam = true
 						contextFiles = append(contextFiles, bootstrap.ContextFile{
 							Path:    bootstrap.TeamFile,
-							Content: buildTeamMD(team, members, ag.ID, tools.IsTeamV2(team)),
+							Content: buildTeamMD(team, members, ag.ID),
 						})
 						// Detect lead role for tool policy
 						for _, m := range members {
@@ -423,7 +423,7 @@ func resolveTenantSlug(ts store.TenantStore, tenantID uuid.UUID) string {
 	if ts == nil {
 		return tenantID.String()
 	}
-	tenant, err := ts.GetTenant(store.WithCrossTenant(context.Background()), tenantID)
+	tenant, err := ts.GetTenant(context.Background(), tenantID)
 	if err != nil || tenant == nil {
 		return tenantID.String()
 	}

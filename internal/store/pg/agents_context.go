@@ -17,7 +17,7 @@ import (
 // --- Agent-level Context Files ---
 
 func (s *PGAgentStore) GetAgentContextFiles(ctx context.Context, agentID uuid.UUID) ([]store.AgentContextFileData, error) {
-	tClause, tArgs, err := tenantClauseN(ctx, 2)
+	tClause, tArgs, _, err := scopeClause(ctx, 2)
 	if err != nil {
 		return nil, err
 	}
@@ -50,10 +50,36 @@ func (s *PGAgentStore) SetAgentContextFile(ctx context.Context, agentID uuid.UUI
 	return err
 }
 
+// PropagateContextFile copies an agent-level context file to all existing user
+// instances that already have that file (seeded users). Returns updated row count.
+func (s *PGAgentStore) PropagateContextFile(ctx context.Context, agentID uuid.UUID, fileName string) (int, error) {
+	tClause, tArgs, _, err := scopeClause(ctx, 4)
+	if err != nil {
+		return 0, err
+	}
+	// $4 (tenant_id) is referenced twice in the query but only needs one arg value.
+	res, err := s.db.ExecContext(ctx,
+		`UPDATE user_context_files
+		 SET content = src.content, updated_at = $3
+		 FROM (
+		     SELECT content FROM agent_context_files
+		     WHERE agent_id = $1 AND file_name = $2`+tClause+`
+		 ) src
+		 WHERE user_context_files.agent_id = $1
+		   AND user_context_files.file_name = $2`+tClause,
+		append([]any{agentID, fileName, time.Now()}, tArgs...)...,
+	)
+	if err != nil {
+		return 0, err
+	}
+	n, _ := res.RowsAffected()
+	return int(n), nil
+}
+
 // --- Per-user Context Files ---
 
 func (s *PGAgentStore) GetUserContextFiles(ctx context.Context, agentID uuid.UUID, userID string) ([]store.UserContextFileData, error) {
-	tClause, tArgs, err := tenantClauseN(ctx, 3)
+	tClause, tArgs, _, err := scopeClause(ctx, 3)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +113,7 @@ func (s *PGAgentStore) SetUserContextFile(ctx context.Context, agentID uuid.UUID
 }
 
 func (s *PGAgentStore) DeleteUserContextFile(ctx context.Context, agentID uuid.UUID, userID, fileName string) error {
-	tClause, tArgs, err := tenantClauseN(ctx, 4)
+	tClause, tArgs, _, err := scopeClause(ctx, 4)
 	if err != nil {
 		return err
 	}
@@ -139,7 +165,7 @@ func (s *PGAgentStore) EnsureUserProfile(ctx context.Context, agentID uuid.UUID,
 // --- User Instances ---
 
 func (s *PGAgentStore) ListUserInstances(ctx context.Context, agentID uuid.UUID) ([]store.UserInstanceData, error) {
-	tClause, tArgs, err := tenantClauseN(ctx, 2)
+	tClause, tArgs, _, err := scopeClauseAlias(ctx, 2, "p")
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +215,7 @@ func (s *PGAgentStore) UpdateUserProfileMetadata(ctx context.Context, agentID uu
 	if err != nil {
 		return err
 	}
-	tClause, tArgs, err := tenantClauseN(ctx, 4)
+	tClause, tArgs, _, err := scopeClause(ctx, 4)
 	if err != nil {
 		return err
 	}
@@ -204,7 +230,7 @@ func (s *PGAgentStore) UpdateUserProfileMetadata(ctx context.Context, agentID uu
 // --- User Overrides ---
 
 func (s *PGAgentStore) GetUserOverride(ctx context.Context, agentID uuid.UUID, userID string) (*store.UserAgentOverrideData, error) {
-	tClause, tArgs, err := tenantClauseN(ctx, 3)
+	tClause, tArgs, _, err := scopeClause(ctx, 3)
 	if err != nil {
 		return nil, err
 	}

@@ -20,12 +20,16 @@ func (s *PGTeamStore) AddTaskComment(ctx context.Context, comment *store.TeamTas
 		comment.ID = store.GenNewID()
 	}
 	comment.CreatedAt = time.Now()
+	commentType := comment.CommentType
+	if commentType == "" {
+		commentType = "note"
+	}
 	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO team_task_comments (id, task_id, agent_id, user_id, content, created_at, tenant_id)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		`INSERT INTO team_task_comments (id, task_id, agent_id, user_id, content, comment_type, created_at, tenant_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		comment.ID, comment.TaskID, comment.AgentID,
 		sql.NullString{String: comment.UserID, Valid: comment.UserID != ""},
-		comment.Content, comment.CreatedAt, tenantIDForInsert(ctx),
+		comment.Content, commentType, comment.CreatedAt, tenantIDForInsert(ctx),
 	)
 	if err != nil {
 		return err
@@ -39,7 +43,7 @@ func (s *PGTeamStore) AddTaskComment(ctx context.Context, comment *store.TeamTas
 func (s *PGTeamStore) ListTaskComments(ctx context.Context, taskID uuid.UUID) ([]store.TeamTaskCommentData, error) {
 	tid := tenantIDForInsert(ctx)
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT c.id, c.task_id, c.agent_id, c.user_id, c.content, c.created_at,
+		`SELECT c.id, c.task_id, c.agent_id, c.user_id, c.content, c.comment_type, c.created_at,
 		 COALESCE(a.agent_key, '') AS agent_key
 		 FROM team_task_comments c
 		 LEFT JOIN agents a ON a.id = c.agent_id
@@ -55,7 +59,7 @@ func (s *PGTeamStore) ListTaskComments(ctx context.Context, taskID uuid.UUID) ([
 		var c store.TeamTaskCommentData
 		var agentID *uuid.UUID
 		var userID sql.NullString
-		if err := rows.Scan(&c.ID, &c.TaskID, &agentID, &userID, &c.Content, &c.CreatedAt, &c.AgentKey); err != nil {
+		if err := rows.Scan(&c.ID, &c.TaskID, &agentID, &userID, &c.Content, &c.CommentType, &c.CreatedAt, &c.AgentKey); err != nil {
 			return nil, err
 		}
 		c.AgentID = agentID
@@ -72,7 +76,7 @@ func (s *PGTeamStore) ListTaskComments(ctx context.Context, taskID uuid.UUID) ([
 func (s *PGTeamStore) ListRecentTaskComments(ctx context.Context, taskID uuid.UUID, limit int) ([]store.TeamTaskCommentData, error) {
 	tid := tenantIDForInsert(ctx)
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT c.id, c.task_id, c.agent_id, c.user_id, c.content, c.created_at,
+		`SELECT c.id, c.task_id, c.agent_id, c.user_id, c.content, c.comment_type, c.created_at,
 		 COALESCE(a.agent_key, '') AS agent_key
 		 FROM team_task_comments c
 		 LEFT JOIN agents a ON a.id = c.agent_id
@@ -89,7 +93,7 @@ func (s *PGTeamStore) ListRecentTaskComments(ctx context.Context, taskID uuid.UU
 		var c store.TeamTaskCommentData
 		var agentID *uuid.UUID
 		var userID sql.NullString
-		if err := rows.Scan(&c.ID, &c.TaskID, &agentID, &userID, &c.Content, &c.CreatedAt, &c.AgentKey); err != nil {
+		if err := rows.Scan(&c.ID, &c.TaskID, &agentID, &userID, &c.Content, &c.CommentType, &c.CreatedAt, &c.AgentKey); err != nil {
 			return nil, err
 		}
 		c.AgentID = agentID

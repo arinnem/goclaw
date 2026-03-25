@@ -20,7 +20,6 @@ import (
 // AgentsHandler handles agent CRUD and sharing endpoints.
 type AgentsHandler struct {
 	agents           store.AgentStore
-	token            string
 	defaultWorkspace string            // default workspace path template (e.g. "~/.goclaw/workspace")
 	msgBus           *bus.MessageBus   // for cache invalidation events (nil = no events)
 	summoner         *AgentSummoner    // LLM-based agent setup (nil = disabled)
@@ -29,8 +28,8 @@ type AgentsHandler struct {
 
 // NewAgentsHandler creates a handler for agent management endpoints.
 // isOwner is a function that checks if a user ID is in GOCLAW_OWNER_IDS (nil = disabled).
-func NewAgentsHandler(agents store.AgentStore, token, defaultWorkspace string, msgBus *bus.MessageBus, summoner *AgentSummoner, isOwner func(string) bool) *AgentsHandler {
-	return &AgentsHandler{agents: agents, token: token, defaultWorkspace: defaultWorkspace, msgBus: msgBus, summoner: summoner, isOwner: isOwner}
+func NewAgentsHandler(agents store.AgentStore, defaultWorkspace string, msgBus *bus.MessageBus, summoner *AgentSummoner, isOwner func(string) bool) *AgentsHandler {
+	return &AgentsHandler{agents: agents, defaultWorkspace: defaultWorkspace, msgBus: msgBus, summoner: summoner, isOwner: isOwner}
 }
 
 // isOwnerUser checks if the given user ID is a system owner.
@@ -68,7 +67,7 @@ func (h *AgentsHandler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *AgentsHandler) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return requireAuth(h.token, "", next)
+	return requireAuth("", next)
 }
 
 func (h *AgentsHandler) handleList(w http.ResponseWriter, r *http.Request) {
@@ -121,11 +120,10 @@ func (h *AgentsHandler) handleCreate(w http.ResponseWriter, r *http.Request) {
 
 	req.OwnerID = userID
 
-	// Resolve tenant_id: cross-tenant callers must provide it; others inherit their own tenant.
-	if store.IsCrossTenant(r.Context()) {
+	// Resolve tenant_id: explicit body field for cross-tenant; otherwise inherit from auth context.
+	if store.IsOwnerRole(r.Context()) {
 		if req.TenantID == uuid.Nil {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": i18n.T(locale, i18n.MsgRequired, "tenant_id")})
-			return
+			req.TenantID = store.TenantIDFromContext(r.Context())
 		}
 	} else {
 		req.TenantID = store.TenantIDFromContext(r.Context())

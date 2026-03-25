@@ -1,16 +1,19 @@
-import { Moon, Sun, PanelLeftClose, PanelLeftOpen, Menu, LogOut, Bell, Globe, Clock, Building2, ChevronDown, Check, User, KeyRound } from "lucide-react";
+import { Moon, Sun, PanelLeftClose, PanelLeftOpen, Menu, LogOut, Globe, Clock, Building2, ChevronDown, Check, User, KeyRound, Info, Settings2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useUiStore } from "@/stores/use-ui-store";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { useTenants } from "@/hooks/use-tenants";
 import { useIsMobile } from "@/hooks/use-media-query";
-import { usePendingPairingsCount } from "@/hooks/use-pending-pairings-count";
+import { useEmbeddingStatus } from "@/hooks/use-embedding-status";
+
 import { ROUTES, SUPPORTED_LANGUAGES, LANGUAGE_LABELS, TIMEZONE_OPTIONS, LOCAL_STORAGE_KEYS, type Language } from "@/lib/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover } from "radix-ui";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { AboutDialog } from "./about-dialog";
+import { SystemSettingsModal } from "./system-settings-modal";
 
 export function Topbar() {
   const { t } = useTranslation("topbar");
@@ -24,10 +27,11 @@ export function Topbar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const setMobileSidebarOpen = useUiStore((s) => s.setMobileSidebarOpen);
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const { pendingCount } = usePendingPairingsCount({ showToast: true });
-
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const { status: embStatus } = useEmbeddingStatus();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const role = useAuthStore((s) => s.role);
+  const isAdmin = role === "admin" || role === "owner";
 
   const handleSidebarToggle = isMobile
     ? () => setMobileSidebarOpen(true)
@@ -52,21 +56,10 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate(ROUTES.NODES)}
-          className="relative cursor-pointer rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          title={pendingCount > 0 ? t("pendingPairing", { count: pendingCount }) : t("pairingRequests")}
-        >
-          <Bell className="h-4 w-4" />
-          {pendingCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive" />
-          )}
-        </button>
-
         <Select value={language} onValueChange={(v) => setLanguage(v as Language)}>
           <SelectTrigger
             title={t("language")}
-            className="h-auto w-auto gap-1 border-0 bg-transparent px-2 py-1.5 text-xs text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent **:data-radix-select-icon:hidden"
+            className="h-auto w-auto gap-1 border-0 bg-transparent px-2 py-1.5 text-sm text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent **:data-radix-select-icon:hidden"
           >
             <Globe className="h-4 w-4 shrink-0" />
             <span className="hidden sm:inline"><SelectValue /></span>
@@ -81,7 +74,7 @@ export function Topbar() {
         <Select value={timezone} onValueChange={setTimezone}>
           <SelectTrigger
             title={t("timezone")}
-            className="h-auto w-auto gap-1 border-0 bg-transparent px-2 py-1.5 text-xs text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent **:data-radix-select-icon:hidden"
+            className="h-auto w-auto gap-1 border-0 bg-transparent px-2 py-1.5 text-sm text-muted-foreground shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent **:data-radix-select-icon:hidden"
           >
             <Clock className="h-4 w-4 shrink-0" />
             <span className="hidden sm:inline"><SelectValue /></span>
@@ -93,6 +86,21 @@ export function Topbar() {
           </SelectContent>
         </Select>
 
+        {isAdmin && (
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="relative cursor-pointer rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            title={t("systemSettings")}
+          >
+            <Settings2 className="h-4 w-4" />
+            <span
+              className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full ${
+                embStatus?.configured ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+            />
+          </button>
+        )}
+
         <button
           onClick={() => setTheme(isDark ? "light" : "dark")}
           className="cursor-pointer rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -103,6 +111,8 @@ export function Topbar() {
 
         <UserMenu />
       </div>
+
+      <SystemSettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </header>
   );
 }
@@ -112,17 +122,18 @@ function UserMenu() {
   const { t: tt } = useTranslation("tenants");
   const logout = useAuthStore((s) => s.logout);
   const userId = useAuthStore((s) => s.userId);
-  const { currentTenant, currentTenantName, tenants, isCrossTenant, isMultiTenant, currentTenantId } = useTenants();
+  const { currentTenant, currentTenantName, tenants, isOwner, isMultiTenant, currentTenantId } = useTenants();
   const [open, setOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const navigate = useNavigate();
 
   const tenantLabel = currentTenant?.name || currentTenantName || "";
 
   const handleSwitchTenant = (_tenantId: string, slug: string) => {
-    // Cross-tenant admin: narrow scope to specific tenant
-    // Non-cross-tenant: use tenant_hint for pairing
-    if (isCrossTenant) {
+    // Owner: narrow scope to specific tenant
+    // Non-owner: use tenant_hint for pairing
+    if (isOwner) {
       localStorage.setItem(LOCAL_STORAGE_KEYS.TENANT_ID, slug);
     } else {
       localStorage.setItem(LOCAL_STORAGE_KEYS.TENANT_HINT, slug);
@@ -135,7 +146,7 @@ function UserMenu() {
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <button
-          className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           title={userId || t("logout")}
         >
           <User className="h-4 w-4 shrink-0" />
@@ -206,6 +217,15 @@ function UserMenu() {
             <span>{t("apiKeys")}</span>
           </button>
 
+          {/* About */}
+          <button
+            onClick={() => { setOpen(false); setShowAbout(true); }}
+            className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+          >
+            <Info className="h-3.5 w-3.5 shrink-0" />
+            <span>{t("about.menuItem")}</span>
+          </button>
+
           <div className="my-1 border-t" />
 
           {/* Logout */}
@@ -229,6 +249,8 @@ function UserMenu() {
       variant="destructive"
       onConfirm={() => { setShowLogoutConfirm(false); logout(); }}
     />
+
+    <AboutDialog open={showAbout} onOpenChange={setShowAbout} />
     </>
   );
 }

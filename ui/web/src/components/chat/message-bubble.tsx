@@ -4,6 +4,8 @@ import { ThinkingBlock } from "./thinking-block";
 import { ToolCallCard } from "./tool-call-card";
 import { BlockReplyBubble } from "./block-reply-bubble";
 import { MediaGallery } from "./media-gallery";
+import { useUiStore } from "@/stores/use-ui-store";
+import { resolveTimezone } from "@/lib/format";
 import type { ChatMessage } from "@/types/chat";
 
 interface MessageBubbleProps {
@@ -11,6 +13,7 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
+  const timezone = useUiStore((s) => s.timezone);
   const isUser = message.role === "user";
   const isTool = message.role === "tool";
 
@@ -66,7 +69,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               ))}
             </div>
           )}
-          <MessageContent content={message.content} role={message.role} />
+          <MessageContent content={message.content} role={message.role} mediaBasenames={message.mediaItems?.map((m) => m.path.split("/").pop() ?? "").filter(Boolean)} />
           {message.mediaItems && message.mediaItems.length > 0 && (
             <div className="mt-2">
               <MediaGallery items={message.mediaItems} />
@@ -74,7 +77,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           )}
           {message.timestamp && (
             <div className="mt-1 text-[10px] text-muted-foreground">
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+              {new Intl.DateTimeFormat([], {
+                timeZone: resolveTimezone(timezone),
+                hour: "numeric",
+                minute: "2-digit",
+              }).format(new Date(message.timestamp))}
             </div>
           )}
         </div>

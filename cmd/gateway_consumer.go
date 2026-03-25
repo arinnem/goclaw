@@ -79,6 +79,14 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 
 	slog.Info("inbound debounce configured", "debounce_ms", debounceMs)
 
+	// Track background goroutines (subagent announces, teammate messages)
+	// so shutdown can wait for in-flight work to complete.
+	var bgWg sync.WaitGroup
+	defer func() {
+		bgWg.Wait()
+		slog.Info("inbound consumer: all background goroutines drained")
+	}()
+
 	for {
 		msg, ok := msgBus.ConsumeInbound(ctx)
 		if !ok {
@@ -95,16 +103,22 @@ func consumeInboundMessages(ctx context.Context, msgBus *bus.MessageBus, agents 
 			}
 		}
 
-		if handleSubagentAnnounce(ctx, msg, cfg, sched, channelMgr, msgBus, getAnnounceMu) {
+		if handleSubagentAnnounce(ctx, msg, cfg, sched, channelMgr, msgBus, getAnnounceMu, &bgWg) {
 			continue
 		}
-		if handleTeammateMessage(ctx, msg, cfg, sched, channelMgr, teamStore, agentStore, msgBus, postTurn, &taskRunSessions) {
+		if handleTeammateMessage(ctx, msg, cfg, sched, channelMgr, teamStore, agentStore, msgBus, postTurn, &taskRunSessions, &bgWg) {
 			continue
 		}
 		if handleResetCommand(msg, cfg, sessStore) {
 			continue
 		}
 		if handleStopCommand(msg, cfg, sched, sessStore, msgBus) {
+			continue
+		}
+
+		// Blocker escalation messages bypass debounce — deliver immediately to leader.
+		if msg.SenderID == "system:escalation" {
+			go processNormalMessage(ctx, msg, agents, cfg, sched, channelMgr, teamStore, quotaChecker, sessStore, agentStore, contactCollector, postTurn, msgBus)
 			continue
 		}
 
@@ -136,11 +150,6 @@ func autoSetFollowup(ctx context.Context, teamStore store.TeamStore, agentStore 
 	if err != nil || team == nil || team.LeadAgentID != ag.ID {
 		return // only lead agent triggers auto-set
 	}
-	// Followup is a v2 feature.
-	if !isConsumerTeamV2(team) {
-		return
-	}
-
 	// Skip auto-followup when lead is waiting for teammates (not user).
 	if hasMember, _ := teamStore.HasActiveMemberTasks(ctx, team.ID, ag.ID); hasMember {
 		slog.Debug("auto-followup: skipping, active member tasks exist", "team_id", team.ID)
@@ -158,9 +167,6 @@ func autoSetFollowup(ctx context.Context, teamStore store.TeamStore, agentStore 
 		slog.Info("auto-set followup: set", "channel", channel, "chat_id", chatID, "count", n, "followup_at", followupAt)
 	}
 }
-
-// isConsumerTeamV2 delegates to tools.IsTeamV2 for version checking.
-var isConsumerTeamV2 = tools.IsTeamV2
 
 // parseFollowupSettings extracts followup interval and max reminders from team settings.
 func parseFollowupSettings(team *store.TeamData) (time.Duration, int) {

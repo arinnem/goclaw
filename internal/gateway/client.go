@@ -38,10 +38,9 @@ type Client struct {
 	// Team access cache for event filtering (lazily populated).
 	teamIDs map[string]bool
 
-	tenantID    uuid.UUID // resolved tenant (uuid.Nil = cross-tenant)
-	crossTenant bool      // true for owner/system admin
-	tenantName  string    // resolved tenant display name (set during connect)
-	tenantSlug  string    // resolved tenant URL slug (set during connect)
+	tenantID   uuid.UUID // resolved tenant; always concrete after connect
+	tenantName string    // resolved tenant display name (set during connect)
+	tenantSlug string    // resolved tenant URL slug (set during connect)
 }
 
 func NewClient(conn *websocket.Conn, server *Server, remoteIP string) *Client {
@@ -160,6 +159,11 @@ func (c *Client) SendResponse(resp *protocol.ResponseFrame) {
 		slog.Error("marshal response failed", "error", err)
 		return
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Debug("client gone, dropping response", "client", c.id)
+		}
+	}()
 	select {
 	case c.send <- data:
 	default:
@@ -174,6 +178,11 @@ func (c *Client) SendEvent(event protocol.EventFrame) {
 		slog.Error("marshal event failed", "error", err)
 		return
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Debug("client gone, dropping event", "client", c.id)
+		}
+	}()
 	select {
 	case c.send <- data:
 	default:
@@ -203,8 +212,8 @@ func (c *Client) RemoteAddr() string { return c.remoteAddr }
 // TenantID returns the resolved tenant UUID (uuid.Nil means cross-tenant).
 func (c *Client) TenantID() uuid.UUID { return c.tenantID }
 
-// IsCrossTenant returns true if the client has cross-tenant (owner/system admin) access.
-func (c *Client) IsCrossTenant() bool { return c.crossTenant }
+// IsOwner returns true if the client has the owner role (tenant management + full access).
+func (c *Client) IsOwner() bool { return c.role == permissions.RoleOwner }
 
 // HasScope reports whether the client has the given scope.
 func (c *Client) HasScope(scope permissions.Scope) bool {
