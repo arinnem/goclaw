@@ -85,11 +85,7 @@ func New(cfg config.TelegramConfig, msgBus *bus.MessageBus, pairingSvc store.Pai
 	}
 
 	httpClient := &http.Client{
-<<<<<<< HEAD
-		Timeout:   40 * time.Second,
-=======
 		Timeout:   60 * time.Second, // Must exceed getUpdates Timeout to avoid long-poll race (#361)
->>>>>>> fabec18606800d115dbb23e288edd41a222f5624
 		Transport: transport,
 	}
 	// Apply ForceIPv4 at init if configured (explicit, predictable, no runtime heuristic).
