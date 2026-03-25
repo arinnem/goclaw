@@ -59,7 +59,7 @@ RUN set -eux; \
         apk add --no-cache python3 py3-pip nodejs npm pandoc github-cli poppler-utils bash; \
         pip3 install --no-cache-dir --break-system-packages \
             pypdf openpyxl pandas python-pptx markitdown defusedxml lxml \
-            pdfplumber pdf2image anthropic; \
+            pdfplumber pdf2image anthropic reportlab; \
         npm install -g --cache /tmp/npm-cache docx pptxgenjs; \
         rm -rf /tmp/npm-cache /root/.cache /var/cache/apk/*; \
     else \
