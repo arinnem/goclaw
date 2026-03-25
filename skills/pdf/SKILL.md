@@ -142,6 +142,54 @@ c.line(100, height - 140, 400, height - 140)
 c.save()
 ```
 
+#### Unicode and Vietnamese Support (Important!)
+
+**IMPORTANT**: Standard ReportLab fonts (like Helvetica) DO NOT support Unicode or Vietnamese characters. You MUST register and use a TrueType font like `DejaVuSans` (which is pre-installed in the GoClaw container) to prevent text from rendering as black squares.
+
+```python
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import os
+
+# 1. Locate the pre-installed DejaVu font in the Alpine Linux container
+font_path = "/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf"
+
+if not os.path.exists(font_path):
+    print("WARNING: DejaVuSans.ttf not found. Text may not render correctly.")
+else:
+    # 2. Register the font
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+
+c = canvas.Canvas("vietnamese.pdf", pagesize=letter)
+
+# 3. Set the font to the registered TTF font before drawing text
+if os.path.exists(font_path):
+    c.setFont("DejaVuSans", 12)
+
+c.drawString(100, 700, "Xin chào, đây là văn bản tiếng Việt!")
+c.save()
+```
+
+When using **Platypus** (`SimpleDocTemplate`, `Paragraphs`, `Styles`), you must assign the registered font to your stylesheet:
+
+```python
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Register font
+pdfmetrics.registerFont(TTFont('DejaVuSans', '/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf'))
+
+# Override styles to use the Unicode font
+styles = getSampleStyleSheet()
+styles['Normal'].fontName = 'DejaVuSans'
+styles['Title'].fontName = 'DejaVuSans'
+styles['Heading1'].fontName = 'DejaVuSans'
+# Now you can create Paragraphs using these styles
+```
+
 #### Create PDF with Multiple Pages
 ```python
 from reportlab.lib.pagesizes import letter
