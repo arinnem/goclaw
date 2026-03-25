@@ -473,6 +473,11 @@ type runState struct {
 	teamTaskCreates int
 	teamTaskSpawns  int
 
+	// Forced continuation
+	forcedContinuations      int
+	forcedContent            string
+	consecutiveZeroToolCalls int
+
 	// Skill evolution nudge state
 	skillNudge70Sent    bool
 	skillNudge90Sent    bool

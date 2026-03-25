@@ -301,6 +301,7 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 	rs := &runState{
 		pendingMsgs: initPendingMsgs,
 	}
+	const maxForcedContinuations = 30
 
 	// Member progress nudge: remind dispatched members to report progress (every 6 iterations).
 
@@ -640,10 +641,40 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 				continue
 			}
 
-			rs.finalContent = resp.Content
+			rs.consecutiveZeroToolCalls++
+
+			// Forced continuation: if the LLM was deep into a multi-step tool chain
+			// but stopped prematurely, nudge it exactly ONCE to continue.
+			const minToolCallsForNudge = 3
+			if rs.totalToolCalls >= minToolCallsForNudge && rs.consecutiveZeroToolCalls == 1 && rs.forcedContinuations < maxForcedContinuations && rs.iteration < maxIter-1 {
+				rs.forcedContinuations++
+				// Accumulate assistant text so the final message contains everything,
+				// not just the last iteration's short summary.
+				if resp.Content != "" {
+					rs.forcedContent += resp.Content + "\n\n"
+				}
+				slog.Info("forced_continuation: nudging LLM to continue multi-step task",
+					"agent", l.id, "attempt", rs.forcedContinuations, "totalToolCalls", rs.totalToolCalls, "iteration", rs.iteration)
+				messages = append(messages, providers.Message{Role: "assistant", Content: resp.Content})
+				rs.pendingMsgs = append(rs.pendingMsgs, providers.Message{Role: "assistant", Content: resp.Content})
+				messages = append(messages, providers.Message{
+					Role:    "user",
+					Content: "[System] You stopped outputting tool calls but your task is likely not 100% complete. If there are remaining steps or parts, continue immediately with the next tool call. Only stop if the task is truly finished.",
+				})
+				continue
+			}
+
+			// Merge any accumulated forced-continuation content with the final response.
+			if rs.forcedContent != "" {
+				rs.finalContent = strings.TrimRight(rs.forcedContent, "\n") + "\n\n" + resp.Content
+			} else {
+				rs.finalContent = resp.Content
+			}
 			rs.finalThinking = resp.Thinking
 			break
 		}
+
+		rs.consecutiveZeroToolCalls = 0
 
 		// Ensure globally unique tool call IDs (OpenAI-compatible APIs return 400 on duplicates).
 		// Skip if raw content is present (Anthropic thinking passback) to avoid desync.
