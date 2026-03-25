@@ -643,10 +643,28 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 
 			rs.consecutiveZeroToolCalls++
 
+			// Break early if the LLM explicitly declared it is finished
+			if strings.Contains(resp.Content, "TASK_COMPLETE") {
+				// Strip the internal marker from the final output
+				cleanContent := strings.ReplaceAll(resp.Content, "TASK_COMPLETE", "")
+				cleanContent = strings.TrimSpace(cleanContent)
+
+				if rs.forcedContent != "" {
+					rs.finalContent = strings.TrimRight(rs.forcedContent, "\n")
+					if cleanContent != "" {
+						rs.finalContent += "\n\n" + cleanContent
+					}
+				} else {
+					rs.finalContent = cleanContent
+				}
+				rs.finalThinking = resp.Thinking
+				break
+			}
+
 			// Forced continuation: if the LLM was deep into a multi-step tool chain
-			// but stopped prematurely, nudge it exactly ONCE to continue.
+			// but stopped prematurely, nudge it properly to continue (up to maxForcedContinuations).
 			const minToolCallsForNudge = 3
-			if rs.totalToolCalls >= minToolCallsForNudge && rs.consecutiveZeroToolCalls == 1 && rs.forcedContinuations < maxForcedContinuations && rs.iteration < maxIter-1 {
+			if rs.totalToolCalls >= minToolCallsForNudge && rs.forcedContinuations < maxForcedContinuations && rs.iteration < maxIter-1 {
 				rs.forcedContinuations++
 				// Accumulate assistant text so the final message contains everything,
 				// not just the last iteration's short summary.
@@ -659,7 +677,7 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 				rs.pendingMsgs = append(rs.pendingMsgs, providers.Message{Role: "assistant", Content: resp.Content})
 				messages = append(messages, providers.Message{
 					Role:    "user",
-					Content: "[System] You stopped outputting tool calls but your task is likely not 100% complete. If there are remaining steps or parts, continue immediately with the next tool call. Only stop if the task is truly finished.",
+					Content: "[System] You stopped outputting tool calls but your task might not be complete. If the task is 100% complete and there is nothing left to do, you MUST reply with the exact text \"TASK_COMPLETE\". If there are remaining steps, continue immediately with the next tool call.",
 				})
 				continue
 			}
