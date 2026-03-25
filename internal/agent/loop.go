@@ -297,45 +297,10 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 		})
 	}
 
-<<<<<<< HEAD
-	// 4. Run LLM iteration loop
-	var loopDetector toolLoopState // detects repeated no-progress tool calls
-	var totalUsage providers.Usage
-	iteration := 0
-	totalToolCalls := 0
-	var finalContent string
-	var finalThinking string
-	var asyncToolCalls []string     // track async spawn tool names for fallback
-	var bootstrapWriteDetected bool // track if write_file was called during bootstrap
-	var mediaResults []MediaResult  // media files from tool MEDIA: results
-	var deliverables []string       // actual content from tool outputs (for team task results)
-	var blockReplies int            // count of block.reply events emitted (for dedup in consumer)
-	var lastBlockReply string       // last block reply content
-
-	// Mid-loop compaction: summarize in-memory messages when context exceeds threshold.
-	// Uses same config as maybeSummarize (contextWindow * historyShare).
-	var midLoopCompacted bool
-
-	// Team task orphan detection: track team_tasks create vs spawn calls.
-	// If the LLM creates tasks but forgets to spawn, inject a reminder.
-	var teamTaskCreates int // count of team_tasks action=create calls
-	var teamTaskSpawns int  // count of spawn calls with team_task_id
-
-	// Forced continuation: when the LLM prematurely stops tool-calling during a multi-step
-	// task, re-inject a system nudge to keep it going. Limited to prevent infinite loops.
-	var forcedContinuations int
-	var forcedContent string // accumulates assistant text across forced nudge iterations
-	const maxForcedContinuations = 30
-
-	// Skill evolution: budget pressure nudge state (sent at most once each per run).
-	var skillNudge70Sent, skillNudge90Sent bool
-	var skillPostscriptSent bool
-=======
 	// 4. Run LLM iteration loop — all mutable state encapsulated in runState.
 	rs := &runState{
 		pendingMsgs: initPendingMsgs,
 	}
->>>>>>> fabec18606800d115dbb23e288edd41a222f5624
 
 	// Member progress nudge: remind dispatched members to report progress (every 6 iterations).
 
@@ -675,41 +640,8 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (*RunResult, error) 
 				continue
 			}
 
-<<<<<<< HEAD
-			// Forced continuation: if the LLM was deep into a multi-step tool chain
-			// but stopped prematurely, nudge it to continue. We use a tool-call
-			// threshold (>= 3) so simple tasks that complete in 1-2 calls finish
-			// cleanly without being poked.
-			const minToolCallsForNudge = 3
-			if totalToolCalls >= minToolCallsForNudge && forcedContinuations < maxForcedContinuations && iteration < maxIter-1 {
-				forcedContinuations++
-				// Accumulate assistant text so the final message contains everything,
-				// not just the last iteration's short summary.
-				if resp.Content != "" {
-					forcedContent += resp.Content + "\n\n"
-				}
-				slog.Info("forced_continuation: nudging LLM to continue multi-step task",
-					"agent", l.id, "attempt", forcedContinuations, "totalToolCalls", totalToolCalls, "iteration", iteration)
-				messages = append(messages, providers.Message{Role: "assistant", Content: resp.Content})
-				pendingMsgs = append(pendingMsgs, providers.Message{Role: "assistant", Content: resp.Content})
-				messages = append(messages, providers.Message{
-					Role:    "user",
-					Content: "[System] You stopped outputting tool calls but your task is likely not 100% complete. If there are remaining steps or parts, continue immediately with the next tool call. Only stop if the task is truly finished.",
-				})
-				continue
-			}
-
-			// Merge any accumulated forced-continuation content with the final response.
-			if forcedContent != "" {
-				finalContent = strings.TrimRight(forcedContent, "\n") + "\n\n" + resp.Content
-			} else {
-				finalContent = resp.Content
-			}
-			finalThinking = resp.Thinking
-=======
 			rs.finalContent = resp.Content
 			rs.finalThinking = resp.Thinking
->>>>>>> fabec18606800d115dbb23e288edd41a222f5624
 			break
 		}
 
