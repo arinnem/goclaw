@@ -118,10 +118,10 @@ func (t *TeamTasksTool) executeRetry(ctx context.Context, args map[string]any) *
 		return ErrorResult("task does not belong to your team")
 	}
 	switch task.Status {
-	case store.TeamTaskStatusStale, store.TeamTaskStatusFailed, store.TeamTaskStatusCompleted:
+	case store.TeamTaskStatusStale, store.TeamTaskStatusFailed, store.TeamTaskStatusCompleted, store.TeamTaskStatusInProgress:
 		// OK — can retry/reopen these statuses
 	default:
-		return ErrorResult(fmt.Sprintf("retry only works on completed, stale, or failed tasks (current status: %s)", task.Status))
+		return ErrorResult(fmt.Sprintf("retry only works on completed, stale, failed, or in_progress tasks (current status: %s)", task.Status))
 	}
 	if task.OwnerAgentID == nil {
 		return ErrorResult("task has no assignee — assign it first via update")
@@ -131,33 +131,59 @@ func (t *TeamTasksTool) executeRetry(ctx context.Context, args map[string]any) *
 		return ErrorResult("cannot retry task assigned to the team lead — reassign to a team member first via update")
 	}
 
-	// Reset status to pending first (AssignTask only transitions from pending).
-	if err := t.manager.teamStore.ResetTaskStatus(ctx, taskID, team.ID); err != nil {
-		return ErrorResult("failed to reset task: " + err.Error())
+	reason, _ := args["text"].(string)
+	if reason == "" {
+		reason = "Retried via tool"
 	}
-	// Assign (pending → in_progress + lock).
-	if err := t.manager.teamStore.AssignTask(ctx, taskID, *task.OwnerAgentID, team.ID); err != nil {
+
+	newTask, err := t.manager.teamStore.ExecSQLRetryTask(ctx, taskID, team.ID, reason)
+	if err != nil {
 		return ErrorResult("failed to retry task: " + err.Error())
 	}
 
+	// Assign (pending → in_progress + lock).
+	if err := t.manager.teamStore.AssignTask(ctx, newTask.ID, *newTask.OwnerAgentID, team.ID); err != nil {
+		return ErrorResult("failed to assign retried task: " + err.Error())
+	}
+
+	actorKey := t.manager.agentKeyFromID(ctx, agentID)
+	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+	userID := store.UserIDFromContext(ctx)
+	channel := ToolChannelFromCtx(ctx)
+	chatID := ToolChatIDFromCtx(ctx)
+
+	// Broadcast cancelled event for old task
+	t.manager.broadcastTeamEvent(ctx, protocol.EventTeamTaskCancelled, protocol.TeamTaskEventPayload{
+		TeamID:    team.ID.String(),
+		TaskID:    taskID.String(),
+		Status:    store.TeamTaskStatusCancelled,
+		Reason:    reason,
+		UserID:    userID,
+		Channel:   channel,
+		ChatID:    chatID,
+		Timestamp: timestamp,
+		ActorType: "agent",
+		ActorID:   actorKey,
+	})
+
 	t.manager.broadcastTeamEvent(ctx, protocol.EventTeamTaskDispatched, protocol.TeamTaskEventPayload{
 		TeamID:        team.ID.String(),
-		TaskID:        taskID.String(),
-		TaskNumber:    task.TaskNumber,
-		Subject:       task.Subject,
+		TaskID:        newTask.ID.String(),
+		TaskNumber:    newTask.TaskNumber,
+		Subject:       newTask.Subject,
 		Status:        store.TeamTaskStatusInProgress,
-		OwnerAgentKey: t.manager.agentKeyFromID(ctx, *task.OwnerAgentID),
-		UserID:        store.UserIDFromContext(ctx),
-		Channel:       ToolChannelFromCtx(ctx),
-		ChatID:        ToolChatIDFromCtx(ctx),
-		Timestamp:     time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		OwnerAgentKey: t.manager.agentKeyFromID(ctx, *newTask.OwnerAgentID),
+		UserID:        userID,
+		Channel:       channel,
+		ChatID:        chatID,
+		Timestamp:     timestamp,
 		ActorType:     "agent",
-		ActorID:       t.manager.agentKeyFromID(ctx, agentID),
+		ActorID:       actorKey,
 	})
 
 	// Dispatch immediately (retry is an explicit action, not during a turn).
-	t.manager.dispatchTaskToAgent(ctx, task, team, *task.OwnerAgentID)
+	t.manager.dispatchTaskToAgent(ctx, newTask, team, *newTask.OwnerAgentID)
 
-	assignee := t.manager.agentKeyFromID(ctx, *task.OwnerAgentID)
-	return NewResult(fmt.Sprintf("Task #%d \"%s\" (id: %s) retried and dispatched to %s. The assignee will receive the task with your recent comments.", task.TaskNumber, task.Subject, taskID, assignee))
+	assignee := t.manager.agentKeyFromID(ctx, *newTask.OwnerAgentID)
+	return NewResult(fmt.Sprintf("Original task %s cancelled. Duplicated into new task #%d (id: %s) and dispatched to %s.", taskID, newTask.TaskNumber, newTask.ID, assignee))
 }

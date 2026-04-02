@@ -223,6 +223,7 @@ type TaskStore interface {
 	AssignTask(ctx context.Context, taskID, agentID, teamID uuid.UUID) error
 	CompleteTask(ctx context.Context, taskID, teamID uuid.UUID, result string) error
 	CancelTask(ctx context.Context, taskID, teamID uuid.UUID, reason string) error
+	ExecSQLRetryTask(ctx context.Context, taskID, teamID uuid.UUID, reason string) (*TeamTaskData, error)
 	FailTask(ctx context.Context, taskID, teamID uuid.UUID, errMsg string) error
 	FailPendingTask(ctx context.Context, taskID, teamID uuid.UUID, errMsg string) error
 	ReviewTask(ctx context.Context, taskID, teamID uuid.UUID) error

@@ -6,7 +6,7 @@ import (
 )
 
 // TeamTasksTool exposes the shared team task list to agents.
-// Actions: list, get, create, claim, complete, cancel, search, review, comment, progress, attach, update.
+// Actions: list, get, create, claim, complete, cancel, search, review, comment, progress, attach, update, retry, ask_user, clear_ask_user.
 type TeamTasksTool struct {
 	manager *TeamToolManager
 }

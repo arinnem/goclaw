@@ -301,3 +301,60 @@ func (s *PGTeamStore) RejectTask(ctx context.Context, taskID, teamID uuid.UUID, 
 	}
 	return tx.Commit()
 }
+
+func (s *PGTeamStore) ExecSQLRetryTask(ctx context.Context, taskID, teamID uuid.UUID, reason string) (*store.TeamTaskData, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	oldTask, err := s.GetTask(ctx, taskID)
+	if err != nil {
+		return nil, err
+	}
+	if oldTask.TeamID != teamID {
+		return nil, fmt.Errorf("task does not belong to team")
+	}
+
+
+	now := time.Now()
+	tid := tenantIDForInsert(ctx)
+
+	res, err := tx.ExecContext(ctx,
+		`UPDATE team_tasks SET status = $1, result = $2, locked_at = NULL, lock_expires_at = NULL,
+		 followup_at = NULL, followup_count = 0, followup_message = NULL, followup_channel = NULL, followup_chat_id = NULL,
+		 progress_percent = NULL, updated_at = $3
+		 WHERE id = $4 AND status != $1 AND team_id = $5 AND tenant_id = $6`,
+		store.TeamTaskStatusCancelled, reason, now,
+		taskID, teamID, tid,
+	)
+	if err != nil {
+		return nil, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if n == 0 {
+		return nil, fmt.Errorf("task not found or already cancelled")
+	}
+
+	if err := unblockDependentTasks(ctx, tx, taskID); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	newTask := *oldTask
+	newTask.ID = store.GenNewID()
+	newTask.Status = store.TeamTaskStatusPending
+
+	if err := s.CreateTask(ctx, &newTask); err != nil {
+		return nil, err
+	}
+
+	return &newTask, nil
+}

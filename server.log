@@ -1,0 +1,77 @@
+time=2026-04-02T07:35:03.468+07:00 level=INFO msg="security.server_ip_scrub: local IPs registered" count=2 ips="[10.32.220.29 172.21.112.1]"
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="memory + knowledge graph tools registered (PG-backed)"
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="browser tool enabled" headless=true
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="web_search tool enabled"
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="web_fetch tool enabled" policy="" blocked=0
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="tts enabled" provider=edge auto=off
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="tool rate limiting enabled" per_hour=150
+time=2026-04-02T07:35:03.469+07:00 level=INFO msg="exec approval enabled" security=full ask=off
+time=2026-04-02T07:35:03.489+07:00 level=INFO msg="schema check passed" current=31 required=31
+time=2026-04-02T07:35:03.499+07:00 level=INFO msg="postgres connected" dsn_len=62
+time=2026-04-02T07:35:03.502+07:00 level=WARN msg="provider store: API key encryption disabled (plain text storage)"
+time=2026-04-02T07:35:03.502+07:00 level=INFO msg="tracing collector started"
+time=2026-04-02T07:35:03.502+07:00 level=INFO msg="LLM tracing enabled"
+time=2026-04-02T07:35:03.502+07:00 level=INFO msg="snapshot worker started"
+time=2026-04-02T07:35:03.515+07:00 level=INFO msg="config secrets loaded from DB" count=2
+time=2026-04-02T07:35:03.518+07:00 level=INFO msg="registered provider from DB" name=9router
+time=2026-04-02T07:35:03.522+07:00 level=INFO msg="registered provider from DB" name=claude
+time=2026-04-02T07:35:03.525+07:00 level=WARN msg="acp: binary not found, skipping" binary=gemini error="exec: \"gemini\": executable file not found in %PATH%"
+time=2026-04-02T07:35:03.525+07:00 level=INFO msg="registered provider from DB" name=openai-codex
+time=2026-04-02T07:35:03.532+07:00 level=INFO msg="system_configs applied to in-memory config" keys=7
+time=2026-04-02T07:35:03.535+07:00 level=WARN msg="no embedding provider configured — enable embedding in a provider's settings"
+time=2026-04-02T07:35:03.535+07:00 level=WARN msg="memory embeddings disabled (no API key), chunks stored without vectors"
+time=2026-04-02T07:35:03.536+07:00 level=INFO msg="bootstrap loaded from filesystem" count=0
+time=2026-04-02T07:35:03.536+07:00 level=INFO msg="bootstrap context files" count=0 files=[]
+time=2026-04-02T07:35:03.536+07:00 level=INFO msg="subagent system enabled" tools=[spawn]
+time=2026-04-02T07:35:03.537+07:00 level=INFO msg="skill_search index rebuilt" docs=1 version=0
+time=2026-04-02T07:35:03.537+07:00 level=INFO msg="skill_search tool registered" skills=1
+time=2026-04-02T07:35:03.537+07:00 level=INFO msg="skills-store directory wired into loader" dir=C:\Users\namnh16\.goclaw\data\skills-store
+time=2026-04-02T07:35:03.542+07:00 level=INFO msg="snapshot computed" hour=2026-04-02T05:00:00+07:00 duration_ms=36
+time=2026-04-02T07:35:03.554+07:00 level=INFO msg="snapshot computed" hour=2026-04-02T06:00:00+07:00 duration_ms=11
+time=2026-04-02T07:35:03.559+07:00 level=INFO msg="snapshot backfill complete" hours=2
+time=2026-04-02T07:35:03.570+07:00 level=INFO msg="publish_skill tool registered"
+time=2026-04-02T07:35:03.570+07:00 level=INFO msg="skill_manage tool registered"
+time=2026-04-02T07:35:03.571+07:00 level=WARN msg="no embedding provider configured — enable embedding in a provider's settings"
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="cron tool registered"
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="heartbeat tool registered"
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="session + message tools registered"
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="tool aliases registered" count=13
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="agents will be resolved lazily from database"
+time=2026-04-02T07:35:03.571+07:00 level=INFO msg="cache backend: in-memory"
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="media tools registered" tools=read_document,read_audio,read_video,create_video
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="memory layering enabled (Postgres)"
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="knowledge graph tool wired (Postgres)"
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="team tools registered" workspace=C:\Users\namnh16/.goclaw/workspace
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="team tools registered"
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="meta-team subscribers wired" auto_add=true aggregation=true
+time=2026-04-02T07:35:03.572+07:00 level=INFO msg="resolver + interceptors + cache subscribers wired"
+time=2026-04-02T07:35:03.614+07:00 level=INFO msg="builtin tools seeded" count=31
+time=2026-04-02T07:35:03.622+07:00 level=INFO msg="registered all RPC methods" phase1="[chat agents sessions config]" phase2="[skills cron heartbeat pairing usage exec_approval send]"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=criticpartner type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=hoang-thuong type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=nhat-dang-dai-su type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=phong-thanh-duong type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=strategicnem type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=tele-helper type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=ERROR msg="failed to load channel instance" name=vuong-trung-duong type=telegram error="decode telegram credentials: invalid character 'a' looking for beginning of value"
+time=2026-04-02T07:35:03.625+07:00 level=INFO msg="audit subscriber registered"
+time=2026-04-02T07:35:03.625+07:00 level=INFO msg="team task event subscriber registered"
+time=2026-04-02T07:35:03.625+07:00 level=INFO msg="team progress notification subscriber registered"
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="skills watcher started" dirs=6 watched=4
+time=2026-04-02T07:35:03.626+07:00 level=WARN msg="no channels enabled"
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="lane created" name=main concurrency=30
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="lane created" name=subagent concurrency=50
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="lane created" name=team concurrency=100
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="lane created" name=cron concurrency=30
+time=2026-04-02T07:35:03.626+07:00 level=INFO msg="outbound dispatcher started"
+time=2026-04-02T07:35:03.629+07:00 level=INFO msg="pg cron service started"
+time=2026-04-02T07:35:03.629+07:00 level=INFO msg="heartbeat ticker started"
+time=2026-04-02T07:35:03.630+07:00 level=INFO msg="task ticker started" interval=5m0s
+time=2026-04-02T07:35:03.630+07:00 level=INFO msg="goclaw gateway starting" version=dev protocol=3 agents=[] tools=34 channels=[]
+time=2026-04-02T07:35:03.630+07:00 level=INFO msg="inbound message consumer started"
+time=2026-04-02T07:35:03.630+07:00 level=INFO msg="inbound debounce configured" debounce_ms=1000
+time=2026-04-02T07:35:03.631+07:00 level=INFO msg="mcp.bridge: tools registered" count=21
+time=2026-04-02T07:35:03.631+07:00 level=WARN msg="security.default_db_password: using default Postgres password — run ./prepare-env.sh to generate a strong one"
+time=2026-04-02T07:35:03.631+07:00 level=WARN msg="security.cors_open: no allowed_origins configured — all WebSocket origins accepted. Set gateway.allowed_origins for production"
+time=2026-04-02T07:35:03.631+07:00 level=INFO msg="gateway starting" addr=0.0.0.0:18790
+time=2026-04-02T07:35:03.632+07:00 level=ERROR msg="gateway error" error="gateway server: listen tcp 0.0.0.0:18790: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted."

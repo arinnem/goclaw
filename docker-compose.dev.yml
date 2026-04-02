@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-goclaw}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-goclaw}
+      POSTGRES_DB: ${POSTGRES_DB:-goclaw}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-goclaw} -d ${POSTGRES_DB:-goclaw}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  goclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENABLE_OTEL: "${ENABLE_OTEL:-false}"
+        ENABLE_PYTHON: "${ENABLE_PYTHON:-true}"
+        ENABLE_FULL_SKILLS: "${ENABLE_FULL_SKILLS:-false}"
+        ENABLE_CODING_AGENTS: "${ENABLE_CODING_AGENTS:-false}"
+        VERSION: "${GOCLAW_VERSION:-dev}"
+    ports:
+      - "${GOCLAW_PORT:-18791}:18790"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - GOCLAW_HOST=0.0.0.0
+      - GOCLAW_PORT=18790
+      - GOCLAW_CONFIG=/app/data/config.json
+      - GOCLAW_GATEWAY_TOKEN=${GOCLAW_GATEWAY_TOKEN:-}
+      - GOCLAW_ENCRYPTION_KEY=${GOCLAW_ENCRYPTION_KEY:-}
+      - GOCLAW_SKILLS_DIR=/app/skills
+      - GOCLAW_TRACE_VERBOSE=${GOCLAW_TRACE_VERBOSE:-0}
+      - GOCLAW_POSTGRES_DSN=postgres://${POSTGRES_USER:-goclaw}:${POSTGRES_PASSWORD:-goclaw}@postgres:5432/${POSTGRES_DB:-goclaw}?sslmode=disable
+    volumes:
+      - goclaw-data:/app/data
+      - goclaw-workspace:/app/workspace
+      - goclaw-skills:/app/skills
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  goclaw-ui:
+    build:
+      context: ./ui/web
+      dockerfile: Dockerfile
+    ports:
+      - "${GOCLAW_UI_PORT:-3001}:80"
+    depends_on:
+      - goclaw
+    restart: unless-stopped
+
+volumes:
+  goclaw-data:
+    external: true
+    name: goclaw_goclaw-data
+  goclaw-workspace:
+    external: true
+    name: goclaw_goclaw-workspace
+  postgres-data:
+    external: true
+    name: goclaw_postgres-data
+  goclaw-skills:
+    external: true
+    name: goclaw_goclaw-skills

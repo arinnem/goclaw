@@ -113,7 +113,7 @@ func pqStringArray(arr []string) any {
 // scanStringArray parses a PostgreSQL text[] column (scanned as []byte) into a Go string slice.
 // Handles both quoted and unquoted elements in PostgreSQL array literal format.
 func scanStringArray(data []byte, dest *[]string) {
-	if data == nil || len(data) == 0 {
+	if len(data) == 0 {
 		return
 	}
 	s := string(data)
