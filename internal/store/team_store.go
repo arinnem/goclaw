@@ -231,6 +231,8 @@ type TaskStore interface {
 	RejectTask(ctx context.Context, taskID, teamID uuid.UUID, reason string) error
 	UpdateTaskProgress(ctx context.Context, taskID, teamID uuid.UUID, percent int, step string) error
 	RenewTaskLock(ctx context.Context, taskID, teamID uuid.UUID) error
+	PauseTask(ctx context.Context, taskID, teamID uuid.UUID) error
+	ResumeTask(ctx context.Context, taskID, teamID uuid.UUID) error
 	ResetTaskStatus(ctx context.Context, taskID, teamID uuid.UUID) error
 }
 

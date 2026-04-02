@@ -27,9 +27,11 @@ func (t *TeamTasksTool) Parameters() map[string]any {
 		"properties": map[string]any{
 			"action": map[string]any{
 				"type": "string",
-				"description": "'list', 'get', 'create', 'claim', 'complete', 'cancel', 'approve', 'reject', 'search', 'review', 'comment', 'progress', 'attach', 'update', 'ask_user', or 'clear_ask_user'. " +
+				"description": "'list', 'get', 'create', 'claim', 'complete', 'cancel', 'approve', 'reject', 'search', 'review', 'comment', 'progress', 'attach', 'update', 'ask_user', 'clear_ask_user', 'pause', or 'resume'. " +
 					"ask_user: set a periodic reminder that is sent to the USER (not the team) when you need the user's input/decision to continue (e.g. 'Which design do you prefer?'). ONLY use when you have a question for the user. Do NOT use for status updates, waiting for teammates, or notifications — use 'progress' instead. " +
 					"clear_ask_user: cancel a previously set ask_user reminder. " +
+					"pause: halt an active task, unsetting its internal locks while keeping you assigned. Useful if you need to pause work indefinitely. " +
+					"resume: re-activate a paused task. " +
 					"retry: re-dispatch a stale or failed task.",
 			},
 			"task_id": map[string]any{
@@ -146,7 +148,11 @@ func (t *TeamTasksTool) Execute(ctx context.Context, args map[string]any) *Resul
 		return t.executeClearAskUser(ctx, args)
 	case "retry":
 		return t.executeRetry(ctx, args)
+	case "pause":
+		return t.executePause(ctx, args)
+	case "resume":
+		return t.executeResume(ctx, args)
 	default:
-		return ErrorResult(fmt.Sprintf("unknown action: %s (use list, get, create, claim, complete, cancel, search, review, comment, progress, attach, update, ask_user, clear_ask_user, or retry)", action))
+		return ErrorResult(fmt.Sprintf("unknown action: %s (use list, get, create, claim, complete, cancel, search, review, comment, progress, attach, update, ask_user, clear_ask_user, pause, resume, or retry)", action))
 	}
 }

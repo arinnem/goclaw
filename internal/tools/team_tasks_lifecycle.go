@@ -152,6 +152,93 @@ func (t *TeamTasksTool) executeCancel(ctx context.Context, args map[string]any) 
 	return NewResult(fmt.Sprintf("Task %s cancelled. Dependent tasks will be unblocked after this turn ends.", taskID))
 }
 
+func (t *TeamTasksTool) executePause(ctx context.Context, args map[string]any) *Result {
+	team, agentID, err := t.manager.resolveTeam(ctx)
+	if err != nil {
+		return ErrorResult(err.Error())
+	}
+
+	taskID, err := resolveTaskID(ctx, args)
+	if err != nil {
+		return ErrorResult(err.Error())
+	}
+
+	task, err := t.manager.teamStore.GetTask(ctx, taskID)
+	if err != nil {
+		return ErrorResult("task not found: " + err.Error())
+	}
+	if task.TeamID != team.ID {
+		return ErrorResult("task does not belong to your team")
+	}
+	if task.OwnerAgentID == nil || (*task.OwnerAgentID != agentID && agentID != team.LeadAgentID) {
+		return ErrorResult("only the task owner or team lead can pause a task")
+	}
+
+	if err := t.manager.teamStore.PauseTask(ctx, taskID, team.ID); err != nil {
+		return ErrorResult("failed to pause task: " + err.Error())
+	}
+
+	actorKey := t.manager.agentKeyFromID(ctx, agentID)
+	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+	t.manager.broadcastTeamEvent(ctx, protocol.EventTeamTaskUpdated, protocol.TeamTaskEventPayload{
+		TeamID:    team.ID.String(),
+		TaskID:    taskID.String(),
+		Status:    store.TeamTaskStatusPending, // It's reverted back to pending (not actively locked)
+		Timestamp: timestamp,
+		ActorType: "agent",
+		ActorID:   actorKey,
+		UserID:    store.UserIDFromContext(ctx),
+		Channel:   ToolChannelFromCtx(ctx),
+		ChatID:    ToolChatIDFromCtx(ctx),
+	})
+
+	return NewResult(fmt.Sprintf("Task %s paused. You remain assigned to it, but it is no longer actively locking your resources.", taskID))
+}
+
+func (t *TeamTasksTool) executeResume(ctx context.Context, args map[string]any) *Result {
+	team, agentID, err := t.manager.resolveTeam(ctx)
+	if err != nil {
+		return ErrorResult(err.Error())
+	}
+
+	taskID, err := resolveTaskID(ctx, args)
+	if err != nil {
+		return ErrorResult(err.Error())
+	}
+
+	task, err := t.manager.teamStore.GetTask(ctx, taskID)
+	if err != nil {
+		return ErrorResult("task not found: " + err.Error())
+	}
+	if task.TeamID != team.ID {
+		return ErrorResult("task does not belong to your team")
+	}
+	if task.OwnerAgentID == nil || (*task.OwnerAgentID != agentID && agentID != team.LeadAgentID) {
+		return ErrorResult("only the task owner or team lead can resume a task")
+	}
+
+	if err := t.manager.teamStore.ResumeTask(ctx, taskID, team.ID); err != nil {
+		return ErrorResult("failed to resume task: " + err.Error())
+	}
+
+	actorKey := t.manager.agentKeyFromID(ctx, agentID)
+	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+	t.manager.broadcastTeamEvent(ctx, protocol.EventTeamTaskUpdated, protocol.TeamTaskEventPayload{
+		TeamID:    team.ID.String(),
+		TaskID:    taskID.String(),
+		Status:    store.TeamTaskStatusInProgress, // It's actively locked again
+		Timestamp: timestamp,
+		ActorType: "agent",
+		ActorID:   actorKey,
+		UserID:    store.UserIDFromContext(ctx),
+		Channel:   ToolChannelFromCtx(ctx),
+		ChatID:    ToolChatIDFromCtx(ctx),
+	})
+
+	return NewResult(fmt.Sprintf("Task %s resumed. Its locks are reactivated.", taskID))
+}
 
 func (t *TeamTasksTool) executeReview(ctx context.Context, args map[string]any) *Result {
 	team, agentID, err := t.manager.resolveTeam(ctx)

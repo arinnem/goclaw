@@ -141,9 +141,15 @@ func (t *TeamTasksTool) executeRetry(ctx context.Context, args map[string]any) *
 		return ErrorResult("failed to retry task: " + err.Error())
 	}
 
-	// Assign (pending → in_progress + lock).
-	if err := t.manager.teamStore.AssignTask(ctx, newTask.ID, *newTask.OwnerAgentID, team.ID); err != nil {
-		return ErrorResult("failed to assign retried task: " + err.Error())
+	isBlocked := newTask.Status == store.TeamTaskStatusBlocked
+	finalStatus := newTask.Status
+
+	if !isBlocked {
+		// Assign (pending → in_progress + lock).
+		if err := t.manager.teamStore.AssignTask(ctx, newTask.ID, *newTask.OwnerAgentID, team.ID); err != nil {
+			return ErrorResult("failed to assign retried task: " + err.Error())
+		}
+		finalStatus = store.TeamTaskStatusInProgress
 	}
 
 	actorKey := t.manager.agentKeyFromID(ctx, agentID)
@@ -171,7 +177,7 @@ func (t *TeamTasksTool) executeRetry(ctx context.Context, args map[string]any) *
 		TaskID:        newTask.ID.String(),
 		TaskNumber:    newTask.TaskNumber,
 		Subject:       newTask.Subject,
-		Status:        store.TeamTaskStatusInProgress,
+		Status:        finalStatus,
 		OwnerAgentKey: t.manager.agentKeyFromID(ctx, *newTask.OwnerAgentID),
 		UserID:        userID,
 		Channel:       channel,
@@ -181,9 +187,14 @@ func (t *TeamTasksTool) executeRetry(ctx context.Context, args map[string]any) *
 		ActorID:       actorKey,
 	})
 
-	// Dispatch immediately (retry is an explicit action, not during a turn).
-	t.manager.dispatchTaskToAgent(ctx, newTask, team, *newTask.OwnerAgentID)
+	if !isBlocked {
+		// Dispatch immediately (retry is an explicit action, not during a turn).
+		t.manager.dispatchTaskToAgent(ctx, newTask, team, *newTask.OwnerAgentID)
+	}
 
 	assignee := t.manager.agentKeyFromID(ctx, *newTask.OwnerAgentID)
+	if isBlocked {
+		return NewResult(fmt.Sprintf("Original task %s cancelled. Duplicated into new task #%d (id: %s) assigned to %s but remains BLOCKED by unresolved dependencies.", taskID, newTask.TaskNumber, newTask.ID, assignee))
+	}
 	return NewResult(fmt.Sprintf("Original task %s cancelled. Duplicated into new task #%d (id: %s) and dispatched to %s.", taskID, newTask.TaskNumber, newTask.ID, assignee))
 }

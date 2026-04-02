@@ -57,6 +57,50 @@ func (s *PGTeamStore) AssignTask(ctx context.Context, taskID, agentID, teamID uu
 	return nil
 }
 
+func (s *PGTeamStore) PauseTask(ctx context.Context, taskID, teamID uuid.UUID) error {
+	tid := tenantIDForInsert(ctx)
+	res, err := s.db.ExecContext(ctx,
+		`UPDATE team_tasks SET status = $1, locked_at = NULL, lock_expires_at = NULL, updated_at = $2
+		 WHERE id = $3 AND team_id = $4 AND status = $5 AND tenant_id = $6`,
+		store.TeamTaskStatusPending, time.Now(),
+		taskID, teamID, store.TeamTaskStatusInProgress, tid,
+	)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("task not available for pausing (not in_progress or wrong team)")
+	}
+	return nil
+}
+
+func (s *PGTeamStore) ResumeTask(ctx context.Context, taskID, teamID uuid.UUID) error {
+	now := time.Now()
+	lockExpires := now.Add(taskLockDuration)
+	tid := tenantIDForInsert(ctx)
+	res, err := s.db.ExecContext(ctx,
+		`UPDATE team_tasks SET status = $1, locked_at = $2, lock_expires_at = $3, updated_at = $2
+		 WHERE id = $4 AND team_id = $5 AND status = $6 AND owner_agent_id IS NOT NULL AND tenant_id = $7`,
+		store.TeamTaskStatusInProgress, now, lockExpires,
+		taskID, teamID, store.TeamTaskStatusPending, tid,
+	)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("task not available for resuming (not pending, no active assignee, or wrong team)")
+	}
+	return nil
+}
+
 func (s *PGTeamStore) CompleteTask(ctx context.Context, taskID, teamID uuid.UUID, result string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -350,7 +394,11 @@ func (s *PGTeamStore) ExecSQLRetryTask(ctx context.Context, taskID, teamID uuid.
 
 	newTask := *oldTask
 	newTask.ID = store.GenNewID()
-	newTask.Status = store.TeamTaskStatusPending
+	if len(newTask.BlockedBy) > 0 {
+		newTask.Status = store.TeamTaskStatusBlocked
+	} else {
+		newTask.Status = store.TeamTaskStatusPending
+	}
 
 	if err := s.CreateTask(ctx, &newTask); err != nil {
 		return nil, err
